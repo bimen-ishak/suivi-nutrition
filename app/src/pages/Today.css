@@ -1,0 +1,332 @@
+.today-page {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.today-header {
+  margin-bottom: 20px;
+}
+
+.today-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  text-transform: capitalize;
+}
+
+/* Carte Bilan */
+.balance-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.balance-card h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.balance-summary {
+  margin-bottom: 16px;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.balance-row:last-child {
+  border-bottom: none;
+}
+
+.balance-row.net {
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 2px solid #e0e0e0;
+  font-weight: 600;
+}
+
+.balance-label {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.balance-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.provisional-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: #fff3e0;
+  color: #e65100;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.balance-message {
+  padding: 12px 16px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.balance-message.neutral {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.balance-message.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.balance-message.warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+/* Barres de macros */
+.macros-bars {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.macro-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.macro-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.macro-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.bar-container {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.bar-protein {
+  background: linear-gradient(90deg, #42a5f5, #1e88e5);
+}
+
+.bar-carbs {
+  background: linear-gradient(90deg, #66bb6a, #43a047);
+}
+
+.bar-fat {
+  background: linear-gradient(90deg, #ffa726, #fb8c00);
+}
+
+/* Carte Aliments */
+.foods-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.foods-card h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.empty-journal {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.journal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journal-entry {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  position: relative;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.journal-entry:hover {
+  border-color: #2e7d32;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
+}
+
+.entry-time {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.entry-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.entry-food {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-food strong {
+  display: block;
+  color: #1a1a1a;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.entry-quantity {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.calculation-note {
+  font-size: 0.75rem;
+  color: #888;
+  font-style: italic;
+}
+
+.entry-kcal {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2e7d32;
+  white-space: nowrap;
+}
+
+.entry-macros {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-icon:hover {
+  opacity: 1;
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+/* Bouton flottant principal */
+.fab {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.5);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: #2e7d32;
+  color: white;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: #1b5e20;
+}
+
+@media (max-width: 600px) {
+  .today-page {
+    padding: 12px;
+  }
+
+  .balance-card,
+  .foods-card {
+    padding: 16px;
+  }
+
+  .fab {
+    right: 16px;
+    bottom: 70px;
+  }
+}

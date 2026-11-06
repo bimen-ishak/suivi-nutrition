@@ -38,5 +38,15 @@
 - [x] Build de production réussi
 - [x] Serveur de développement fonctionnel (localhost:5173)
 
+## Phase 3 : Bibliothèque d'aliments 🔄
+- [x] Composant FoodCard (affichage d'un aliment)
+- [x] Composant FoodForm (création/modification d'aliment avec validation)
+- [x] Page Library (liste, recherche, onglets Mes aliments / Génériques)
+- [x] CRUD complet : créer, lire, modifier, supprimer
+- [x] Gestion des portions personnalisées
+- [x] Calcul automatique sodium depuis sel
+- [x] Types stricts TypeScript
+- [x] Build et tests passent
+
 ## Prochaine action
-Passer à la Phase 3 : Bibliothèque d'aliments (CRUD aliments, écran Bibliothèque).
+Passer à la Phase 4 : Ajout d'aliment manuel (formulaire complet déjà fait, maintenant intégration dans l'écran "Ajouter un aliment").

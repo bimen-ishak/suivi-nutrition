@@ -1,0 +1,181 @@
+.food-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.food-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.food-card.compact {
+  padding: 12px;
+}
+
+.food-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.food-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-name {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.food-brand {
+  font-size: 0.85rem;
+  color: #666;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.food-barcode {
+  font-size: 0.75rem;
+  color: #888;
+  font-family: monospace;
+}
+
+.food-source {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.food-source.étiquette {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.food-source.estimation {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.food-nutrition {
+  margin-bottom: 8px;
+}
+
+.nutrition-row {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.nutrition-row.detail {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.nutrition-label {
+  color: #666;
+  min-width: 70px;
+}
+
+.nutrition-value {
+  flex: 1;
+  color: #333;
+}
+
+.food-portions {
+  margin-bottom: 8px;
+}
+
+.portions-label {
+  font-size: 0.8rem;
+  color: #666;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.portions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.portion-badge {
+  background: #e3f2fd;
+  color: #1565c0;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.food-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.food-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.btn-danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.btn-danger:hover {
+  background: #ffcdd2;
+}
