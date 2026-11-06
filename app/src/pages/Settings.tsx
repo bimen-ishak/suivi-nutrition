@@ -52,7 +52,7 @@ export function Settings() {
   const handleRestore = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'application/json,.json';
+    // Pas de filtre : un fichier reçu par WhatsApp ou Mail peut perdre son extension .json et resterait grisé
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
