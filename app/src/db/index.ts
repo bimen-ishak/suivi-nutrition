@@ -200,6 +200,10 @@ export async function getDailyIntakesSince(date: string): Promise<{ date: string
   return mergeIntakes(history, [...byDate.values()]);
 }
 
+export async function getCutHistoryDay(date: string): Promise<CutHistoryDay | undefined> {
+  return db.cutHistory.get(date);
+}
+
 /** Ajoute un historique sans toucher au journal ni aux photos déjà présentes */
 export async function importHistory(data: HistoryImport): Promise<{ days: number; photos: number }> {
   return db.transaction('rw', [db.cutHistory, db.photos], async () => {

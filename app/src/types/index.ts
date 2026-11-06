@@ -109,6 +109,9 @@ export interface CutHistoryDay {
   weight?: number;
   kcal?: number;
   protein?: number;
+  carbs?: number;
+  fat?: number;
+  burned?: number;               // calories brûlées du jour
 }
 
 export interface HistoryImport {

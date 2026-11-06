@@ -5,6 +5,7 @@ import {
   getRateVerdict,
   getWeeklyRate,
   getWeightTrend,
+  importedDayToView,
   mergeIntakes,
   mergeWeights,
   proteinTarget
@@ -148,6 +149,30 @@ describe('mergeIntakes', () => {
 
   it('ignore une journée importée sans calories', () => {
     expect(mergeIntakes([{ date: day(0), weight: 83 }], [])).toEqual([]);
+  });
+});
+
+describe('importedDayToView', () => {
+  it('reprend les calories, les macros et la dépense d\'un jour importé', () => {
+    const view = importedDayToView({
+      date: day(0), weight: 82.5, kcal: 2450, protein: 123.6, carbs: 291.7, fat: 89.3, burned: 2919
+    });
+    expect(view.hasCalories).toBe(true);
+    expect(view.totals).toEqual({ caloriesEaten: 2450, protein: 123.6, carbs: 291.7, fat: 89.3 });
+    expect(view.summary).toMatchObject({ date: day(0), weight: 82.5, caloriesBurned: 2919 });
+  });
+
+  it('signale un jour sans calories', () => {
+    const view = importedDayToView({ date: day(0), weight: 83.2 });
+    expect(view.hasCalories).toBe(false);
+    expect(view.totals.caloriesEaten).toBe(0);
+    expect(view.summary).toMatchObject({ weight: 83.2 });
+  });
+
+  it('ne crée pas de bilan sans poids ni dépense', () => {
+    const view = importedDayToView({ date: day(0), kcal: 2000, protein: 100 });
+    expect(view.summary).toBeUndefined();
+    expect(view.totals).toEqual({ caloriesEaten: 2000, protein: 100, carbs: 0, fat: 0 });
   });
 });
 

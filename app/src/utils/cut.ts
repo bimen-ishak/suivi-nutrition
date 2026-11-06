@@ -1,5 +1,5 @@
 // Calculs de suivi de sèche, sans effets de bord
-import type { CutHistoryDay } from '../types';
+import type { CutHistoryDay, DailySummary } from '../types';
 
 const DAY_MS = 86_400_000;
 const KCAL_PER_KG = 7700;
@@ -161,6 +161,27 @@ export function mergeIntakes(history: CutHistoryDay[], intakes: IntakeDay[]): In
       : []
   );
   return byDate([...imported, ...intakes]);
+}
+
+/** Ce que l'écran Historique affiche pour un jour importé, qui n'a que des totaux */
+export function importedDayToView(day: CutHistoryDay): {
+  hasCalories: boolean;
+  totals: { caloriesEaten: number; protein: number; carbs: number; fat: number };
+  summary: DailySummary | undefined;
+} {
+  const hasSummary = day.weight !== undefined || day.burned !== undefined;
+  return {
+    hasCalories: day.kcal !== undefined,
+    totals: {
+      caloriesEaten: day.kcal ?? 0,
+      protein: day.protein ?? 0,
+      carbs: day.carbs ?? 0,
+      fat: day.fat ?? 0
+    },
+    summary: hasSummary
+      ? { date: day.date, weight: day.weight, caloriesBurned: day.burned, createdAt: '', updatedAt: '' }
+      : undefined
+  };
 }
 
 /** Objectif de protéines pendant une sèche, arrondi à 5 g */

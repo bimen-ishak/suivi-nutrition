@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getJournalEntriesByDate, getDailySummary, recalculateDailySummary } from '../db';
+import { getCutHistoryDay, getJournalEntriesByDate, getDailySummary, recalculateDailySummary } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
 import { CutCard } from '../components/CutCard';
+import { importedDayToView } from '../utils/cut';
 import './History.css';
 
 interface DayData {
@@ -14,6 +15,8 @@ interface DayData {
     carbs: number;
     fat: number;
   };
+  // Présent pour un jour importé : des totaux sans le détail des repas
+  imported?: { hasCalories: boolean };
 }
 
 export function History() {
@@ -39,24 +42,29 @@ export function History() {
 
       const daysData: DayData[] = [];
       for (const date of dates) {
-        const [entries, summary, totals] = await Promise.all([
+        const [entries, summary, totals, history] = await Promise.all([
           getJournalEntriesByDate(date),
           getDailySummary(date),
-          recalculateDailySummary(date)
+          recalculateDailySummary(date),
+          getCutHistoryDay(date)
         ]);
 
+        // Un jour sans repas dans l'app peut venir d'un historique importé
+        const imported = entries.length === 0 && history ? importedDayToView(history) : null;
+
         // Ne garder que les jours avec des données
-        if (entries.length > 0 || summary) {
+        if (entries.length > 0 || summary || imported) {
           daysData.push({
             date,
             entries,
-            summary,
-            totals: {
+            summary: summary ?? imported?.summary,
+            totals: imported?.totals ?? {
               caloriesEaten: totals.caloriesEaten,
               protein: totals.protein,
               carbs: totals.carbs,
               fat: totals.fat
-            }
+            },
+            imported: imported ? { hasCalories: imported.hasCalories } : undefined
           });
         }
       }
@@ -94,6 +102,7 @@ export function History() {
 
   const getNetBalance = (day: DayData) => {
     if (!day.summary?.caloriesBurned) return null;
+    if (day.imported && !day.imported.hasCalories) return null;
     return day.totals.caloriesEaten - day.summary.caloriesBurned;
   };
 
@@ -136,7 +145,9 @@ export function History() {
           <h2>Bilan</h2>
           <div className="day-stats">
             <div className="stat">
-              <span className="stat-value">{day.totals.caloriesEaten}</span>
+              <span className="stat-value">
+                {day.imported && !day.imported.hasCalories ? '?' : day.totals.caloriesEaten}
+              </span>
               <span className="stat-label">kcal mangées</span>
             </div>
             <div className="stat">
@@ -179,6 +190,11 @@ export function History() {
         {/* Aliments par repas */}
         <div className="day-foods-card">
           <h2>Aliments ({day.entries.length})</h2>
+          {day.imported && (
+            <p className="imported-note">
+              Journée importée : les calories et les macros sont gardées, sans le détail des repas.
+            </p>
+          )}
           {Object.entries(mealGroups).map(([meal, entries]) => (
             <div key={meal} className="meal-group">
               <h3 className="meal-name">{meal}</h3>
@@ -232,8 +248,12 @@ export function History() {
                   </span>
                 </div>
                 <div className="day-card-body">
-                  <span className="day-kcal">{day.totals.caloriesEaten} kcal</span>
-                  <span className="day-count">{day.entries.length} aliment{day.entries.length > 1 ? 's' : ''}</span>
+                  {(!day.imported || day.imported.hasCalories) && (
+                    <span className="day-kcal">{day.totals.caloriesEaten} kcal</span>
+                  )}
+                  <span className="day-count">
+                    {day.imported ? 'importé' : `${day.entries.length} aliment${day.entries.length > 1 ? 's' : ''}`}
+                  </span>
                   {day.summary?.weight && <span className="day-weight">⚖️ {day.summary.weight}kg</span>}
                 </div>
               </div>

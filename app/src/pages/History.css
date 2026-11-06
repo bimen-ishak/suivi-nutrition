@@ -242,3 +242,12 @@
     font-size: 1.1rem;
   }
 }
+
+.imported-note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--text-2);
+  background: var(--surface-soft);
+  border-radius: 14px;
+}
