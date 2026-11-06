@@ -339,9 +339,11 @@ export function Today({ onAddFood }: TodayProps) {
       </div>
 
       {/* Bouton principal "Ajouter" */}
-      <button className="fab" onClick={onAddFood}>
-        + Ajouter un aliment
-      </button>
+      <div className="fab-bar">
+        <button className="fab" onClick={onAddFood}>
+          + Ajouter un aliment
+        </button>
+      </div>
     </div>
   );
 }

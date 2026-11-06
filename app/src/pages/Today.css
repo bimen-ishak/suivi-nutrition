@@ -296,10 +296,23 @@
 }
 
 /* Bouton flottant principal */
-.fab {
+.fab-bar {
   position: fixed;
-  bottom: calc(92px + env(safe-area-inset-bottom));
-  right: 20px;
+  left: 0;
+  right: 0;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  padding: 28px 20px 12px;
+  background: linear-gradient(to top, var(--bg) 62%, transparent);
+  pointer-events: none;
+}
+
+.fab {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 340px;
   height: 52px;
   padding: 0 22px;
   border-radius: 26px;
@@ -315,16 +328,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
-}
-
-.fab:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(79, 127, 104, 0.28);
 }
 
 .fab:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 /* Groupement par repas */
