@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192x192.png', 'apple-touch-icon.png'],
+      includeAssets: ['pwa-192x192.png', 'icone-ecran-accueil.png'],
       manifest: {
         name: 'Suivi Nutrition',
         short_name: 'Nutrition',

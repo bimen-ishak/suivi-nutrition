@@ -60,5 +60,5 @@ export function setAppIcon(dataUrl: string): void {
 export function clearAppIcon(): void {
   localStorage.removeItem(STORAGE_KEY);
   const link = touchIconLink();
-  link.href = `${import.meta.env.BASE_URL}apple-touch-icon.png`;
+  link.href = `${import.meta.env.BASE_URL}icone-ecran-accueil.png`;
 }
