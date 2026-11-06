@@ -1,4 +1,5 @@
 // Calculs de suivi de sèche, sans effets de bord
+import type { CutHistoryDay } from '../types';
 
 const DAY_MS = 86_400_000;
 const KCAL_PER_KG = 7700;
@@ -140,6 +141,26 @@ export function averageIntake(days: IntakeDay[]): { days: number; kcal: number; 
     kcal: Math.round(total.kcal / logged.length),
     protein: Math.round(total.protein / logged.length)
   };
+}
+
+/** Ajoute les pesées importées, sans remplacer celles saisies dans l'app */
+export function mergeWeights(history: CutHistoryDay[], weights: WeightPoint[]): WeightPoint[] {
+  const known = new Set(weights.map(w => w.date));
+  const imported = history.flatMap(day =>
+    day.weight !== undefined && !known.has(day.date) ? [{ date: day.date, weight: day.weight }] : []
+  );
+  return byDate([...imported, ...weights]);
+}
+
+/** Ajoute les totaux importés, sans remplacer les journées notées dans l'app */
+export function mergeIntakes(history: CutHistoryDay[], intakes: IntakeDay[]): IntakeDay[] {
+  const known = new Set(intakes.map(i => i.date));
+  const imported = history.flatMap(day =>
+    day.kcal !== undefined && !known.has(day.date)
+      ? [{ date: day.date, kcal: day.kcal, protein: day.protein ?? 0 }]
+      : []
+  );
+  return byDate([...imported, ...intakes]);
 }
 
 /** Objectif de protéines pendant une sèche, arrondi à 5 g */

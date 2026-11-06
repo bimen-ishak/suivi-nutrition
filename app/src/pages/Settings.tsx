@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { exportAllData, importAllData, getAllJournalEntries, getAllDailySummaries } from '../db';
+import { exportAllData, importAllData, importHistory, getAllJournalEntries, getAllDailySummaries } from '../db';
 import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
 import './Settings.css';
@@ -68,6 +68,33 @@ export function Settings() {
       } catch (error) {
         console.error('Erreur lors de la restauration:', error);
         alert('❌ Erreur: fichier invalide ou corrompu');
+      } finally {
+        setImporting(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleImportHistory = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      setImporting(true);
+      try {
+        const data = JSON.parse(await file.text());
+        if (data.type !== 'suivi-nutrition-historique' || !Array.isArray(data.cutHistory) || !Array.isArray(data.photos)) {
+          throw new Error('Format de fichier invalide');
+        }
+
+        const result = await importHistory(data);
+        alert(`✅ ${result.days} jours ajoutés à Ma sèche et ${result.photos} photos ajoutées.`);
+      } catch (error) {
+        console.error('Erreur lors de l\'import de l\'historique:', error);
+        alert('❌ Ce fichier n\'est pas un historique à importer');
       } finally {
         setImporting(false);
       }
@@ -195,6 +222,17 @@ export function Settings() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Section Import */}
+      <div className="settings-section">
+        <h2>📥 Importer mon historique</h2>
+        <p className="section-desc">
+          Ajoute tes anciennes journées à Ma sèche et tes anciennes photos. Ton journal et tes données actuelles ne changent pas.
+        </p>
+        <button className="btn btn-secondary btn-block" onClick={handleImportHistory} disabled={importing}>
+          {importing ? '⏳ Import en cours...' : '📥 Choisir le fichier'}
+        </button>
       </div>
 
       {/* Section Infos */}

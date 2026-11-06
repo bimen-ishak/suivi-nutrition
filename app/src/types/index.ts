@@ -103,6 +103,21 @@ export interface DailyPhoto {
   createdAt: string;
 }
 
+// Journée importée pour Ma sèche : des totaux seulement, jamais de repas
+export interface CutHistoryDay {
+  date: string;                  // YYYY-MM-DD (clé primaire)
+  weight?: number;
+  kcal?: number;
+  protein?: number;
+}
+
+export interface HistoryImport {
+  type: 'suivi-nutrition-historique';
+  version: number;
+  cutHistory: CutHistoryDay[];
+  photos: DailyPhoto[];
+}
+
 export type CalculationType = 'tare' | 'difference' | 'remaining';
 
 export interface MealTemplate {
@@ -137,6 +152,7 @@ export interface BackupData {
   dailySummaries: DailySummary[];
   mealTemplates: MealTemplate[];
   photos?: DailyPhoto[];         // absent des sauvegardes d'avant l'onglet Photos
+  cutHistory?: CutHistoryDay[];  // absent des sauvegardes d'avant l'import
 }
 
 // Types pour les calculs

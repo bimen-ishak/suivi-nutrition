@@ -1,6 +1,7 @@
 // Base de données locale avec Dexie.js
 import Dexie, { type Table } from 'dexie';
-import type { Food, JournalEntry, DailySummary, MealTemplate, BackupData, DailyPhoto } from '../types';
+import type { Food, JournalEntry, DailySummary, MealTemplate, BackupData, DailyPhoto, CutHistoryDay, HistoryImport } from '../types';
+import { mergeIntakes, mergeWeights } from '../utils/cut';
 
 class NutritionDatabase extends Dexie {
   foods!: Table<Food>;
@@ -8,6 +9,7 @@ class NutritionDatabase extends Dexie {
   dailySummaries!: Table<DailySummary>;
   mealTemplates!: Table<MealTemplate>;
   photos!: Table<DailyPhoto>;
+  cutHistory!: Table<CutHistoryDay>;
 
   constructor() {
     super('NutritionDB');
@@ -20,16 +22,20 @@ class NutritionDatabase extends Dexie {
     this.version(2).stores({
       photos: 'date'
     });
+    this.version(3).stores({
+      cutHistory: 'date'
+    });
   }
 
   // Méthodes helper pour l'export/restauration
   async exportAll(): Promise<BackupData> {
-    const [foods, journal, dailySummaries, mealTemplates, photos] = await Promise.all([
+    const [foods, journal, dailySummaries, mealTemplates, photos, cutHistory] = await Promise.all([
       this.foods.toArray(),
       this.journal.toArray(),
       this.dailySummaries.toArray(),
       this.mealTemplates.toArray(),
-      this.photos.toArray()
+      this.photos.toArray(),
+      this.cutHistory.toArray()
     ]);
 
     return {
@@ -39,12 +45,13 @@ class NutritionDatabase extends Dexie {
       journal,
       dailySummaries,
       mealTemplates,
-      photos
+      photos,
+      cutHistory
     };
   }
 
   async importAll(data: BackupData): Promise<void> {
-    await this.transaction('rw', [this.foods, this.journal, this.dailySummaries, this.mealTemplates, this.photos], async () => {
+    await this.transaction('rw', [this.foods, this.journal, this.dailySummaries, this.mealTemplates, this.photos, this.cutHistory], async () => {
       await Promise.all([
         this.foods.clear(),
         this.journal.clear(),
@@ -63,6 +70,11 @@ class NutritionDatabase extends Dexie {
       if (data.photos) {
         await this.photos.clear();
         await this.photos.bulkAdd(data.photos);
+      }
+
+      if (data.cutHistory) {
+        await this.cutHistory.clear();
+        await this.cutHistory.bulkAdd(data.cutHistory);
       }
     });
   }
@@ -165,12 +177,19 @@ export async function getLastNDailySummaries(n: number): Promise<DailySummary[]>
 
 // Suivi de sèche
 export async function getWeightsSince(date: string): Promise<{ date: string; weight: number }[]> {
-  const summaries = await db.dailySummaries.where('date').aboveOrEqual(date).toArray();
-  return summaries.flatMap(s => (s.weight ? [{ date: s.date, weight: s.weight }] : []));
+  const [summaries, history] = await Promise.all([
+    db.dailySummaries.where('date').aboveOrEqual(date).toArray(),
+    db.cutHistory.where('date').aboveOrEqual(date).toArray()
+  ]);
+  const weights = summaries.flatMap(s => (s.weight ? [{ date: s.date, weight: s.weight }] : []));
+  return mergeWeights(history, weights);
 }
 
 export async function getDailyIntakesSince(date: string): Promise<{ date: string; kcal: number; protein: number }[]> {
-  const entries = await db.journal.where('date').aboveOrEqual(date).toArray();
+  const [entries, history] = await Promise.all([
+    db.journal.where('date').aboveOrEqual(date).toArray(),
+    db.cutHistory.where('date').aboveOrEqual(date).toArray()
+  ]);
   const byDate = new Map<string, { date: string; kcal: number; protein: number }>();
   for (const entry of entries) {
     const day = byDate.get(entry.date) ?? { date: entry.date, kcal: 0, protein: 0 };
@@ -178,7 +197,18 @@ export async function getDailyIntakesSince(date: string): Promise<{ date: string
     day.protein += entry.protein;
     byDate.set(entry.date, day);
   }
-  return [...byDate.values()];
+  return mergeIntakes(history, [...byDate.values()]);
+}
+
+/** Ajoute un historique sans toucher au journal ni aux photos déjà présentes */
+export async function importHistory(data: HistoryImport): Promise<{ days: number; photos: number }> {
+  return db.transaction('rw', [db.cutHistory, db.photos], async () => {
+    await db.cutHistory.bulkPut(data.cutHistory);
+    const existing = new Set(await db.photos.toCollection().primaryKeys());
+    const newPhotos = data.photos.filter(photo => !existing.has(photo.date));
+    await db.photos.bulkAdd(newPhotos);
+    return { days: data.cutHistory.length, photos: newPhotos.length };
+  });
 }
 
 // Photos du jour

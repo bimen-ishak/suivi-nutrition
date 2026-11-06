@@ -5,6 +5,8 @@ import {
   getRateVerdict,
   getWeeklyRate,
   getWeightTrend,
+  mergeIntakes,
+  mergeWeights,
   proteinTarget
 } from './cut';
 
@@ -112,6 +114,40 @@ describe('estimateMaintenance', () => {
     const result = estimateMaintenance(weights(5, 82, 0), intakes(5, 2000));
     expect(result.value).toBeNull();
     expect(result.daysMissing).toBe(9);
+  });
+});
+
+describe('mergeWeights', () => {
+  it('ajoute les pesées importées', () => {
+    const merged = mergeWeights(
+      [{ date: day(0), weight: 83 }, { date: day(1) }],
+      [{ date: day(2), weight: 82 }]
+    );
+    expect(merged).toEqual([{ date: day(0), weight: 83 }, { date: day(2), weight: 82 }]);
+  });
+
+  it('garde la pesée de l\'app si les deux existent', () => {
+    const merged = mergeWeights([{ date: day(0), weight: 83 }], [{ date: day(0), weight: 82 }]);
+    expect(merged).toEqual([{ date: day(0), weight: 82 }]);
+  });
+});
+
+describe('mergeIntakes', () => {
+  it('ajoute les totaux importés', () => {
+    const merged = mergeIntakes([{ date: day(0), kcal: 2000, protein: 120 }], []);
+    expect(merged).toEqual([{ date: day(0), kcal: 2000, protein: 120 }]);
+  });
+
+  it('garde le journal de l\'app si les deux existent', () => {
+    const merged = mergeIntakes(
+      [{ date: day(0), kcal: 2000, protein: 120 }],
+      [{ date: day(0), kcal: 1800, protein: 100 }]
+    );
+    expect(merged).toEqual([{ date: day(0), kcal: 1800, protein: 100 }]);
+  });
+
+  it('ignore une journée importée sans calories', () => {
+    expect(mergeIntakes([{ date: day(0), weight: 83 }], [])).toEqual([]);
   });
 });
 
