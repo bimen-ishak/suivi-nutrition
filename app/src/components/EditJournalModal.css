@@ -1,0 +1,122 @@
+.edit-journal-modal {
+  max-width: 480px;
+}
+
+.entry-food-name {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.entry-food-name h4 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #1a1a1a;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.edit-field label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.edit-field input[type="time"],
+.edit-field input[type="number"],
+.edit-field select {
+  padding: 12px 14px;
+  font-size: 1rem;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-field input:focus,
+.edit-field select:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.quantity-input-group {
+  display: flex;
+  gap: 12px;
+}
+
+.quantity-input-group input {
+  flex: 1;
+}
+
+.quantity-input-group .unit-selector {
+  min-width: 90px;
+}
+
+.nutrition-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.preview-kcal {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.preview-macros {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.calculation-note {
+  padding: 10px 14px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #2e7d32;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.modal-actions .btn {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+}
+
+.btn-danger {
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #b71c1c;
+}
+
+@media (max-width: 500px) {
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+
+  .modal-actions .btn-danger {
+    flex-basis: 100%;
+  }
+}

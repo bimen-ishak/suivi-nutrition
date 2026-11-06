@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
+  base: '/suivi-nutrition/',
   plugins: [
     react(),
     VitePWA({
@@ -20,8 +21,8 @@ export default defineConfig({
         background_color: '#F1F8E9',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: '/suivi-nutrition/',
+        start_url: '/suivi-nutrition/',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -62,5 +63,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 600
   }
 })

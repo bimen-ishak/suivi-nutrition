@@ -5,6 +5,7 @@ import './FoodForm.css';
 
 interface FoodFormProps {
   initialFood?: Food | null;
+  initialBarcode?: string;
   onSave: (food: Omit<Food, 'id' | 'frequency' | 'lastUsed' | 'createdAt' | 'updatedAt'>) => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -26,13 +27,13 @@ interface FormState {
   source: 'étiquette' | 'estimation';
 }
 
-export function FoodForm({ initialFood, onSave, onCancel, isLoading = false }: FoodFormProps) {
+export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoading = false }: FoodFormProps) {
   const isEditing = !!initialFood;
 
   const [form, setForm] = useState<FormState>({
     name: '',
     brand: '',
-    barcode: '',
+    barcode: initialBarcode || '',
     kcal_per_100g: '',
     protein: '',
     carbs: '',
@@ -42,7 +43,7 @@ export function FoodForm({ initialFood, onSave, onCancel, isLoading = false }: F
     salt: '',
     sodium: '',
     potassium: '',
-    source: 'étiquette'
+    source: initialBarcode ? 'étiquette' : 'étiquette'
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});

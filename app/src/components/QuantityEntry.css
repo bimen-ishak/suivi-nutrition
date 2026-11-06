@@ -1,0 +1,301 @@
+.quantity-entry {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: white;
+}
+
+.quantity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.quantity-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #1a1a1a;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #2e7d32;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.back-btn:hover {
+  background: #f0f0f0;
+}
+
+.quantity-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.food-name-display {
+  text-align: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.food-name-display h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+}
+
+.food-brand {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.quantity-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quantity-input-section label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.quantity-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.quantity-input-group input {
+  flex: 1;
+  padding: 16px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid #d0d0d0;
+  border-radius: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.quantity-input-group input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.unit-selector {
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: 2px solid #d0d0d0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  min-width: 100px;
+  transition: border-color 0.2s;
+}
+
+.unit-selector:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
+.advanced-calc-btn {
+  margin-top: -8px;
+}
+
+.calculation-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  margin-top: -12px;
+}
+
+.calc-icon {
+  font-size: 1.2rem;
+}
+
+.calc-text {
+  font-size: 0.9rem;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.meal-selector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meal-selector-section label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.meal-selector {
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 2px solid #d0d0d0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.meal-selector:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
+.nutrition-preview {
+  background: #f9f9f9;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.nutrition-preview h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: #555;
+  text-align: center;
+}
+
+.preview-main {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.preview-calories {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.preview-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2e7d32;
+  line-height: 1;
+}
+
+.preview-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.preview-macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.preview-macro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.preview-macro .macro-label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.preview-macro .macro-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.quantity-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.quantity-actions .btn {
+  flex: 1;
+  padding: 14px 20px;
+  font-size: 1.05rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1b5e20;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+@media (max-width: 400px) {
+  .quantity-input-group input {
+    font-size: 1.5rem;
+  }
+
+  .preview-value {
+    font-size: 2rem;
+  }
+
+  .preview-macros {
+    gap: 12px;
+  }
+}

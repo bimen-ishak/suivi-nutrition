@@ -1,0 +1,206 @@
+.settings-page {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.settings-header {
+  margin-bottom: 20px;
+}
+
+.settings-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+}
+
+.settings-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.settings-section h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  color: #1a1a1a;
+}
+
+.section-desc {
+  margin: 0 0 16px 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.last-backup {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.settings-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.objective-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.objective-input input {
+  width: 100px;
+  padding: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.objective-input input:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
+.objective-input .unit {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.info-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1b5e20;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+/* Sélecteur de période */
+.period-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.period-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  background: white;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.period-btn:hover {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+
+.period-btn.active {
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: white;
+}
+
+.objective-presets {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  padding: 8px 14px;
+  border: 2px solid #d0d0d0;
+  border-radius: 20px;
+  background: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-btn.active {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.preset-btn:active {
+  transform: scale(0.95);
+}

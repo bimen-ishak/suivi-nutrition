@@ -1,0 +1,79 @@
+.add-food-page {
+  height: 100vh;
+  background: white;
+}
+
+.templates-view {
+  padding: 16px;
+  background: white;
+  min-height: 100vh;
+}
+
+.templates-view .page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.templates-view .page-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #1a1a1a;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #2e7d32;
+  cursor: pointer;
+  padding: 8px;
+  font-weight: 500;
+}
+
+.quantity-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.quantity-screen h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.quantity-screen p {
+  margin: 0 0 24px 0;
+  color: #666;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}

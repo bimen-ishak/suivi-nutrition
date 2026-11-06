@@ -100,6 +100,11 @@ export async function incrementFoodFrequency(id: string): Promise<void> {
 }
 
 // Journal
+export async function createJournalEntry(entry: JournalEntry): Promise<void> {
+  await db.journal.add(entry);
+  await incrementFoodFrequency(entry.foodId);
+}
+
 export async function addJournalEntry(entry: JournalEntry): Promise<void> {
   await db.journal.add(entry);
   await incrementFoodFrequency(entry.foodId);
@@ -124,6 +129,14 @@ export async function getJournalEntry(id: string): Promise<JournalEntry | undefi
 // Daily Summaries
 export async function getDailySummary(date: string): Promise<DailySummary | undefined> {
   return db.dailySummaries.get(date);
+}
+
+export async function createDailySummary(summary: DailySummary): Promise<void> {
+  await db.dailySummaries.add(summary);
+}
+
+export async function updateDailySummary(summary: DailySummary): Promise<void> {
+  await db.dailySummaries.put(summary);
 }
 
 export async function upsertDailySummary(summary: DailySummary): Promise<void> {
@@ -184,4 +197,23 @@ export async function recalculateDailySummary(date: string): Promise<{
   );
 
   return { ...totals, entries };
+}
+
+// Export/import pour sauvegarde JSON
+export async function exportAllData(): Promise<BackupData> {
+  return db.exportAll();
+}
+
+export async function importAllData(data: BackupData): Promise<void> {
+  return db.importAll(data);
+}
+
+// Récupérer toutes les entrées du journal (pour export Excel)
+export async function getAllJournalEntries(): Promise<JournalEntry[]> {
+  return db.journal.orderBy('date').toArray();
+}
+
+// Récupérer tous les résumés quotidiens
+export async function getAllDailySummaries(): Promise<DailySummary[]> {
+  return db.dailySummaries.orderBy('date').toArray();
 }

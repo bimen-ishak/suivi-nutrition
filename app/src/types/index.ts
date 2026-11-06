@@ -43,7 +43,7 @@ export type MealType =
   | 'Boisson';
 
 export interface CalculationInfo {
-  type: 'tare' | 'difference' | 'remaining';
+  type: CalculationType;
   values: number[];
   description: string;           // ex: "556 g mangés (675 g − 119 g restes)"
 }
@@ -71,7 +71,7 @@ export interface JournalEntry {
 }
 
 export interface DailySummary {
-  date: string;                  // YYYY-MM-DD
+  date: string;                  // YYYY-MM-DD (clé primaire)
   weight?: number;               // kg
   caloriesBurned?: number;
   caloriesBurnedProvisional?: boolean;
@@ -80,17 +80,23 @@ export interface DailySummary {
   sleepBedtime?: string;         // HH:MM
   sleepWakeup?: string;          // HH:MM
   sleepDuration?: number;        // heures décimales
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
 
+export type CalculationType = 'tare' | 'difference' | 'remaining';
+
 export interface MealTemplate {
   id: string;
   name: string;
+  meal: MealType;
   items: {
     foodId: string;
+    foodName: string;
     quantity: number;
     unit: string;
+    kcal?: number;
   }[];
   createdAt: string;
 }
