@@ -3,6 +3,7 @@ import { exportAllData, importAllData, importHistory, getAllJournalEntries, getA
 import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
 import { getTheme, setTheme, type ThemeName } from '../utils/theme';
+import { getAppIcon, setAppIcon, clearAppIcon, photoToIcon } from '../utils/appIcon';
 import './Settings.css';
 
 const THEMES: { name: ThemeName; label: string }[] = [
@@ -16,6 +17,7 @@ export function Settings() {
   );
   const [objective, setObjectiveState] = useState<number>(getObjective());
   const [theme, setThemeState] = useState<ThemeName>(getTheme());
+  const [appIcon, setAppIconState] = useState<string | null>(getAppIcon());
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [exportPeriod, setExportPeriod] = useState<'7d' | '30d' | 'all'>('all');
@@ -107,6 +109,30 @@ export function Settings() {
       }
     };
     input.click();
+  };
+
+  const handleChooseIcon = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      try {
+        const icon = await photoToIcon(file);
+        setAppIcon(icon);
+        setAppIconState(icon);
+      } catch (error) {
+        console.error('Erreur lors du choix de l\'icône:', error);
+        alert('❌ Impossible d\'utiliser cette photo');
+      }
+    };
+    input.click();
+  };
+
+  const handleResetIcon = () => {
+    clearAppIcon();
+    setAppIconState(null);
   };
 
   const handleSaveObjective = () => {
@@ -250,6 +276,23 @@ export function Settings() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Section Icône */}
+      <div className="settings-section">
+        <h2>🖼️ Icône de l'app</h2>
+        <p className="section-desc">
+          Choisis une photo de toi : elle reste sur ce téléphone et n'est publiée nulle part. Pour qu'elle apparaisse sur l'écran d'accueil, supprime l'icône puis rajoute-la depuis Safari (fais une sauvegarde avant).
+        </p>
+        {appIcon && <img className="app-icon-preview" src={appIcon} alt="Icône actuelle" width={90} height={90} />}
+        <button className="btn btn-secondary btn-block" onClick={handleChooseIcon}>
+          🖼️ Choisir une photo
+        </button>
+        {appIcon && (
+          <button className="btn btn-secondary btn-block" onClick={handleResetIcon}>
+            ↩️ Remettre l'icône d'origine
+          </button>
+        )}
       </div>
 
       {/* Section Import */}
