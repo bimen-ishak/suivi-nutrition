@@ -303,3 +303,26 @@
   background: #a5d6a7;
   cursor: not-allowed;
 }
+.base-unit-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.base-unit-toggle button {
+  flex: 1;
+  padding: 10px 8px;
+  border: 2px solid #d0d0d0;
+  border-radius: 10px;
+  background: white;
+  color: #555;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.base-unit-toggle button.active {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+  color: #2e7d32;
+}

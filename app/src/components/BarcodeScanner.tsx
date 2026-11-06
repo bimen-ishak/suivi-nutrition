@@ -45,25 +45,19 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
         const reader: ZXingReader = new BrowserMultiFormatReader();
         readerRef.current = reader;
 
-        const videoInputDevices = await reader.listVideoInputDevices();
-        if (cancelled) { reader.reset(); return; }
-
-        if (videoInputDevices.length === 0) {
-          setError('Aucune caméra détectée');
-          setLoading(false);
-          return;
-        }
-
-        // Préférer la caméra arrière sur mobile
-        const backCamera = videoInputDevices.find(d =>
-          d.label.toLowerCase().includes('back') ||
-          d.label.toLowerCase().includes('rear') ||
-          d.label.toLowerCase().includes('environment')
-        );
-        const deviceId = backCamera?.deviceId || videoInputDevices[videoInputDevices.length - 1].deviceId;
-
-        await reader.decodeFromVideoDevice(
-          deviceId,
+        // facingMode laisse le système choisir la caméra arrière principale.
+        // Choisir par libellé échoue sur un iPhone en français et peut
+        // sélectionner le téléobjectif, qui zoome et ne fait pas le point de près.
+        await reader.decodeFromConstraints(
+          {
+            audio: false,
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet]
+            }
+          },
           videoRef.current!,
           (result, err) => {
             if (result) {
@@ -78,6 +72,8 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
         console.error('Erreur caméra:', err);
         if (err instanceof Error && err.name === 'NotAllowedError') {
           setError('Accès à la caméra refusé. Autorise la caméra dans les réglages Safari.');
+        } else if (err instanceof Error && err.name === 'NotFoundError') {
+          setError('Aucune caméra détectée');
         } else {
           setError('Impossible d\'accéder à la caméra');
         }
@@ -119,7 +115,7 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
             <div className="scan-frame"></div>
           </div>
           {loading && <p className="scan-hint">Chargement de la caméra...</p>}
-          {scanning && !loading && <p className="scan-hint">Centre le code-barres dans le cadre</p>}
+          {scanning && !loading && <p className="scan-hint">Centre le code-barres, à 15-20 cm du téléphone</p>}
         </div>
       )}
 

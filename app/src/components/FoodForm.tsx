@@ -25,6 +25,7 @@ interface FormState {
   sodium: string;
   potassium: string;
   source: 'étiquette' | 'estimation';
+  baseUnit: 'g' | 'ml';
 }
 
 export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoading = false }: FoodFormProps) {
@@ -43,7 +44,8 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
     salt: '',
     sodium: '',
     potassium: '',
-    source: initialBarcode ? 'étiquette' : 'étiquette'
+    source: initialBarcode ? 'étiquette' : 'étiquette',
+    baseUnit: 'g'
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -67,7 +69,8 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
         salt: initialFood.salt !== undefined ? String(initialFood.salt) : '',
         sodium: initialFood.sodium !== undefined ? String(initialFood.sodium) : '',
         potassium: initialFood.potassium !== undefined ? String(initialFood.potassium) : '',
-        source: initialFood.source
+        source: initialFood.source,
+        baseUnit: initialFood.baseUnit ?? 'g'
       });
       setPortions(initialFood.portions || []);
     }
@@ -124,6 +127,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
       sodium: form.sodium !== '' && !isNaN(Number(form.sodium)) ? Number(form.sodium) : undefined,
       potassium: form.potassium !== '' && !isNaN(Number(form.potassium)) ? Number(form.potassium) : undefined,
       source: form.source,
+      baseUnit: form.baseUnit,
       portions
     };
 
@@ -190,7 +194,21 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
           </div>
 
           <div className="form-section">
-            <h3>Valeurs nutritionnelles pour 100g *</h3>
+            <h3>Valeurs nutritionnelles pour 100{form.baseUnit} *</h3>
+
+            <div className="base-unit-toggle" role="group" aria-label="Unité de référence">
+              {(['g', 'ml'] as const).map(unit => (
+                <button
+                  key={unit}
+                  type="button"
+                  className={form.baseUnit === unit ? 'active' : ''}
+                  aria-pressed={form.baseUnit === unit}
+                  onClick={() => handleChange('baseUnit', unit)}
+                >
+                  {unit === 'g' ? 'Solide (100 g)' : 'Liquide (100 ml)'}
+                </button>
+              ))}
+            </div>
 
             <div className="form-grid">
               <div className="form-row">
@@ -376,7 +394,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                   </div>
 
                   <div className="form-row">
-                    <label htmlFor="portionGrams">Poids (g)</label>
+                    <label htmlFor="portionGrams">{form.baseUnit === 'ml' ? 'Volume (ml)' : 'Poids (g)'}</label>
                     <input
                       id="portionGrams"
                       type="number"
@@ -402,7 +420,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                   <div className="portions-list">
                     {portions.map((portion, index) => (
                       <div key={index} className="portion-item">
-                        <span><strong>{portion.name}</strong> = {portion.grams}g</span>
+                        <span><strong>{portion.name}</strong> = {portion.grams}{form.baseUnit}</span>
                         <button
                           type="button"
                           className="btn-remove"

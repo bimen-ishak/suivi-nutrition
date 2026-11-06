@@ -82,6 +82,7 @@
 
 .quantity-input-group input {
   flex: 1;
+  min-width: 0;
   padding: 16px;
   font-size: 1.8rem;
   font-weight: 600;

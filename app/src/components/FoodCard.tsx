@@ -30,7 +30,7 @@ export function FoodCard({ food, onEdit, onDelete, showSource = true, compact = 
       {!compact && (
         <div className="food-nutrition">
           <div className="nutrition-row">
-            <span className="nutrition-label">Pour 100g :</span>
+            <span className="nutrition-label">Pour 100{food.baseUnit ?? 'g'} :</span>
             <span className="nutrition-value">
               <strong>{formatNumber(food.kcal_per_100g)} kcal</strong> ·
               P {formatNumber(food.protein)}g ·
@@ -58,7 +58,7 @@ export function FoodCard({ food, onEdit, onDelete, showSource = true, compact = 
           <div className="portions-list">
             {food.portions.map((portion, index) => (
               <span key={index} className="portion-badge">
-                {portion.name} = {portion.grams}g
+                {portion.name} = {portion.grams}{food.baseUnit ?? 'g'}
               </span>
             ))}
           </div>

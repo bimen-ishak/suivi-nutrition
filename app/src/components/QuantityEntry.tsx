@@ -36,7 +36,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
     if (food.portions && food.portions.length > 0) {
       setSelectedUnit(food.portions[0].name);
     } else {
-      setSelectedUnit('g');
+      setSelectedUnit(food.baseUnit ?? 'g');
     }
   }, [food]);
 

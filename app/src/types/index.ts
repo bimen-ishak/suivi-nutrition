@@ -13,7 +13,8 @@ export interface Food {
   name: string;
   brand?: string;
   barcode?: string;
-  kcal_per_100g: number;
+  kcal_per_100g: number;         // pour 100 g ou 100 ml selon baseUnit
+  baseUnit?: 'g' | 'ml';         // unité de référence, 'g' si absent
   protein: number;               // g
   carbs: number;                 // g
   sugars?: number;               // g, optionnel
