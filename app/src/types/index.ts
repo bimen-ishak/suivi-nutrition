@@ -49,6 +49,16 @@ export interface CalculationInfo {
   description: string;           // ex: "556 g mangés (675 g − 119 g restes)"
 }
 
+// Valeurs pour 100 g d'un aliment noté une seule fois, hors bibliothèque
+export interface OneOffValues {
+  kcal_per_100g: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export const ONE_OFF_FOOD_ID = 'ponctuel';
+
 export interface JournalEntry {
   id: string;
   date: string;                  // YYYY-MM-DD
@@ -60,6 +70,7 @@ export interface JournalEntry {
   quantity: number;
   unit: 'g' | 'ml' | string;     // ou nom de portion personnalisée
   calculation?: CalculationInfo;
+  oneOff?: OneOffValues;         // présent si l'aliment n'est pas dans la bibliothèque
   // Valeurs calculées (dénormalisées)
   kcal: number;
   protein: number;

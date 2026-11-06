@@ -143,7 +143,8 @@ export function Today({ onAddFood }: TodayProps) {
   };
 
   const handleCreateTemplate = (meal: MealType) => {
-    const mealEntries = journalEntries.filter(e => e.meal === meal);
+    // Un aliment ponctuel n'a pas de fiche à réutiliser dans un repas type
+    const mealEntries = journalEntries.filter(e => e.meal === meal && !e.oneOff);
     if (mealEntries.length === 0) {
       alert('Aucun aliment pour ce repas');
       return;

@@ -41,17 +41,20 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
     return options;
   };
 
+  // Un aliment ponctuel n'est pas en bibliothèque : ses valeurs sont dans l'entrée
+  const nutritionSource = food ?? entry.oneOff;
+
   const calculatePreview = () => {
-    if (!food) return null;
+    if (!nutritionSource) return null;
     const qty = parseFloat(quantity);
     if (isNaN(qty) || qty <= 0) return null;
 
     let grams = qty;
-    if (selectedUnit !== 'g' && selectedUnit !== 'ml' && food.portions) {
+    if (selectedUnit !== 'g' && selectedUnit !== 'ml' && food?.portions) {
       const g = convertPortionToGrams(qty, selectedUnit, food.portions);
       if (g !== null) grams = g;
     }
-    return calculateNutrition(food, grams);
+    return calculateNutrition(nutritionSource, grams);
   };
 
   const preview = calculatePreview();
@@ -69,7 +72,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
       if (g !== null) grams = g;
     }
 
-    const nutrition = food ? calculateNutrition(food, grams) : {
+    const nutrition = nutritionSource ? calculateNutrition(nutritionSource, grams) : {
       kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat
     };
 

@@ -30,7 +30,10 @@ export function convertPortionToGrams(
 /**
  * Calcule les valeurs nutritionnelles pour une quantité donnée
  */
-export function calculateNutrition(food: Food, quantityGrams: number): NutritionResult {
+export function calculateNutrition(
+  food: Pick<Food, 'kcal_per_100g' | 'protein' | 'carbs' | 'fat' | 'sodium' | 'potassium'>,
+  quantityGrams: number
+): NutritionResult {
   const ratio = quantityGrams / 100;
 
   return {

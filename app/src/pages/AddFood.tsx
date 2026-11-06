@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Food, JournalEntry, CalculationType, MealType, MealTemplate } from '../types';
+import { ONE_OFF_FOOD_ID } from '../types';
+import type { QuickEntryData } from '../components/QuickEntry';
 import { getAllFoods, createFood, createJournalEntry, updateFood } from '../db';
 import { FoodSelector } from '../components/FoodSelector';
 import { FoodForm } from '../components/FoodForm';
@@ -175,6 +177,38 @@ export function AddFood({ onComplete }: AddFoodProps) {
     }
   };
 
+  const handleSaveOneOff = async (data: QuickEntryData) => {
+    try {
+      const now = new Date();
+      const nowISO = now.toISOString();
+      const nutrition = calculateNutrition(data.values, data.quantity);
+
+      await createJournalEntry({
+        id: crypto.randomUUID(),
+        foodId: ONE_OFF_FOOD_ID,
+        foodName: data.name,
+        foodSource: 'estimation',
+        date: nowISO.split('T')[0],
+        time: now.toTimeString().slice(0, 5),
+        meal: data.meal,
+        quantity: data.quantity,
+        unit: data.unit,
+        oneOff: data.values,
+        kcal: nutrition.kcal,
+        protein: nutrition.protein,
+        carbs: nutrition.carbs,
+        fat: nutrition.fat,
+        createdAt: nowISO,
+        updatedAt: nowISO
+      });
+
+      onComplete?.();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout ponctuel:', error);
+      alert('Erreur lors de l\'ajout au journal');
+    }
+  };
+
   const handleSelectTemplate = async (template: MealTemplate, foodsMap: Map<string, Food>) => {
     try {
       const now = new Date();
@@ -284,6 +318,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
         onSelectGeneric={handleSelectGeneric}
         onScanNotFound={handleScanNotFound}
         onShowTemplates={() => setShowTemplates(true)}
+        onSaveOneOff={handleSaveOneOff}
         onClose={() => onComplete?.()}
       />
     </div>

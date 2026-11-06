@@ -2,10 +2,11 @@ import { useState, useMemo } from 'react';
 import type { Food } from '../types';
 import { FoodCard } from './FoodCard';
 import { BarcodeScanner } from './BarcodeScanner';
+import { QuickEntry, type QuickEntryData } from './QuickEntry';
 import { GENERIC_FOODS, GENERIC_CATEGORIES, searchGenericFoods, type GenericFood } from '../data/genericFoods';
 import './FoodSelector.css';
 
-export type SelectorTab = 'frequent' | 'scan' | 'search' | 'templates';
+export type SelectorTab = 'frequent' | 'oneoff' | 'scan' | 'search' | 'templates';
 
 interface FoodSelectorProps {
   foods: Food[];
@@ -14,10 +15,11 @@ interface FoodSelectorProps {
   onSelectGeneric: (generic: GenericFood) => void;
   onScanNotFound: (barcode: string) => void;
   onShowTemplates: () => void;
+  onSaveOneOff: (data: QuickEntryData) => void;
   onClose: () => void;
 }
 
-export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric, onScanNotFound, onClose }: FoodSelectorProps) {
+export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric, onScanNotFound, onSaveOneOff, onClose }: FoodSelectorProps) {
   const [activeTab, setActiveTab] = useState<SelectorTab>('frequent');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -88,6 +90,12 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
           ⭐ Fréquents
         </button>
         <button
+          className={`tab ${activeTab === 'oneoff' ? 'active' : ''}`}
+          onClick={() => setActiveTab('oneoff')}
+        >
+          ⚡ Ponctuel
+        </button>
+        <button
           className={`tab ${activeTab === 'scan' ? 'active' : ''}`}
           onClick={() => setActiveTab('scan')}
         >
@@ -133,6 +141,9 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
             )}
           </div>
         )}
+
+        {/* Onglet Ponctuel */}
+        {activeTab === 'oneoff' && <QuickEntry onSave={onSaveOneOff} />}
 
         {/* Onglet Scanner */}
         {activeTab === 'scan' && (
@@ -277,11 +288,13 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
         )}
       </div>
 
-      <div className="selector-footer">
-        <button className="btn btn-secondary btn-block" onClick={onCreateNew}>
-          + Créer un nouvel aliment
-        </button>
-      </div>
+      {activeTab !== 'oneoff' && (
+        <div className="selector-footer">
+          <button className="btn btn-secondary btn-block" onClick={onCreateNew}>
+            + Créer un nouvel aliment
+          </button>
+        </div>
+      )}
     </div>
   );
 }
