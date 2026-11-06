@@ -2,13 +2,20 @@ import { useState } from 'react';
 import { exportAllData, importAllData, importHistory, getAllJournalEntries, getAllDailySummaries } from '../db';
 import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
+import { getTheme, setTheme, type ThemeName } from '../utils/theme';
 import './Settings.css';
+
+const THEMES: { name: ThemeName; label: string }[] = [
+  { name: 'sauge', label: '🌿 Sauge' },
+  { name: 'halloween', label: '🎃 Halloween' }
+];
 
 export function Settings() {
   const [lastBackup, setLastBackup] = useState<string | null>(
     localStorage.getItem('lastBackupDate')
   );
   const [objective, setObjectiveState] = useState<number>(getObjective());
+  const [theme, setThemeState] = useState<ThemeName>(getTheme());
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [exportPeriod, setExportPeriod] = useState<'7d' | '30d' | 'all'>('all');
@@ -219,6 +226,27 @@ export function Settings() {
               onClick={() => setObjectiveState(preset)}
             >
               {preset}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Section Thème */}
+      <div className="settings-section">
+        <h2>🎨 Thème</h2>
+        <p className="section-desc">Choisis l'ambiance de l'application.</p>
+        <div className="objective-presets">
+          {THEMES.map(({ name, label }) => (
+            <button
+              key={name}
+              className={`preset-btn ${theme === name ? 'active' : ''}`}
+              aria-pressed={theme === name}
+              onClick={() => {
+                setTheme(name);
+                setThemeState(name);
+              }}
+            >
+              {label}
             </button>
           ))}
         </div>

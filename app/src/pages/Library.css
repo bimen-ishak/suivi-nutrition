@@ -60,7 +60,7 @@
 .search-bar input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 127, 104, 0.1);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .foods-list {
