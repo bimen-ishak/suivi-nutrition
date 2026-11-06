@@ -1,16 +1,6 @@
 .add-food-page {
   height: 100vh;
-  background: white;
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: #2e7d32;
-  cursor: pointer;
-  padding: 8px;
-  font-weight: 500;
+  background: var(--surface);
 }
 
 .quantity-screen {
@@ -26,33 +16,10 @@
 .quantity-screen h2 {
   margin: 0 0 16px 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--text);
 }
 
 .quantity-screen p {
   margin: 0 0 24px 0;
-  color: #666;
-}
-
-.btn {
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn:active {
-  transform: scale(0.98);
-}
-
-.btn-secondary {
-  background: #e0e0e0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background: #d0d0d0;
+  color: var(--text-2);
 }

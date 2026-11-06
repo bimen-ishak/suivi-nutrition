@@ -1,5 +1,5 @@
 .history-page {
-  padding: 16px;
+  padding: var(--page-gap);
   max-width: 800px;
   margin: 0 auto;
   padding-bottom: 100px;
@@ -13,36 +13,19 @@
 }
 
 .history-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #1a1a1a;
   text-transform: capitalize;
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: #2e7d32;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
-}
-
-.back-btn:hover {
-  background: #f0f0f0;
 }
 
 .loading,
 .empty-history {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--text-2);
 }
 
 .empty-history .hint {
   font-size: 0.9rem;
-  color: #999;
+  color: var(--text-3);
 }
 
 /* Liste des jours */
@@ -53,10 +36,10 @@
 }
 
 .day-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--surface);
+  border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -66,7 +49,7 @@
 }
 
 .day-card.today {
-  border: 2px solid #2e7d32;
+  border: 2px solid var(--primary);
 }
 
 .day-card-header {
@@ -79,7 +62,7 @@
 .day-date {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
   text-transform: capitalize;
 }
 
@@ -89,11 +72,11 @@
 }
 
 .day-net.negative {
-  color: #2e7d32;
+  color: var(--primary);
 }
 
 .day-net.positive {
-  color: #d32f2f;
+  color: var(--danger);
 }
 
 .day-card-body {
@@ -101,29 +84,29 @@
   gap: 16px;
   align-items: center;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .day-kcal {
   font-weight: 600;
-  color: #2e7d32;
+  color: var(--primary);
 }
 
 /* Vue détaillée */
 .day-balance-card,
 .day-foods-card {
-  background: white;
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: 20px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
 }
 
 .day-balance-card h2,
 .day-foods-card h2 {
   margin: 0 0 16px 0;
   font-size: 1.2rem;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .day-stats {
@@ -139,27 +122,27 @@
   align-items: center;
   gap: 4px;
   padding: 12px;
-  background: #f9f9f9;
-  border-radius: 12px;
+  background: var(--surface-soft);
+  border-radius: 16px;
 }
 
 .stat-value {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .stat-value.negative {
-  color: #2e7d32;
+  color: var(--primary);
 }
 
 .stat-value.positive {
-  color: #d32f2f;
+  color: var(--danger);
 }
 
 .stat-label {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .day-macros {
@@ -167,7 +150,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border);
 }
 
 .macro-stat {
@@ -179,13 +162,13 @@
 
 .macro-stat .macro-label {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .macro-stat .macro-value {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
 }
 
 .day-extra {
@@ -194,9 +177,9 @@
   justify-content: center;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border);
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 /* Aliments par repas */
@@ -208,7 +191,7 @@
   margin: 0 0 8px 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #2e7d32;
+  color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -218,7 +201,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--surface-soft);
 }
 
 .history-entry:last-child {
@@ -227,7 +210,7 @@
 
 .entry-time {
   font-size: 0.85rem;
-  color: #999;
+  color: var(--text-3);
   min-width: 44px;
 }
 
@@ -240,13 +223,13 @@
 
 .entry-qty {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .entry-kcal {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #2e7d32;
+  color: var(--primary);
 }
 
 @media (max-width: 500px) {

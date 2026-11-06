@@ -19,14 +19,9 @@
   font-size: 1.2rem;
 }
 
-.back-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
+.barcode-scanner .back-btn {
   color: white;
-  font-size: 0.95rem;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .video-container {
@@ -60,7 +55,7 @@
   width: 70%;
   max-width: 300px;
   aspect-ratio: 2 / 1;
-  border: 3px solid #2e7d32;
+  border: 3px solid var(--primary);
   border-radius: 12px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
 }
@@ -125,27 +120,9 @@
 
 .manual-input-group input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--primary);
 }
 
 .manual-input-group input::placeholder {
   color: rgba(255, 255, 255, 0.4);
-}
-
-.btn {
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-}
-
-.btn-primary {
-  background: #2e7d32;
-  color: white;
 }

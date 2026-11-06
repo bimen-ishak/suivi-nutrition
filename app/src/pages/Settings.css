@@ -1,5 +1,5 @@
 .settings-page {
-  padding: 16px;
+  padding: var(--page-gap);
   max-width: 800px;
   margin: 0 auto;
   padding-bottom: 100px;
@@ -10,36 +10,33 @@
 }
 
 .settings-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #1a1a1a;
 }
 
 .settings-section {
-  background: white;
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: 20px;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
 }
 
 .settings-section h2 {
   margin: 0 0 8px 0;
   font-size: 1.15rem;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .section-desc {
   margin: 0 0 16px 0;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-2);
   line-height: 1.5;
 }
 
 .last-backup {
   margin: 0 0 12px 0;
   font-size: 0.85rem;
-  color: #2e7d32;
+  color: var(--primary);
   font-weight: 500;
 }
 
@@ -60,19 +57,19 @@
   padding: 12px;
   font-size: 1.1rem;
   font-weight: 600;
-  border: 2px solid #d0d0d0;
-  border-radius: 8px;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
   text-align: center;
 }
 
 .objective-input input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--primary);
 }
 
 .objective-input .unit {
   font-size: 0.95rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .info-list {
@@ -86,7 +83,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--surface-soft);
 }
 
 .info-item:last-child {
@@ -95,54 +92,17 @@
 
 .info-label {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .info-value {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #1a1a1a;
-}
-
-.btn {
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn:active {
-  transform: scale(0.98);
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-block {
-  width: 100%;
-}
-
-.btn-primary {
-  background: #2e7d32;
-  color: white;
+  color: var(--text);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1b5e20;
-}
-
-.btn-secondary {
-  background: #e0e0e0;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background: #d0d0d0;
+  background: var(--primary-strong);
 }
 
 /* Sélecteur de période */
@@ -157,22 +117,22 @@
   padding: 10px 8px;
   font-size: 0.85rem;
   font-weight: 500;
-  border: 2px solid #d0d0d0;
-  border-radius: 8px;
-  background: white;
-  color: #555;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-2);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .period-btn:hover {
-  border-color: #2e7d32;
-  color: #2e7d32;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .period-btn.active {
-  background: #2e7d32;
-  border-color: #2e7d32;
+  background: var(--primary);
+  border-color: var(--primary);
   color: white;
 }
 
@@ -185,20 +145,20 @@
 
 .preset-btn {
   padding: 8px 14px;
-  border: 2px solid #d0d0d0;
+  border: 2px solid var(--border-strong);
   border-radius: 20px;
-  background: white;
+  background: var(--surface);
   font-size: 0.9rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-2);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .preset-btn.active {
-  border-color: #2e7d32;
-  background: #e8f5e9;
-  color: #2e7d32;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .preset-btn:active {

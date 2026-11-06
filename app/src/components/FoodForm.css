@@ -14,8 +14,8 @@
 }
 
 .food-form-modal {
-  background: white;
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: 20px;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
@@ -28,37 +28,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: white;
+  background: var(--surface);
   z-index: 10;
 }
 
 .food-form-header h2 {
   margin: 0;
   font-size: 1.4rem;
-  color: #1a1a1a;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #666;
-  cursor: pointer;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.15s;
-}
-
-.close-btn:hover {
-  background: #f0f0f0;
+  color: var(--text);
 }
 
 .food-form {
@@ -72,25 +52,25 @@
 .form-section h3 {
   margin: 0 0 12px 0;
   font-size: 1.1rem;
-  color: #333;
+  color: var(--text);
 }
 
 .form-section h4 {
   margin: 0 0 8px 0;
   font-size: 0.95rem;
-  color: #555;
+  color: var(--text-2);
 }
 
 .salt-section {
-  background: #f9f9f9;
+  background: var(--surface-soft);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-top: 16px;
 }
 
 .hint {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-2);
   margin: 0 0 12px 0;
   line-height: 1.4;
 }
@@ -108,8 +88,8 @@
 
 .btn-toggle {
   background: none;
-  border: 1px solid #2e7d32;
-  color: #2e7d32;
+  border: 1px solid var(--primary);
+  color: var(--primary);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -118,7 +98,7 @@
 }
 
 .btn-toggle:hover {
-  background: #2e7d32;
+  background: var(--primary);
   color: white;
 }
 
@@ -131,33 +111,33 @@
   margin-bottom: 6px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-2);
 }
 
 .form-row input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
   font-size: 1rem;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .form-row input:focus {
   outline: none;
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 127, 104, 0.1);
 }
 
 .form-row input:disabled {
-  background: #f5f5f5;
-  color: #888;
+  background: var(--surface-soft);
+  color: var(--text-3);
   cursor: not-allowed;
 }
 
 .form-row .error {
   display: block;
-  color: #d32f2f;
+  color: var(--danger);
   font-size: 0.8rem;
   margin-top: 4px;
 }
@@ -199,21 +179,21 @@
   align-items: center;
   gap: 10px;
   padding: 12px;
-  border: 2px solid #d0d0d0;
-  border-radius: 8px;
+  border: 2px solid var(--border-strong);
+  border-radius: 12px;
   transition: all 0.15s;
   flex: 1;
 }
 
 .radio-label input:checked + .radio-custom {
-  border-color: #2e7d32;
-  background: #f1f8e9;
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
 
 .radio-dot {
   width: 18px;
   height: 18px;
-  border: 2px solid #999;
+  border: 2px solid var(--text-3);
   border-radius: 50%;
   position: relative;
   transition: border-color 0.15s;
@@ -221,7 +201,7 @@
 }
 
 .radio-label input:checked + .radio-custom .radio-dot {
-  border-color: #2e7d32;
+  border-color: var(--primary);
 }
 
 .radio-label input:checked + .radio-custom .radio-dot::after {
@@ -231,14 +211,14 @@
   left: 3px;
   width: 8px;
   height: 8px;
-  background: #2e7d32;
+  background: var(--primary);
   border-radius: 50%;
 }
 
 .portions-form {
-  background: #f9f9f9;
+  background: var(--surface-soft);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .portions-list {
@@ -252,15 +232,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--surface);
   padding: 10px 12px;
   border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
 }
 
 .btn-remove {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--danger-soft);
+  color: var(--danger);
   border: none;
   width: 24px;
   height: 24px;
@@ -275,7 +255,7 @@
 }
 
 .btn-remove:hover {
-  background: #ffcdd2;
+  background: var(--danger-border);
 }
 
 .form-actions {
@@ -283,26 +263,17 @@
   gap: 12px;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border);
   position: sticky;
   bottom: 0;
-  background: white;
+  background: var(--surface);
   margin-top: 24px;
 }
 
-.btn-primary {
-  background: #2e7d32;
-  color: white;
-}
-
 .btn-primary:hover:not(:disabled) {
-  background: #1b5e20;
+  background: var(--primary-strong);
 }
 
-.btn-primary:disabled {
-  background: #a5d6a7;
-  cursor: not-allowed;
-}
 .base-unit-toggle {
   display: flex;
   gap: 8px;
@@ -312,17 +283,17 @@
 .base-unit-toggle button {
   flex: 1;
   padding: 10px 8px;
-  border: 2px solid #d0d0d0;
-  border-radius: 10px;
-  background: white;
-  color: #555;
+  border: 2px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-2);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
 }
 
 .base-unit-toggle button.active {
-  border-color: #2e7d32;
-  background: #e8f5e9;
-  color: #2e7d32;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
 }

@@ -1,14 +1,13 @@
 .quick-entry {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  text-align: left;
+  gap: 20px;
 }
 
 .quick-intro {
   margin: 0;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .quick-field {
@@ -18,7 +17,7 @@
   min-width: 0;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-2);
 }
 
 .quick-entry input,
@@ -28,16 +27,16 @@
   box-sizing: border-box;
   padding: 12px;
   font-size: 1rem;
-  color: #1a1a1a;
-  background: white;
-  border: 2px solid #d0d0d0;
-  border-radius: 10px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
 }
 
 .quick-entry input:focus,
 .quick-entry select:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--primary);
 }
 
 .quick-pair {
@@ -59,24 +58,24 @@
 }
 
 .quick-subtitle {
-  margin: 0 0 -6px;
+  margin: 0 0 -10px;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-2);
 }
 
 .quick-macros {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .quick-preview {
   margin: 0;
   padding: 12px;
   text-align: center;
-  color: #2e7d32;
-  background: #e8f5e9;
-  border-radius: 10px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 14px;
 }
 
 .quick-entry .btn-primary:disabled {

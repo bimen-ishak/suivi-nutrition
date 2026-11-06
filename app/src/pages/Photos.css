@@ -1,23 +1,21 @@
 .photos-page {
-  padding: 16px;
+  padding: var(--page-gap);
   text-align: left;
 }
 
 .photos-page h1 {
-  margin: 0 0 16px;
-  font-size: 1.5rem;
-  color: #1a1a1a;
+  margin-bottom: 24px;
 }
 
 .photo-add {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
 }
 
 .photo-date {
@@ -27,17 +25,17 @@
   gap: 12px;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-2);
 }
 
 .photo-date input {
   min-width: 0;
   padding: 10px;
   font-size: 1rem;
-  color: #1a1a1a;
-  background: white;
-  border: 2px solid #d0d0d0;
-  border-radius: 10px;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border-strong);
+  border-radius: 14px;
 }
 
 .photo-add-btn {
@@ -46,8 +44,8 @@
   font-size: 1rem;
   font-weight: 600;
   color: white;
-  background: #2e7d32;
-  border-radius: 10px;
+  background: var(--primary);
+  border-radius: 14px;
   cursor: pointer;
 }
 
@@ -58,13 +56,13 @@
 .photos-empty {
   padding: 32px 0;
   text-align: center;
-  color: #888;
+  color: var(--text-3);
 }
 
 .photos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 14px;
 }
 
 .photo-tile {
@@ -73,10 +71,10 @@
   min-width: 0;
   padding: 0;
   overflow: hidden;
-  background: white;
+  background: var(--surface);
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
   cursor: pointer;
 }
 
@@ -88,9 +86,9 @@
 }
 
 .photo-tile span {
-  padding: 8px;
+  padding: 10px 8px;
   font-size: 0.8rem;
-  color: #555;
+  color: var(--text-2);
 }
 
 .photo-viewer {
