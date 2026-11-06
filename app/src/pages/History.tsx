@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getJournalEntriesByDate, getDailySummary, recalculateDailySummary } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
+import { CutCard } from '../components/CutCard';
 import './History.css';
 
 interface DayData {
@@ -204,6 +205,8 @@ export function History() {
       <div className="history-header">
         <h1>📊 Historique</h1>
       </div>
+
+      <CutCard />
 
       {days.length === 0 ? (
         <div className="empty-history">

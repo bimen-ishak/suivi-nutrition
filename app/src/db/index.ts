@@ -163,6 +163,24 @@ export async function getLastNDailySummaries(n: number): Promise<DailySummary[]>
   return all.reverse(); // ordre chronologique
 }
 
+// Suivi de sèche
+export async function getWeightsSince(date: string): Promise<{ date: string; weight: number }[]> {
+  const summaries = await db.dailySummaries.where('date').aboveOrEqual(date).toArray();
+  return summaries.flatMap(s => (s.weight ? [{ date: s.date, weight: s.weight }] : []));
+}
+
+export async function getDailyIntakesSince(date: string): Promise<{ date: string; kcal: number; protein: number }[]> {
+  const entries = await db.journal.where('date').aboveOrEqual(date).toArray();
+  const byDate = new Map<string, { date: string; kcal: number; protein: number }>();
+  for (const entry of entries) {
+    const day = byDate.get(entry.date) ?? { date: entry.date, kcal: 0, protein: 0 };
+    day.kcal += entry.kcal;
+    day.protein += entry.protein;
+    byDate.set(entry.date, day);
+  }
+  return [...byDate.values()];
+}
+
 // Photos du jour
 export async function getAllPhotos(): Promise<DailyPhoto[]> {
   return db.photos.orderBy('date').reverse().toArray();

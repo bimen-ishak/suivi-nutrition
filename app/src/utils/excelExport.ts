@@ -1,4 +1,4 @@
-// Export Excel compatible avec le tableau existant Suivi_Calories_Bimen.xlsx
+// Export Excel compatible avec le tableau de suivi d'origine
 // 3 feuilles : Bilan quotidien, Journal, Photos
 // SheetJS chargé dynamiquement (gros bundle) via loadXLSX()
 
@@ -194,5 +194,5 @@ export async function exportToExcel(
   // Télécharger le fichier
   const date = new Date().toISOString().split('T')[0];
   const periodLabel = period === '7d' ? '7j' : period === '30d' ? '30j' : 'tout';
-  XLSX.writeFile(wb, `Suivi_Calories_Bimen_${periodLabel}_${date}.xlsx`);
+  XLSX.writeFile(wb, `Suivi_Calories_${periodLabel}_${date}.xlsx`);
 }

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getJournalEntriesByDate, getDailySummary, recalculateDailySummary, createDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
+import { getJournalEntriesByDate, getDailySummary, getWeightsSince, recalculateDailySummary, createDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
 import { getObjective, onObjectiveChange } from '../utils/objective';
+import { getWeightTrend, proteinTarget } from '../utils/cut';
 import './Today.css';
+
+const DEFAULT_PROTEIN_GOAL = 150;
 
 interface TodayProps {
   onAddFood: () => void;
@@ -24,6 +27,7 @@ export function Today({ onAddFood }: TodayProps) {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [objective, setObjective] = useState<number>(getObjective());
+  const [proteinGoal, setProteinGoal] = useState(DEFAULT_PROTEIN_GOAL);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -47,12 +51,16 @@ export function Today({ onAddFood }: TodayProps) {
 
   const loadTodayData = async () => {
     try {
-      const [entries, summary, calculatedTotals] = await Promise.all([
+      const twoWeeksAgo = new Date(Date.now() - 14 * 86_400_000).toISOString().split('T')[0];
+      const [entries, summary, calculatedTotals, weights] = await Promise.all([
         getJournalEntriesByDate(today),
         getDailySummary(today),
-        recalculateDailySummary(today)
+        recalculateDailySummary(today),
+        getWeightsSince(twoWeeksAgo)
       ]);
 
+      const latestTrend = getWeightTrend(weights).at(-1)?.trend;
+      setProteinGoal(latestTrend ? proteinTarget(latestTrend) : DEFAULT_PROTEIN_GOAL);
       setJournalEntries(entries);
       setDailySummary(summary || null);
       setTotals(calculatedTotals);
@@ -229,12 +237,12 @@ export function Today({ onAddFood }: TodayProps) {
           <div className="macro-bar">
             <div className="macro-label">
               <span>Protéines</span>
-              <span className="macro-value">{Math.round(totals.protein * 10) / 10}g</span>
+              <span className="macro-value">{Math.round(totals.protein)} / {proteinGoal} g</span>
             </div>
             <div className="bar-container">
               <div
                 className="bar bar-protein"
-                style={{ width: `${Math.min((totals.protein / 150) * 100, 100)}%` }}
+                style={{ width: `${Math.min((totals.protein / proteinGoal) * 100, 100)}%` }}
               />
             </div>
           </div>
