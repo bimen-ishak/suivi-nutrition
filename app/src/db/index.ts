@@ -1,12 +1,13 @@
 // Base de données locale avec Dexie.js
 import Dexie, { type Table } from 'dexie';
-import type { Food, JournalEntry, DailySummary, MealTemplate, BackupData } from '../types';
+import type { Food, JournalEntry, DailySummary, MealTemplate, BackupData, DailyPhoto } from '../types';
 
 class NutritionDatabase extends Dexie {
   foods!: Table<Food>;
   journal!: Table<JournalEntry>;
   dailySummaries!: Table<DailySummary>;
   mealTemplates!: Table<MealTemplate>;
+  photos!: Table<DailyPhoto>;
 
   constructor() {
     super('NutritionDB');
@@ -16,15 +17,19 @@ class NutritionDatabase extends Dexie {
       dailySummaries: 'date',
       mealTemplates: 'id, name'
     });
+    this.version(2).stores({
+      photos: 'date'
+    });
   }
 
   // Méthodes helper pour l'export/restauration
   async exportAll(): Promise<BackupData> {
-    const [foods, journal, dailySummaries, mealTemplates] = await Promise.all([
+    const [foods, journal, dailySummaries, mealTemplates, photos] = await Promise.all([
       this.foods.toArray(),
       this.journal.toArray(),
       this.dailySummaries.toArray(),
-      this.mealTemplates.toArray()
+      this.mealTemplates.toArray(),
+      this.photos.toArray()
     ]);
 
     return {
@@ -33,12 +38,13 @@ class NutritionDatabase extends Dexie {
       foods,
       journal,
       dailySummaries,
-      mealTemplates
+      mealTemplates,
+      photos
     };
   }
 
   async importAll(data: BackupData): Promise<void> {
-    await this.transaction('rw', this.foods, this.journal, this.dailySummaries, this.mealTemplates, async () => {
+    await this.transaction('rw', [this.foods, this.journal, this.dailySummaries, this.mealTemplates, this.photos], async () => {
       await Promise.all([
         this.foods.clear(),
         this.journal.clear(),
@@ -52,6 +58,12 @@ class NutritionDatabase extends Dexie {
         this.dailySummaries.bulkAdd(data.dailySummaries),
         this.mealTemplates.bulkAdd(data.mealTemplates)
       ]);
+
+      // Une ancienne sauvegarde n'a pas de photos : on garde celles de l'app
+      if (data.photos) {
+        await this.photos.clear();
+        await this.photos.bulkAdd(data.photos);
+      }
     });
   }
 }
@@ -151,25 +163,17 @@ export async function getLastNDailySummaries(n: number): Promise<DailySummary[]>
   return all.reverse(); // ordre chronologique
 }
 
-// Meal Templates
-export async function createMealTemplate(template: MealTemplate): Promise<void> {
-  await db.mealTemplates.add(template);
+// Photos du jour
+export async function getAllPhotos(): Promise<DailyPhoto[]> {
+  return db.photos.orderBy('date').reverse().toArray();
 }
 
-export async function getAllMealTemplates(): Promise<MealTemplate[]> {
-  return db.mealTemplates.toArray();
+export async function savePhoto(photo: DailyPhoto): Promise<void> {
+  await db.photos.put(photo);
 }
 
-export async function getMealTemplate(id: string): Promise<MealTemplate | undefined> {
-  return db.mealTemplates.get(id);
-}
-
-export async function updateMealTemplate(id: string, changes: Partial<MealTemplate>): Promise<number> {
-  return db.mealTemplates.update(id, changes);
-}
-
-export async function deleteMealTemplate(id: string): Promise<void> {
-  await db.mealTemplates.delete(id);
+export async function deletePhoto(date: string): Promise<void> {
+  await db.photos.delete(date);
 }
 
 // Calculs quotidiens

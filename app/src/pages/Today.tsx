@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getJournalEntriesByDate, getDailySummary, recalculateDailySummary, createDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry, createMealTemplate } from '../db';
-import type { JournalEntry, DailySummary, MealType } from '../types';
+import { getJournalEntriesByDate, getDailySummary, recalculateDailySummary, createDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
+import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
-import { MealTemplateModal } from '../components/MealTemplateModal';
 import { getObjective, onObjectiveChange } from '../utils/objective';
 import './Today.css';
 
@@ -24,7 +23,6 @@ export function Today({ onAddFood }: TodayProps) {
   });
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
-  const [creatingTemplate, setCreatingTemplate] = useState<{ entries: JournalEntry[], meal: MealType } | null>(null);
   const [objective, setObjective] = useState<number>(getObjective());
 
   const today = new Date().toISOString().split('T')[0];
@@ -142,38 +140,6 @@ export function Today({ onAddFood }: TodayProps) {
     }
   };
 
-  const handleCreateTemplate = (meal: MealType) => {
-    // Un aliment ponctuel n'a pas de fiche à réutiliser dans un repas type
-    const mealEntries = journalEntries.filter(e => e.meal === meal && !e.oneOff);
-    if (mealEntries.length === 0) {
-      alert('Aucun aliment pour ce repas');
-      return;
-    }
-    setCreatingTemplate({ entries: mealEntries, meal });
-  };
-
-  const handleSaveTemplate = async (name: string, meal: MealType) => {
-    if (!creatingTemplate) return;
-
-    const template = {
-      id: crypto.randomUUID(),
-      name,
-      meal,
-      items: creatingTemplate.entries.map(e => ({
-        foodId: e.foodId,
-        foodName: e.foodName,
-        quantity: e.quantity,
-        unit: e.unit,
-        kcal: e.kcal
-      })),
-      createdAt: new Date().toISOString()
-    };
-
-    await createMealTemplate(template);
-    setCreatingTemplate(null);
-    alert(`Repas type "${name}" créé !`);
-  };
-
   const balance = getBalanceMessage();
 
   if (editingEntry) {
@@ -194,16 +160,6 @@ export function Today({ onAddFood }: TodayProps) {
         existingSummary={dailySummary}
         onSave={handleSaveSummary}
         onCancel={() => setShowSummaryModal(false)}
-      />
-    );
-  }
-
-  if (creatingTemplate) {
-    return (
-      <MealTemplateModal
-        entries={creatingTemplate.entries}
-        onSave={handleSaveTemplate}
-        onCancel={() => setCreatingTemplate(null)}
       />
     );
   }
@@ -334,16 +290,7 @@ export function Today({ onAddFood }: TodayProps) {
                   <div key={meal} className="meal-section">
                     <div className="meal-header">
                       <h3>{meal}</h3>
-                      <div className="meal-header-actions">
-                        <button
-                          className="save-template-btn"
-                          onClick={() => handleCreateTemplate(meal as MealType)}
-                          title="Enregistrer comme repas type"
-                        >
-                          💾
-                        </button>
-                        <span className="meal-total">{mealTotal} kcal</span>
-                      </div>
+                      <span className="meal-total">{mealTotal} kcal</span>
                     </div>
                     <div className="journal-list">
                       {entries.map(entry => (

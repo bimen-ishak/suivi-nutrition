@@ -1,0 +1,135 @@
+.photos-page {
+  padding: 16px;
+  text-align: left;
+}
+
+.photos-page h1 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+}
+
+.photo-add {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.photo-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.photo-date input {
+  min-width: 0;
+  padding: 10px;
+  font-size: 1rem;
+  color: #1a1a1a;
+  background: white;
+  border: 2px solid #d0d0d0;
+  border-radius: 10px;
+}
+
+.photo-add-btn {
+  padding: 14px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: #2e7d32;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.photo-add-btn.disabled {
+  opacity: 0.6;
+}
+
+.photos-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: #888;
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.photo-tile {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+}
+
+.photo-tile img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-tile span {
+  padding: 8px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.photo-viewer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  color: white;
+  background: #111;
+}
+
+.photo-viewer-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.photo-viewer-bar button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.photo-viewer-bar .photo-delete {
+  color: #ff8a80;
+}
+
+.photo-viewer img {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  object-fit: contain;
+}
+
+.photo-viewer p {
+  margin: 0;
+  padding: 12px 16px 20px;
+  text-align: center;
+  color: #ddd;
+}

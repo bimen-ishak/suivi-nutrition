@@ -97,6 +97,12 @@ export interface DailySummary {
   updatedAt: string;
 }
 
+export interface DailyPhoto {
+  date: string;                  // YYYY-MM-DD (clé primaire, une photo par jour)
+  image: string;                 // image JPEG compressée, en data URL
+  createdAt: string;
+}
+
 export type CalculationType = 'tare' | 'difference' | 'remaining';
 
 export interface MealTemplate {
@@ -130,6 +136,7 @@ export interface BackupData {
   journal: JournalEntry[];
   dailySummaries: DailySummary[];
   mealTemplates: MealTemplate[];
+  photos?: DailyPhoto[];         // absent des sauvegardes d'avant l'onglet Photos
 }
 
 // Types pour les calculs

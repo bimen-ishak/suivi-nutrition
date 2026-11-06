@@ -3,27 +3,6 @@
   background: white;
 }
 
-.templates-view {
-  padding: 16px;
-  background: white;
-  min-height: 100vh;
-}
-
-.templates-view .page-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.templates-view .page-header h2 {
-  margin: 0;
-  font-size: 1.4rem;
-  color: #1a1a1a;
-}
-
 .back-btn {
   background: none;
   border: none;

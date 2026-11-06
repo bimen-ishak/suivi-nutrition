@@ -395,31 +395,6 @@
   color: #2e7d32;
 }
 
-.meal-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.save-template-btn {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  opacity: 0.6;
-  padding: 4px;
-  transition: opacity 0.15s, transform 0.15s;
-}
-
-.save-template-btn:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-.save-template-btn:active {
-  transform: scale(0.95);
-}
-
 .meal-total {
   font-size: 0.95rem;
   font-weight: 500;

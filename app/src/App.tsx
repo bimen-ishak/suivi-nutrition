@@ -3,6 +3,7 @@ import { Navigation, type NavigationTab } from './components/Navigation';
 import { Today } from './pages/Today';
 import { Library } from './pages/Library';
 import { History } from './pages/History';
+import { Photos } from './pages/Photos';
 import { Settings } from './pages/Settings';
 import { AddFood } from './pages/AddFood';
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
         {activeTab === 'today' && <Today onAddFood={() => setShowAddFood(true)} />}
         {activeTab === 'library' && <Library />}
         {activeTab === 'history' && <History />}
+        {activeTab === 'photos' && <Photos />}
         {activeTab === 'settings' && <Settings />}
       </main>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />

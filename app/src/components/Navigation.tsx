@@ -1,6 +1,6 @@
 import './Navigation.css';
 
-export type NavigationTab = 'today' | 'history' | 'library' | 'settings';
+export type NavigationTab = 'today' | 'history' | 'photos' | 'library' | 'settings';
 
 interface NavigationProps {
   activeTab: NavigationTab;
@@ -24,6 +24,14 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
       >
         <span className="nav-icon">📊</span>
         <span className="nav-label">Historique</span>
+      </button>
+
+      <button
+        className={`nav-item ${activeTab === 'photos' ? 'active' : ''}`}
+        onClick={() => onTabChange('photos')}
+      >
+        <span className="nav-icon">📷</span>
+        <span className="nav-label">Photos</span>
       </button>
 
       <button

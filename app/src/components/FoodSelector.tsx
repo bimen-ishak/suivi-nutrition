@@ -6,7 +6,7 @@ import { QuickEntry, type QuickEntryData } from './QuickEntry';
 import { GENERIC_FOODS, GENERIC_CATEGORIES, searchGenericFoods, type GenericFood } from '../data/genericFoods';
 import './FoodSelector.css';
 
-export type SelectorTab = 'frequent' | 'oneoff' | 'scan' | 'search' | 'templates';
+export type SelectorTab = 'frequent' | 'oneoff' | 'scan' | 'search';
 
 interface FoodSelectorProps {
   foods: Food[];
@@ -14,7 +14,6 @@ interface FoodSelectorProps {
   onCreateNew: () => void;
   onSelectGeneric: (generic: GenericFood) => void;
   onScanNotFound: (barcode: string) => void;
-  onShowTemplates: () => void;
   onSaveOneOff: (data: QuickEntryData) => void;
   onClose: () => void;
 }
@@ -106,12 +105,6 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
           onClick={() => setActiveTab('search')}
         >
           🔍 Rechercher
-        </button>
-        <button
-          className={`tab ${activeTab === 'templates' ? 'active' : ''}`}
-          onClick={() => setActiveTab('templates')}
-        >
-          🍽️ Repas types
         </button>
       </div>
 
@@ -274,18 +267,6 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
           </div>
         )}
 
-        {/* Onglet Repas types */}
-        {activeTab === 'templates' && (
-          <div className="templates-tab">
-            <div className="tab-header">
-              <h3>Repas types</h3>
-            </div>
-            <div className="empty-state">
-              <p>Aucun repas type enregistré</p>
-              <p className="hint">Les repas types seront disponibles en Phase 10</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {activeTab !== 'oneoff' && (
