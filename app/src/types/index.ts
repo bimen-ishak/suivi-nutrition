@@ -1,0 +1,131 @@
+// Types TypeScript pour l'application de suivi nutritionnel
+
+export interface Portion {
+  name: string;           // ex: "biscuit", "bol", "carré"
+  grams: number;          // poids en grammes
+}
+
+export interface Food {
+  id: string;                    // UUID
+  name: string;
+  brand?: string;
+  barcode?: string;
+  kcal_per_100g: number;
+  protein: number;               // g
+  carbs: number;                 // g
+  sugars?: number;               // g, optionnel
+  fat: number;                   // g
+  fiber?: number;                // g, optionnel
+  salt?: number;                 // g, optionnel
+  sodium?: number;               // mg
+  potassium?: number;            // mg
+  source: 'étiquette' | 'estimation';
+  portions: Portion[];
+  frequency: number;             // compteur d'utilisations
+  lastUsed: string;              // ISO date
+  createdAt: string;
+  updatedAt: string;
+  // Pour les versions de recette (V2)
+  version?: number;
+  parentId?: string;             // ID de l'aliment original
+  versionDate?: string;          // Date de cette version
+}
+
+export type MealType =
+  | 'Petit-déj'
+  | 'Collation'
+  | 'Déjeuner'
+  | 'Dîner'
+  | 'Repas'
+  | 'Boisson';
+
+export interface CalculationInfo {
+  type: 'tare' | 'difference' | 'remaining';
+  values: number[];
+  description: string;           // ex: "556 g mangés (675 g − 119 g restes)"
+}
+
+export interface JournalEntry {
+  id: string;
+  date: string;                  // YYYY-MM-DD
+  time: string;                  // HH:MM
+  meal: MealType;
+  foodId: string;
+  foodName: string;              // dénormalisé pour affichage rapide
+  foodSource: 'étiquette' | 'estimation';
+  quantity: number;
+  unit: 'g' | 'ml' | string;     // ou nom de portion personnalisée
+  calculation?: CalculationInfo;
+  // Valeurs calculées (dénormalisées)
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sodium?: number;
+  potassium?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DailySummary {
+  date: string;                  // YYYY-MM-DD
+  weight?: number;               // kg
+  caloriesBurned?: number;
+  caloriesBurnedProvisional?: boolean;
+  caloriesRest?: number;
+  caloriesActivity?: number;
+  sleepBedtime?: string;         // HH:MM
+  sleepWakeup?: string;          // HH:MM
+  sleepDuration?: number;        // heures décimales
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MealTemplate {
+  id: string;
+  name: string;
+  items: {
+    foodId: string;
+    quantity: number;
+    unit: string;
+  }[];
+  createdAt: string;
+}
+
+export interface NutritionResult {
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sodium?: number;
+  potassium?: number;
+}
+
+// Types pour la sauvegarde/restauration
+export interface BackupData {
+  version: string;
+  exportDate: string;
+  foods: Food[];
+  journal: JournalEntry[];
+  dailySummaries: DailySummary[];
+  mealTemplates: MealTemplate[];
+}
+
+// Types pour les calculs
+export interface BalanceResult {
+  net: number;                   // mangé - brûlé
+  remainingToObjective: number;  // kcal restantes pour atteindre l'objectif (positif = à manger, négatif = à brûler)
+  message: string;               // message lisible
+}
+
+// Constantes
+export const MEAL_TYPES: MealType[] = [
+  'Petit-déj',
+  'Collation',
+  'Déjeuner',
+  'Dîner',
+  'Repas',
+  'Boisson'
+];
+
+export const OBJECTIVE_DEFAULT = -500; // kcal par jour

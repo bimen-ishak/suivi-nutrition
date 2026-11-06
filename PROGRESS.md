@@ -15,10 +15,28 @@
 - Stockage : IndexedDB + sauvegarde/restauration par fichier JSON (protection contre effacement 7 jours)
 - Rappels fixes : via app Rappels iPhone (config manuelle)
 
-## Phase 1 : Conception 🔄
+## Phase 1 : Conception ✅
 - [x] Rédaction de SPEC.md
 - [x] Rédaction de PLAN.md
-- [ ] Validation utilisateur
+- [x] Validation utilisateur
+
+## Phase 2 : Initialisation du projet ✅
+- [x] Création du squelette React + TypeScript + Vite
+- [x] Configuration Vitest
+- [x] Installation des dépendances (Dexie, ZXing, SheetJS, PWA)
+- [x] Structure de dossiers (components, pages, hooks, utils, db, types)
+- [x] Types TypeScript de base (Food, JournalEntry, DailySummary, MealTemplate)
+- [x] Base de données Dexie.js avec schémas et méthodes CRUD
+- [x] Fonctions de calcul pur (calculations.ts) avec 34 tests unitaires
+  - Sodium depuis sel
+  - Portions personnalisées
+  - Nutrition pour quantité
+  - Tare, différence, restes
+  - Sommeil (passage minuit)
+  - Bilan quotidien
+  - Cohérence macros/kcal
+- [x] Build de production réussi
+- [x] Serveur de développement fonctionnel (localhost:5173)
 
 ## Prochaine action
-Attendre la validation de l'utilisateur sur SPEC.md (parcours, fonctionnalités, priorisation).
+Passer à la Phase 3 : Bibliothèque d'aliments (CRUD aliments, écran Bibliothèque).
