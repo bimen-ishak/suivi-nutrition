@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DailyPhoto } from '../types';
 import { deletePhoto, getAllPhotos, savePhoto } from '../db';
 import { compressPhoto, localDateKey } from '../utils/photo';
 import './Photos.css';
+
+const SWIPE_DISTANCE = 50;
 
 const formatDate = (date: string) =>
   new Date(`${date}T12:00:00`).toLocaleDateString('fr-FR', {
@@ -18,6 +20,7 @@ export function Photos() {
   const [date, setDate] = useState(today);
   const [saving, setSaving] = useState(false);
   const [viewing, setViewing] = useState<DailyPhoto | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const loadPhotos = async () => {
     setPhotos(await getAllPhotos());
@@ -56,14 +59,41 @@ export function Photos() {
   };
 
   if (viewing) {
+    // La liste va de la plus récente à la plus ancienne
+    const index = photos.findIndex(p => p.date === viewing.date);
+    const older = photos[index + 1];
+    const newer = photos[index - 1];
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+      if (touchStartX.current === null) return;
+      const distance = e.changedTouches[0].clientX - touchStartX.current;
+      touchStartX.current = null;
+      if (distance > SWIPE_DISTANCE && older) setViewing(older);
+      if (distance < -SWIPE_DISTANCE && newer) setViewing(newer);
+    };
+
     return (
       <div className="photo-viewer">
         <div className="photo-viewer-bar">
           <button onClick={() => setViewing(null)}>← Retour</button>
           <button className="photo-delete" onClick={() => handleDelete(viewing)}>Supprimer</button>
         </div>
-        <img src={viewing.image} alt={`Photo du ${formatDate(viewing.date)}`} />
-        <p>{formatDate(viewing.date)}</p>
+
+        <div
+          className="photo-stage"
+          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={handleTouchEnd}
+        >
+          <img src={viewing.image} alt={`Photo du ${formatDate(viewing.date)}`} />
+          {older && (
+            <button className="photo-arrow left" onClick={() => setViewing(older)} aria-label="Photo précédente">‹</button>
+          )}
+          {newer && (
+            <button className="photo-arrow right" onClick={() => setViewing(newer)} aria-label="Photo suivante">›</button>
+          )}
+        </div>
+
+        <p>{formatDate(viewing.date)} · {photos.length - index} / {photos.length}</p>
       </div>
     );
   }
