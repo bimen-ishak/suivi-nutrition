@@ -5,6 +5,7 @@ import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
 import { getObjective, onObjectiveChange } from '../utils/objective';
 import { getWeightTrend, proteinTarget } from '../utils/cut';
+import { parseHealthText, applyHealthToSummary } from '../utils/health';
 import './Today.css';
 
 const DEFAULT_PROTEIN_GOAL = 150;
@@ -126,6 +127,31 @@ export function Today({ onAddFood }: TodayProps) {
     }
   };
 
+  const handleImportHealth = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const data = parseHealthText(text);
+      const summary = applyHealthToSummary(dailySummary ?? undefined, today, data);
+      const found = [
+        data.weight !== undefined && `poids ${data.weight} kg`,
+        summary.caloriesBurned !== undefined && `dépense ${summary.caloriesBurned} kcal`
+      ].filter(Boolean);
+
+      if (found.length === 0) {
+        alert('Je ne trouve rien de Santé dans ce qui est copié. Lance d\'abord ton raccourci « Santé → Suivi », puis reviens ici.');
+        return;
+      }
+
+      if (dailySummary) await updateDailySummary(summary);
+      else await createDailySummary(summary);
+      await loadTodayData();
+      alert(`✅ Importé depuis Santé : ${found.join(', ')}.`);
+    } catch (error) {
+      console.error('Erreur lors de l\'import depuis Santé:', error);
+      alert('Impossible de lire ce qui est copié. Autorise le collage si iPhone te le demande, puis réessaie.');
+    }
+  };
+
   const handleSaveEntry = async (updatedEntry: JournalEntry) => {
     try {
       await updateJournalEntry(updatedEntry.id, updatedEntry);
@@ -230,6 +256,13 @@ export function Today({ onAddFood }: TodayProps) {
           onClick={() => setShowSummaryModal(true)}
         >
           {dailySummary?.caloriesBurned ? '✏️ Modifier le bilan' : '📊 Saisir ma dépense'}
+        </button>
+        <button
+          className="btn btn-secondary"
+          style={{ marginTop: '8px' }}
+          onClick={handleImportHealth}
+        >
+          ❤️ Importer depuis Santé
         </button>
 
         {/* Barres de macros */}
