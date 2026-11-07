@@ -1,0 +1,67 @@
+.macro-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.macro-card.wide {
+  grid-column: 1 / -1;
+}
+
+.macro-card-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.macro-card-figures {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.macro-card-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.macro-card-value.over {
+  color: var(--danger);
+}
+
+.macro-card-goal {
+  font-size: 0.78rem;
+  color: var(--text-3);
+}
+
+.macro-card-track {
+  height: 10px;
+  margin-top: 2px;
+  overflow: hidden;
+  background: var(--surface-soft);
+  border-radius: 6px;
+}
+
+.macro-card-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+.fill-protein { background: var(--macro-protein); }
+.fill-carbs { background: var(--macro-carbs); }
+.fill-fat { background: var(--macro-fat); }
+.fill-sodium { background: var(--macro-sodium); }
+.fill-potassium { background: var(--macro-potassium); }
+
+/* Plafond dépassé : la barre prend la couleur d'alerte */
+.macro-card-fill.over {
+  background: var(--danger);
+}

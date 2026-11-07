@@ -77,15 +77,6 @@ export function History() {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + 'T12:00:00');
-    return new Intl.DateTimeFormat('fr-FR', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short'
-    }).format(date);
-  };
-
   const formatDateLong = (dateStr: string) => {
     const date = new Date(dateStr + 'T12:00:00');
     return new Intl.DateTimeFormat('fr-FR', {
@@ -95,6 +86,11 @@ export function History() {
       year: 'numeric'
     }).format(date);
   };
+
+  const shortWeekday = (dateStr: string) =>
+    new Intl.DateTimeFormat('fr-FR', { weekday: 'short' }).format(new Date(dateStr + 'T12:00:00')).replace('.', '');
+
+  const dayNumber = (dateStr: string) => Number(dateStr.slice(8, 10));
 
   const isToday = (dateStr: string) => {
     return dateStr === new Date().toISOString().split('T')[0];
@@ -239,23 +235,35 @@ export function History() {
                 className={`day-card ${isToday(day.date) ? 'today' : ''}`}
                 onClick={() => setSelectedDate(day.date)}
               >
-                <div className="day-card-header">
-                  <span className="day-date">
-                    {isToday(day.date) ? "Aujourd'hui" : formatDate(day.date)}
-                  </span>
-                  <span className={`day-net ${net !== null ? (net < 0 ? 'negative' : 'positive') : ''}`}>
-                    {net !== null ? `${net > 0 ? '+' : ''}${net} kcal` : ''}
-                  </span>
+                <div className="day-badge">
+                  <span className="day-badge-weekday">{shortWeekday(day.date)}</span>
+                  <span className="day-badge-number">{dayNumber(day.date)}</span>
                 </div>
-                <div className="day-card-body">
-                  {(!day.imported || day.imported.hasCalories) && (
-                    <span className="day-kcal">{day.totals.caloriesEaten} kcal</span>
-                  )}
+                <div className="day-main">
+                  <span className="day-kcal">
+                    {!day.imported || day.imported.hasCalories ? `${day.totals.caloriesEaten} kcal` : 'Poids seul'}
+                  </span>
+                  <span className="day-sub">
+                    {(!day.imported || day.imported.hasCalories) &&
+                      `P ${Math.round(day.totals.protein)} · G ${Math.round(day.totals.carbs)} · L ${Math.round(day.totals.fat)}`}
+                    {day.summary?.weight && (
+                      <>
+                        {(!day.imported || day.imported.hasCalories) && ' · '}
+                        <span className="day-weight">⚖️ {day.summary.weight} kg</span>
+                      </>
+                    )}
+                  </span>
                   <span className="day-count">
+                    {isToday(day.date) && "Aujourd'hui · "}
                     {day.imported ? 'importé' : `${day.entries.length} aliment${day.entries.length > 1 ? 's' : ''}`}
                   </span>
-                  {day.summary?.weight && <span className="day-weight">⚖️ {day.summary.weight}kg</span>}
                 </div>
+                {net !== null && (
+                  <span className={`day-net ${net < 0 ? 'negative' : 'positive'}`}>
+                    {net > 0 ? '+' : ''}{net}
+                    <small>kcal net</small>
+                  </span>
+                )}
               </div>
             );
           })}

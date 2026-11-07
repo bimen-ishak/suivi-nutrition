@@ -32,64 +32,106 @@
 .days-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .day-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
   background: var(--surface);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 20px;
   box-shadow: var(--shadow);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s;
 }
 
 .day-card:active {
   transform: scale(0.98);
 }
 
-.day-card.today {
-  border: 2px solid var(--primary);
-}
-
-.day-card-header {
+.day-badge {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 8px;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 56px;
+  background: var(--surface-soft);
+  border-radius: 16px;
 }
 
-.day-date {
-  font-size: 1rem;
+.day-card.today .day-badge {
+  color: #fff;
+  background: var(--primary);
+}
+
+.day-badge-weekday {
+  font-size: 0.7rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+.day-badge-number {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.day-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.day-kcal {
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--text);
-  text-transform: capitalize;
+}
+
+.day-sub,
+.day-count {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+.day-count {
+  color: var(--text-3);
 }
 
 .day-net {
-  font-size: 0.9rem;
-  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 64px;
+  padding: 6px 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border-radius: 14px;
+}
+
+.day-net small {
+  font-size: 0.65rem;
+  font-weight: 500;
 }
 
 .day-net.negative {
-  color: var(--primary);
+  color: var(--primary-strong);
+  background: var(--primary-soft);
 }
 
 .day-net.positive {
   color: var(--danger);
-}
-
-.day-card-body {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  font-size: 0.9rem;
-  color: var(--text-2);
-}
-
-.day-kcal {
-  font-weight: 600;
-  color: var(--primary);
+  background: var(--danger-soft);
 }
 
 /* Vue détaillée */
@@ -250,4 +292,8 @@
   color: var(--text-2);
   background: var(--surface-soft);
   border-radius: 14px;
+}
+
+.day-weight {
+  white-space: nowrap;
 }

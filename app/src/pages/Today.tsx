@@ -3,6 +3,8 @@ import { getJournalEntriesByDate, getDailySummary, getWeightsSince, recalculateD
 import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
+import { CalorieRing } from '../components/CalorieRing';
+import { MacroCard } from '../components/MacroCard';
 import { getObjective, onObjectiveChange } from '../utils/objective';
 import { getWeightTrend, proteinTarget, carbLimit, SODIUM_LIMIT_MG, POTASSIUM_TARGET_MG } from '../utils/cut';
 import { parseHealthText, applyHealthToSummary } from '../utils/health';
@@ -178,6 +180,11 @@ export function Today({ onAddFood }: TodayProps) {
   };
 
   const balance = getBalanceMessage();
+  const burned = dailySummary?.caloriesBurned;
+  // On peut manger ce qu'on a brûlé, moins le déficit visé (objectif négatif)
+  const budget = burned ? Math.max(burned + objective, 0) : null;
+  const remaining = budget !== null ? budget - totals.caloriesEaten : null;
+  const net = burned ? totals.caloriesEaten - burned : null;
 
   if (editingEntry) {
     return (
@@ -208,8 +215,8 @@ export function Today({ onAddFood }: TodayProps) {
       </div>
 
       {/* Carte Bilan du jour */}
-      <div className="balance-card">
-        <div className="card-header">
+      <section className="hero-card">
+        <div className="hero-top">
           <h2>Bilan du jour</h2>
           {(dailySummary?.weight || dailySummary?.sleepDuration) && (
             <div className="secondary-data">
@@ -223,122 +230,55 @@ export function Today({ onAddFood }: TodayProps) {
           )}
         </div>
 
-        <div className="balance-summary">
-          <div className="balance-row">
-            <span className="balance-label">Calories mangées</span>
-            <span className="balance-value">{totals.caloriesEaten} kcal</span>
-          </div>
+        <CalorieRing eaten={totals.caloriesEaten} budget={budget} />
 
-          <div className="balance-row">
-            <span className="balance-label">Calories brûlées</span>
-            <span className="balance-value">
-              {dailySummary?.caloriesBurned || '?'} kcal
+        <p className={`hero-message ${balance.type}`}>{balance.message}</p>
+
+        <div className="stat-tiles">
+          <div className="stat-tile">
+            <span className="stat-tile-value">{dailySummary?.caloriesBurned ?? '?'}</span>
+            <span className="stat-tile-label">
+              brûlées
               {dailySummary?.caloriesBurnedProvisional && (
                 <span className="provisional-badge">provisoire</span>
               )}
             </span>
           </div>
-
-          {dailySummary?.caloriesBurned && (
-            <div className="balance-row net">
-              <span className="balance-label">Bilan net</span>
-              <span className="balance-value">
-                {totals.caloriesEaten - dailySummary.caloriesBurned} kcal
-              </span>
-            </div>
-          )}
+          <div className="stat-tile">
+            <span className={`stat-tile-value ${remaining !== null && remaining < 0 ? 'negative' : ''}`}>
+              {remaining !== null ? Math.abs(remaining) : '?'}
+            </span>
+            <span className="stat-tile-label">{remaining !== null && remaining < 0 ? 'en trop' : 'restant'}</span>
+          </div>
+          <div className="stat-tile">
+            <span className="stat-tile-value">
+              {net !== null ? `${net > 0 ? '+' : ''}${net}` : '?'}
+            </span>
+            <span className="stat-tile-label">bilan net</span>
+          </div>
         </div>
 
-        <div className={`balance-message ${balance.type}`}>
-          {balance.message}
+        <div className="action-row">
+          <button className="btn btn-primary" onClick={() => setShowSummaryModal(true)}>
+            {dailySummary?.caloriesBurned ? '✏️ Modifier le bilan' : '📊 Saisir ma dépense'}
+          </button>
+          <button className="btn btn-secondary" onClick={handleImportHealth}>
+            ❤️ Importer depuis Santé
+          </button>
         </div>
+      </section>
 
-        <button
-          className="btn btn-primary"
-          style={{ marginTop: '12px' }}
-          onClick={() => setShowSummaryModal(true)}
-        >
-          {dailySummary?.caloriesBurned ? '✏️ Modifier le bilan' : '📊 Saisir ma dépense'}
-        </button>
-        <button
-          className="btn btn-secondary"
-          style={{ marginTop: '8px' }}
-          onClick={handleImportHealth}
-        >
-          ❤️ Importer depuis Santé
-        </button>
-
-        {/* Barres de macros */}
-        <div className="macros-bars">
-          <div className="macro-bar">
-            <div className="macro-label">
-              <span>Protéines</span>
-              <span className="macro-value">{Math.round(totals.protein)} / {proteinGoal} g</span>
-            </div>
-            <div className="bar-container">
-              <div
-                className="bar bar-protein"
-                style={{ width: `${Math.min((totals.protein / proteinGoal) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="macro-bar">
-            <div className="macro-label">
-              <span>Glucides</span>
-              <span className="macro-value">{Math.round(totals.carbs)} / max {carbMax} g</span>
-            </div>
-            <div className="bar-container">
-              <div
-                className={`bar bar-carbs ${totals.carbs > carbMax ? 'bar-over' : ''}`}
-                style={{ width: `${Math.min((totals.carbs / carbMax) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="macro-bar">
-            <div className="macro-label">
-              <span>Lipides</span>
-              <span className="macro-value">{Math.round(totals.fat * 10) / 10}g</span>
-            </div>
-            <div className="bar-container">
-              <div
-                className="bar bar-fat"
-                style={{ width: `${Math.min((totals.fat / 70) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="macro-bar">
-            <div className="macro-label">
-              <span>Sodium</span>
-              <span className="macro-value">{Math.round(totals.sodium)} / max {SODIUM_LIMIT_MG} mg</span>
-            </div>
-            <div className="bar-container">
-              <div
-                className={`bar bar-sodium ${totals.sodium > SODIUM_LIMIT_MG ? 'bar-over' : ''}`}
-                style={{ width: `${Math.min((totals.sodium / SODIUM_LIMIT_MG) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="macro-bar">
-            <div className="macro-label">
-              <span>Potassium</span>
-              <span className="macro-value">{Math.round(totals.potassium)} / {POTASSIUM_TARGET_MG} mg</span>
-            </div>
-            <div className="bar-container">
-              <div
-                className="bar bar-potassium"
-                style={{ width: `${Math.min((totals.potassium / POTASSIUM_TARGET_MG) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-          <p className="macro-note">
-            Sodium et potassium ne comptent que les aliments où ils sont renseignés.
-          </p>
-        </div>
-      </div>
+      {/* Macros et minéraux */}
+      <section className="macro-grid">
+        <MacroCard label="Protéines" kind="protein" value={totals.protein} goal={proteinGoal} unit="g" />
+        <MacroCard label="Glucides" kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit />
+        <MacroCard label="Lipides" kind="fat" value={totals.fat} goal={70} unit="g" />
+        <MacroCard label="Sodium" kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit />
+        <MacroCard label="Potassium" kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" wide />
+        <p className="macro-note">
+          Sodium et potassium ne comptent que les aliments où ils sont renseignés.
+        </p>
+      </section>
 
       {/* Carte Aliments du jour */}
       <div className="foods-card">

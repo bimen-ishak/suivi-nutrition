@@ -6,7 +6,7 @@ interface WeightChartProps {
 }
 
 const WIDTH = 320;
-const HEIGHT = 150;
+const HEIGHT = 170;
 const PAD = { top: 10, right: 12, bottom: 22, left: 34 };
 
 const dayNumber = (date: string) => Date.parse(`${date}T00:00:00Z`) / 86_400_000;
@@ -29,6 +29,8 @@ export function WeightChart({ points }: WeightChartProps) {
     PAD.top + ((max - value) / (max - min)) * (HEIGHT - PAD.top - PAD.bottom);
 
   const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.date).toFixed(1)} ${y(p.trend).toFixed(1)}`).join(' ');
+  const baseline = HEIGHT - PAD.bottom;
+  const area = `${line} L${x(points[points.length - 1].date).toFixed(1)} ${baseline} L${x(points[0].date).toFixed(1)} ${baseline} Z`;
   const active = points[selected ?? points.length - 1];
 
   const handlePointer = (e: React.PointerEvent<SVGSVGElement>) => {
@@ -54,6 +56,13 @@ export function WeightChart({ points }: WeightChartProps) {
         onPointerDown={handlePointer}
         onPointerMove={handlePointer}
       >
+        <defs>
+          <linearGradient id="weight-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" className="chart-area-top" />
+            <stop offset="1" className="chart-area-bottom" />
+          </linearGradient>
+        </defs>
+
         {[max, min].map(value => (
           <g key={value}>
             <line className="chart-grid" x1={PAD.left} x2={WIDTH - PAD.right} y1={y(value)} y2={y(value)} />
@@ -71,6 +80,7 @@ export function WeightChart({ points }: WeightChartProps) {
         {points.map(p => (
           <circle key={p.date} className="chart-dot" cx={x(p.date)} cy={y(p.weight)} r={4} />
         ))}
+        <path d={area} fill="url(#weight-area)" />
         <path className="chart-trend" d={line} />
         <circle className="chart-active" cx={x(active.date)} cy={y(active.trend)} r={5} />
       </svg>

@@ -189,6 +189,22 @@ export function importedDayToView(day: CutHistoryDay): {
   };
 }
 
+/** Variation de la tendance entre le premier et le dernier point affichés */
+export function weightChange(trend: TrendPoint[]): { kg: number; days: number } | null {
+  if (trend.length < 2) return null;
+  const first = trend[0];
+  const last = trend[trend.length - 1];
+  return { kg: last.trend - first.trend, days: dayNumber(last.date) - dayNumber(first.date) };
+}
+
+const GAUGE_MAX_PERCENT = 1.5;
+
+/** Position (0 à 100) d'un rythme de perte sur la jauge : 0 = poids stable, 100 = 1,5 % par semaine ou plus */
+export function paceGaugePosition(percentPerWeek: number): number {
+  const loss = Math.max(-percentPerWeek, 0);
+  return Math.min((loss / GAUGE_MAX_PERCENT) * 100, 100);
+}
+
 /** Plafond de glucides : au-delà, le corps stocke plus de glycogène, donc plus d'eau (environ 3 g par gramme) */
 export function carbLimit(weight: number): number {
   return Math.round((weight * CARBS_G_PER_KG) / 5) * 5;

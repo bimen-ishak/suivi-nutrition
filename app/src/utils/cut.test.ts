@@ -9,7 +9,9 @@ import {
   importedDayToView,
   mergeIntakes,
   mergeWeights,
-  proteinTarget
+  paceGaugePosition,
+  proteinTarget,
+  weightChange
 } from './cut';
 
 // Journées consécutives depuis le 1er octobre 2026
@@ -180,6 +182,34 @@ describe('importedDayToView', () => {
 describe('proteinTarget', () => {
   it('vise 2 g par kilo, arrondi à 5 g', () => {
     expect(proteinTarget(82.4)).toBe(165);
+  });
+});
+
+describe('weightChange', () => {
+  it('donne la variation de la tendance sur la période affichée', () => {
+    const trend = getWeightTrend(weights(10, 84, -0.1));
+    const change = weightChange(trend);
+    expect(change?.days).toBe(9);
+    expect(change?.kg).toBeCloseTo(trend[9].trend - trend[0].trend, 5);
+    expect(change!.kg).toBeLessThan(0);
+  });
+
+  it('renvoie null avec moins de deux points', () => {
+    expect(weightChange([])).toBeNull();
+    expect(weightChange(getWeightTrend(weights(1, 84, 0)))).toBeNull();
+  });
+});
+
+describe('paceGaugePosition', () => {
+  it('place le rythme sur une échelle de 0 à 1,5 % par semaine', () => {
+    expect(paceGaugePosition(0)).toBe(0);
+    expect(paceGaugePosition(-0.75)).toBeCloseTo(50);
+    expect(paceGaugePosition(-1.5)).toBe(100);
+  });
+
+  it('borne les valeurs hors échelle', () => {
+    expect(paceGaugePosition(0.4)).toBe(0);
+    expect(paceGaugePosition(-3)).toBe(100);
   });
 });
 

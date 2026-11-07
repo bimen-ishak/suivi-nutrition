@@ -14,40 +14,39 @@
 }
 
 /* Carte Bilan */
-.balance-card {
+.hero-card {
   background: var(--surface);
-  border-radius: 20px;
-  padding: 24px 20px;
-  margin-bottom: 20px;
+  border-radius: 24px;
+  padding: 22px 18px 18px;
+  margin-bottom: 16px;
   box-shadow: var(--shadow);
 }
 
-.card-header {
+.hero-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
   gap: 12px;
 }
 
-.card-header h2 {
+.hero-top h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   color: var(--text);
 }
 
 .secondary-data {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
-  align-items: flex-end;
+  justify-content: flex-end;
 }
 
 .data-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-2);
   background: var(--surface-soft);
@@ -55,93 +54,105 @@
   border-radius: 16px;
 }
 
-.balance-card h2 {
-  margin: 0 0 16px 0;
-  font-size: 1.2rem;
-  color: var(--text);
-}
-
-.balance-summary {
-  margin-bottom: 16px;
-}
-
-.balance-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--surface-soft);
-}
-
-.balance-row:last-child {
-  border-bottom: none;
-}
-
-.balance-row.net {
-  padding-top: 12px;
-  margin-top: 8px;
-  border-top: 2px solid var(--border);
-  font-weight: 600;
-}
-
-.balance-label {
-  color: var(--text-2);
-  font-size: 0.95rem;
-}
-
-.balance-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.provisional-badge {
-  font-size: 0.7rem;
-  font-weight: 500;
-  background: var(--warning-soft);
-  color: var(--warning);
-  padding: 2px 6px;
-  border-radius: 6px;
-}
-
-.balance-message {
-  padding: 12px 16px;
+.hero-message {
+  margin: 8px auto 16px;
+  padding: 10px 14px;
   border-radius: 14px;
   text-align: center;
+  font-size: 0.9rem;
   font-weight: 500;
-  margin-top: 16px;
 }
 
-.balance-message.neutral {
+.hero-message.neutral {
   background: var(--info-soft);
   color: var(--info);
 }
 
-.balance-message.success {
+.hero-message.success {
   background: var(--primary-soft);
   color: var(--primary);
 }
 
-.balance-message.warning {
+.hero-message.warning {
   background: var(--warning-soft);
   color: var(--warning);
 }
 
-/* Barres de macros */
-.macros-bars {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* Trois tuiles sous l'anneau */
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.macro-bar {
+.stat-tile {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px;
+  background: var(--surface-soft);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.stat-tile-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.stat-tile-value.negative {
+  color: var(--danger);
+}
+
+.stat-tile-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.78rem;
+  color: var(--text-2);
+}
+
+.provisional-badge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  background: var(--warning-soft);
+  color: var(--warning);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+/* Boutons côte à côte */
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.action-row .btn {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 0.9rem;
+}
+
+/* Macros et minéraux */
+.macro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.macro-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0 4px;
+  font-size: 0.75rem;
+  color: var(--text-3);
 }
 
 .macro-label {
@@ -154,50 +165,6 @@
 .macro-value {
   font-weight: 600;
   color: var(--text);
-}
-
-.bar-container {
-  height: 8px;
-  background: var(--surface-soft);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.bar {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.bar-protein {
-  background: var(--macro-protein);
-}
-
-.bar-carbs {
-  background: var(--macro-carbs);
-}
-
-.bar-fat {
-  background: var(--macro-fat);
-}
-
-.bar-sodium {
-  background: var(--macro-sodium);
-}
-
-.bar-potassium {
-  background: var(--macro-potassium);
-}
-
-/* Plafond dépassé : la barre prend la couleur d'alerte */
-.bar-over {
-  background: var(--danger);
-}
-
-.macro-note {
-  margin: -4px 0 0;
-  font-size: 0.75rem;
-  color: var(--text-3);
 }
 
 /* Carte Aliments */

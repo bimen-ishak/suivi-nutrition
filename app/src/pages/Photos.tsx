@@ -126,7 +126,11 @@ export function Photos() {
       </div>
 
       {photos.length === 0 ? (
-        <p className="photos-empty">Aucune photo pour le moment</p>
+        <div className="photos-empty">
+          <span className="photos-empty-icon" aria-hidden="true">📷</span>
+          <strong>Aucune photo pour le moment</strong>
+          <p>Une photo par jour suffit pour voir ta sèche avancer.</p>
+        </div>
       ) : (
         <div className="photos-grid">
           {photos.map(photo => (
