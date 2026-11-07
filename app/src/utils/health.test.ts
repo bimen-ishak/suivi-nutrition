@@ -56,6 +56,12 @@ describe('applyHealthToSummary', () => {
     expect(summary.caloriesBurned).toBeUndefined();
   });
 
+  it('compte le repos seul quand Santé n\'a encore aucune calorie active', () => {
+    const summary = applyHealthToSummary(undefined, '2026-11-07', parseHealthText('Poids : 83\nRepos : 570,16\nActives : '), now);
+    expect(summary).toMatchObject({ weight: 83, caloriesBurned: 570, caloriesRest: 570.16, caloriesBurnedProvisional: true });
+    expect(summary.caloriesActivity).toBeUndefined();
+  });
+
   it('utilise la dépense totale donnée directement', () => {
     expect(applyHealthToSummary(undefined, '2026-11-07', { burned: 2390 }, now).caloriesBurned).toBe(2390);
   });

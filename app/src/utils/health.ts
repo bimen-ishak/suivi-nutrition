@@ -50,7 +50,8 @@ export function applyHealthToSummary(
   if (data.rest !== undefined) summary.caloriesRest = data.rest;
   if (data.activity !== undefined) summary.caloriesActivity = data.activity;
 
-  const total = data.burned ?? (data.rest !== undefined && data.activity !== undefined ? data.rest + data.activity : undefined);
+  // Sans calorie active, Santé renvoie un texte vide : la dépense du moment est alors le repos seul
+  const total = data.burned ?? (data.rest !== undefined ? data.rest + (data.activity ?? 0) : undefined);
   if (total !== undefined) {
     summary.caloriesBurned = Math.round(total);
     // La journée n'est pas finie : Santé continue de compter jusqu'à minuit
