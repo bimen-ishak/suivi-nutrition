@@ -11,11 +11,6 @@
       try {
         if (localStorage.getItem('theme') === 'halloween') document.documentElement.dataset.theme = 'halloween';
       } catch (e) {}
-      // Icône choisie par l'utilisateur, lue avant que iOS ne regarde la page
-      try {
-        var icon = localStorage.getItem('appIcon');
-        if (icon) document.querySelector('link[rel="apple-touch-icon"]').href = icon;
-      } catch (e) {}
     </script>
     <title>Suivi Nutrition</title>
   </head>
