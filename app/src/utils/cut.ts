@@ -10,6 +10,11 @@ const MAINTENANCE_REQUIRED_DAYS = 14;
 const MIN_WEIGH_INS = 5;
 const MIN_LOGGED_KCAL = 800; // en dessous, la journée est sans doute mal remplie
 const PROTEIN_G_PER_KG = 2;
+const CARBS_G_PER_KG = 3;
+
+/** Repères de santé publique : sel au plus ~5,8 g/jour (2 300 mg de sodium), potassium au moins 3 500 mg */
+export const SODIUM_LIMIT_MG = 2300;
+export const POTASSIUM_TARGET_MG = 3500;
 
 export interface WeightPoint {
   date: string;
@@ -182,6 +187,11 @@ export function importedDayToView(day: CutHistoryDay): {
       ? { date: day.date, weight: day.weight, caloriesBurned: day.burned, createdAt: '', updatedAt: '' }
       : undefined
   };
+}
+
+/** Plafond de glucides : au-delà, le corps stocke plus de glycogène, donc plus d'eau (environ 3 g par gramme) */
+export function carbLimit(weight: number): number {
+  return Math.round((weight * CARBS_G_PER_KG) / 5) * 5;
 }
 
 /** Objectif de protéines pendant une sèche, arrondi à 5 g */

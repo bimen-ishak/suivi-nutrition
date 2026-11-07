@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   averageIntake,
+  carbLimit,
   estimateMaintenance,
   getRateVerdict,
   getWeeklyRate,
@@ -179,6 +180,13 @@ describe('importedDayToView', () => {
 describe('proteinTarget', () => {
   it('vise 2 g par kilo, arrondi à 5 g', () => {
     expect(proteinTarget(82.4)).toBe(165);
+  });
+});
+
+describe('carbLimit', () => {
+  it('plafonne à 3 g par kilo, arrondi à 5 g', () => {
+    expect(carbLimit(83)).toBe(250);
+    expect(carbLimit(82.4)).toBe(245);
   });
 });
 

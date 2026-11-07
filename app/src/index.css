@@ -32,6 +32,8 @@
   --macro-protein: #7fa6c4;
   --macro-carbs: #8db59b;
   --macro-fat: #ddb27e;
+  --macro-sodium: #b8a6cf;
+  --macro-potassium: #d99a8f;
 
   --shadow: 0 2px 14px rgba(70, 62, 45, 0.06);
   --page-gap: 20px;

@@ -181,6 +181,25 @@
   background: var(--macro-fat);
 }
 
+.bar-sodium {
+  background: var(--macro-sodium);
+}
+
+.bar-potassium {
+  background: var(--macro-potassium);
+}
+
+/* Plafond dépassé : la barre prend la couleur d'alerte */
+.bar-over {
+  background: var(--danger);
+}
+
+.macro-note {
+  margin: -4px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
 /* Carte Aliments */
 .foods-card {
   background: var(--surface);

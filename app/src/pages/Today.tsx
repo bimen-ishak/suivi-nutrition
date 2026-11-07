@@ -4,11 +4,12 @@ import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
 import { getObjective, onObjectiveChange } from '../utils/objective';
-import { getWeightTrend, proteinTarget } from '../utils/cut';
+import { getWeightTrend, proteinTarget, carbLimit, SODIUM_LIMIT_MG, POTASSIUM_TARGET_MG } from '../utils/cut';
 import { parseHealthText, applyHealthToSummary } from '../utils/health';
 import './Today.css';
 
 const DEFAULT_PROTEIN_GOAL = 150;
+const DEFAULT_CARB_LIMIT = 250;
 
 interface TodayProps {
   onAddFood: () => void;
@@ -29,6 +30,7 @@ export function Today({ onAddFood }: TodayProps) {
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [objective, setObjective] = useState<number>(getObjective());
   const [proteinGoal, setProteinGoal] = useState(DEFAULT_PROTEIN_GOAL);
+  const [carbMax, setCarbMax] = useState(DEFAULT_CARB_LIMIT);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -62,6 +64,7 @@ export function Today({ onAddFood }: TodayProps) {
 
       const latestTrend = getWeightTrend(weights).at(-1)?.trend;
       setProteinGoal(latestTrend ? proteinTarget(latestTrend) : DEFAULT_PROTEIN_GOAL);
+      setCarbMax(latestTrend ? carbLimit(latestTrend) : DEFAULT_CARB_LIMIT);
       setJournalEntries(entries);
       setDailySummary(summary || null);
       setTotals(calculatedTotals);
@@ -283,12 +286,12 @@ export function Today({ onAddFood }: TodayProps) {
           <div className="macro-bar">
             <div className="macro-label">
               <span>Glucides</span>
-              <span className="macro-value">{Math.round(totals.carbs * 10) / 10}g</span>
+              <span className="macro-value">{Math.round(totals.carbs)} / max {carbMax} g</span>
             </div>
             <div className="bar-container">
               <div
-                className="bar bar-carbs"
-                style={{ width: `${Math.min((totals.carbs / 250) * 100, 100)}%` }}
+                className={`bar bar-carbs ${totals.carbs > carbMax ? 'bar-over' : ''}`}
+                style={{ width: `${Math.min((totals.carbs / carbMax) * 100, 100)}%` }}
               />
             </div>
           </div>
@@ -305,6 +308,35 @@ export function Today({ onAddFood }: TodayProps) {
               />
             </div>
           </div>
+
+          <div className="macro-bar">
+            <div className="macro-label">
+              <span>Sodium</span>
+              <span className="macro-value">{Math.round(totals.sodium)} / max {SODIUM_LIMIT_MG} mg</span>
+            </div>
+            <div className="bar-container">
+              <div
+                className={`bar bar-sodium ${totals.sodium > SODIUM_LIMIT_MG ? 'bar-over' : ''}`}
+                style={{ width: `${Math.min((totals.sodium / SODIUM_LIMIT_MG) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="macro-bar">
+            <div className="macro-label">
+              <span>Potassium</span>
+              <span className="macro-value">{Math.round(totals.potassium)} / {POTASSIUM_TARGET_MG} mg</span>
+            </div>
+            <div className="bar-container">
+              <div
+                className="bar bar-potassium"
+                style={{ width: `${Math.min((totals.potassium / POTASSIUM_TARGET_MG) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+          <p className="macro-note">
+            Sodium et potassium ne comptent que les aliments où ils sont renseignés.
+          </p>
         </div>
       </div>
 
