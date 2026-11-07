@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { MealType, OneOffValues } from '../types';
 import { MEAL_TYPES } from '../types';
 import { calculateNutrition } from '../utils/calculations';
+import { LabelScanButton } from './LabelScanButton';
+import type { LabelResult } from '../utils/labelReader';
 import './QuickEntry.css';
 
 export interface QuickEntryData {
@@ -41,6 +43,16 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
   const canSave = kcal.trim() !== '' && eaten > 0;
   const preview = canSave ? calculateNutrition(values, eaten) : null;
 
+  const handleLabelRead = (result: LabelResult) => {
+    const text = (value: number | undefined, previous: string) => (value !== undefined ? String(value) : previous);
+    if (result.name) setName(result.name);
+    setUnit(result.unit);
+    setKcal(text(result.kcal, kcal));
+    setProtein(text(result.protein, protein));
+    setCarbs(text(result.carbs, carbs));
+    setFat(text(result.fat, fat));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSave) return;
@@ -58,6 +70,8 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
       <p className="quick-intro">
         Pour un aliment que tu ne manges pas souvent. Il compte dans ta journée, sans aller dans ta bibliothèque.
       </p>
+
+      <LabelScanButton onRead={handleLabelRead} />
 
       <label className="quick-field">
         Nom (optionnel)

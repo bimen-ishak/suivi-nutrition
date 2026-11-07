@@ -9,14 +9,14 @@ export function localDateKey(date = new Date()): string {
 }
 
 /** Réduit une photo pour limiter la place prise sur le téléphone et dans les sauvegardes */
-export async function compressPhoto(file: File): Promise<string> {
+export async function compressPhoto(file: File, maxSize = MAX_SIZE, quality = JPEG_QUALITY): Promise<string> {
   const url = URL.createObjectURL(file);
   try {
     const image = new Image();
     image.src = url;
     await image.decode();
 
-    const scale = Math.min(1, MAX_SIZE / Math.max(image.naturalWidth, image.naturalHeight));
+    const scale = Math.min(1, maxSize / Math.max(image.naturalWidth, image.naturalHeight));
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(image.naturalWidth * scale);
     canvas.height = Math.round(image.naturalHeight * scale);
@@ -25,7 +25,7 @@ export async function compressPhoto(file: File): Promise<string> {
     if (!context) throw new Error('Canvas indisponible');
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+    return canvas.toDataURL('image/jpeg', quality);
   } finally {
     URL.revokeObjectURL(url);
   }

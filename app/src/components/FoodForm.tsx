@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { Food, Portion } from '../types';
 import { calculateSodiumFromSalt } from '../types';
+import { LabelScanButton } from './LabelScanButton';
+import type { LabelResult } from '../utils/labelReader';
 import './FoodForm.css';
 
 interface FoodFormProps {
@@ -87,6 +89,31 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
     });
   };
 
+  // Remplit le formulaire avec ce que l'IA a lu, sans effacer ce qui n'a pas été lu
+  const handleLabelRead = (result: LabelResult) => {
+    const text = (value: number | undefined, previous: string) => (value !== undefined ? String(value) : previous);
+    setForm(prev => ({
+      ...prev,
+      name: result.name ?? prev.name,
+      brand: result.brand ?? prev.brand,
+      baseUnit: result.unit,
+      kcal_per_100g: text(result.kcal, prev.kcal_per_100g),
+      protein: text(result.protein, prev.protein),
+      carbs: text(result.carbs, prev.carbs),
+      fat: text(result.fat, prev.fat),
+      sugars: text(result.sugars, prev.sugars),
+      fiber: text(result.fiber, prev.fiber),
+      salt: text(result.salt, prev.salt),
+      sodium:
+        result.salt !== undefined
+          ? String(calculateSodiumFromSalt(result.salt))
+          : text(result.sodium, prev.sodium),
+      potassium: text(result.potassium, prev.potassium),
+      source: 'étiquette'
+    }));
+    setErrors({});
+  };
+
   const handleChange = (field: keyof FormState, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setErrors(prev => ({ ...prev, [field]: '' }));
@@ -153,6 +180,8 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
         </div>
 
         <form onSubmit={handleSubmit} className="food-form">
+          {!isEditing && <LabelScanButton onRead={handleLabelRead} />}
+
           <div className="form-section">
             <h3>Informations de base</h3>
 

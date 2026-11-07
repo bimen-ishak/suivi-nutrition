@@ -164,3 +164,17 @@
 .preset-btn:active {
   transform: scale(0.95);
 }
+
+.key-input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.key-status {
+  margin: 0 0 10px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--primary-strong);
+  background: var(--primary-soft);
+  border-radius: 14px;
+}

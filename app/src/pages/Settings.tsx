@@ -3,6 +3,7 @@ import { exportAllData, importAllData, importHistory, getAllJournalEntries, getA
 import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
 import { getTheme, setTheme, type ThemeName } from '../utils/theme';
+import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
 import './Settings.css';
 
 const THEMES: { name: ThemeName; label: string }[] = [
@@ -16,6 +17,8 @@ export function Settings() {
   );
   const [objective, setObjectiveState] = useState<number>(getObjective());
   const [theme, setThemeState] = useState<ThemeName>(getTheme());
+  const [hasApiKey, setHasApiKey] = useState(getApiKey() !== null);
+  const [apiKeyInput, setApiKeyInput] = useState('');
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [exportPeriod, setExportPeriod] = useState<'7d' | '30d' | 'all'>('all');
@@ -107,6 +110,17 @@ export function Settings() {
       }
     };
     input.click();
+  };
+
+  const handleSaveKey = () => {
+    setApiKey(apiKeyInput);
+    setApiKeyInput('');
+    setHasApiKey(true);
+  };
+
+  const handleRemoveKey = () => {
+    clearApiKey();
+    setHasApiKey(false);
   };
 
   const handleSaveObjective = () => {
@@ -250,6 +264,49 @@ export function Settings() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Section Lecture d'étiquette */}
+      <div className="settings-section">
+        <h2>🤖 Lecture d'étiquette</h2>
+        <p className="section-desc">
+          Prends en photo le tableau nutritionnel d'un produit : l'IA Gemini de Google remplit les valeurs pour toi. Il faut une clé gratuite, créée sur{' '}
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+          {' '}avec ton compte Google.
+        </p>
+        <p className="section-desc">
+          La clé reste sur ce téléphone, et n'est pas dans tes sauvegardes. Seules les photos d'étiquettes sont envoyées à Google, et seulement quand tu lances une lecture.
+        </p>
+        {hasApiKey ? (
+          <>
+            <p className="key-status">✅ Clé enregistrée sur ce téléphone</p>
+            <button className="btn btn-secondary btn-block" onClick={handleRemoveKey}>
+              🗑️ Supprimer la clé
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              type="password"
+              className="key-input"
+              value={apiKeyInput}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              placeholder="Colle ta clé ici"
+              autoComplete="off"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              aria-label="Clé Google AI Studio"
+            />
+            <button
+              className="btn btn-primary btn-block"
+              onClick={handleSaveKey}
+              disabled={apiKeyInput.trim() === ''}
+            >
+              Enregistrer la clé
+            </button>
+          </>
+        )}
       </div>
 
       {/* Section Import */}
