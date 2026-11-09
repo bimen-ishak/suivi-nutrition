@@ -4,7 +4,7 @@ const STORAGE_KEY = 'theme';
 
 // Couleur de la barre d'état du téléphone, alignée sur le fond de chaque thème
 const BAR_COLORS: Record<ThemeName, string> = {
-  sauge: '#F6F4EE',
+  sauge: '#EEF1F5',
   halloween: '#F6EFE6'
 };
 

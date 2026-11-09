@@ -171,7 +171,7 @@ export const AR: Record<string, ArabicEntry> = {
   'Une photo par jour suffit pour voir ta sèche avancer.': 'صورة كل يوم كفاية عشان تشوف التنشيف ماشي إزاي.',
 
   // --- Paramètres
-  '🌿 Sauge': '🌿 أخضر هادي',
+  '🎯 Cobalt': '🎯 كوبالت',
   '🎃 Halloween': '🎃 هالوين',
   'Sauvegarde téléchargée avec succès !': 'النسخة الاحتياطية اتنزلت بنجاح!',
   'Restaurer cette sauvegarde remplacera TOUTES les données actuelles. Continuer ?': 'استرجاع النسخة دي هيبدّل كل البيانات الحالية. تكمّل؟',

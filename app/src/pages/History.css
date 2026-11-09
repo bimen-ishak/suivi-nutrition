@@ -41,7 +41,7 @@
   gap: 18px;
   padding: 20px 22px;
   background: var(--surface);
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: transform 0.15s;
@@ -138,7 +138,7 @@
 .day-balance-card,
 .day-foods-card {
   background: var(--surface);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 30px 26px;
   margin-bottom: 28px;
   box-shadow: var(--shadow);

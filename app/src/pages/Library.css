@@ -84,7 +84,7 @@
 
 .confirm-modal {
   background: var(--surface);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 24px;
   max-width: 400px;
   width: 90%;

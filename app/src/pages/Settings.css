@@ -14,7 +14,7 @@
 
 .settings-section {
   background: var(--surface);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 30px 26px;
   margin-bottom: 28px;
   box-shadow: var(--shadow);
@@ -146,7 +146,7 @@
 .preset-btn {
   padding: 8px 14px;
   border: 2px solid var(--border-strong);
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--surface);
   font-size: 0.9rem;
   font-weight: 500;

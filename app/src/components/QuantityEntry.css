@@ -154,7 +154,7 @@
 
 .nutrition-preview {
   background: var(--surface-soft);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 20px;
   margin-top: 8px;
 }

@@ -14,7 +14,7 @@ const LANGUAGES: { name: Language; label: ReactNode }[] = [
 ];
 
 const THEMES: { name: ThemeName; label: ReactNode }[] = [
-  { name: 'sauge', label: ti('🌿 Sauge') },
+  { name: 'sauge', label: ti('🎯 Cobalt') },
   { name: 'halloween', label: ti('🎃 Halloween') }
 ];
 
