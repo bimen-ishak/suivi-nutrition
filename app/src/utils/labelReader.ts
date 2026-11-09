@@ -4,8 +4,8 @@ import { t } from '../i18n';
 const KEY_STORAGE = 'geminiApiKey';
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 // Si un modèle disparaît (erreur 404), on essaie le suivant
-// Au-delà, on abandonne plutôt que de laisser l'écran tourner
-const REQUEST_TIMEOUT_MS = 45_000;
+// Au-delà pour un modèle, on essaie le suivant plutôt que de laisser l'écran tourner
+const REQUEST_TIMEOUT_MS = 20_000;
 const MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
 
 const PROMPT = `Tu analyses 1 à 3 photos d'un produit alimentaire ou d'un repas : le produit posé sur une balance, son étiquette nutritionnelle, son emballage.
@@ -228,6 +228,7 @@ export async function readFoodPhotos(
   });
 
   let lastStatus = 0;
+  let anyTimeout = false;
   for (const model of MODELS) {
     let response;
     // AbortSignal.timeout n'existe pas sur les anciens iPhone : on arme le délai à la main
@@ -246,7 +247,9 @@ export async function readFoodPhotos(
       });
     } catch (error) {
       if (timedOut) {
-        throw new LabelReadError(t("Google met trop de temps à répondre. Réessaie, ou remplis à la main."));
+        // Ce modèle ne répond pas : on passe au suivant
+        anyTimeout = true;
+        continue;
       }
       // Le détail technique aide à comprendre la panne : on le garde dans le message
       const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
@@ -271,6 +274,9 @@ export async function readFoodPhotos(
       throw new LabelReadError(t("Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel."));
     }
     return result;
+  }
+  if (anyTimeout) {
+    throw new LabelReadError(t("Google met trop de temps à répondre. Réessaie, ou remplis à la main."));
   }
   throw new LabelReadError(describeFailure(lastStatus || 500));
 }
