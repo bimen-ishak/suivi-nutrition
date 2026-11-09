@@ -18,13 +18,15 @@ Réponds UNIQUEMENT par un objet JSON avec ces clés :
 Si mode = "label" (valeurs de l'étiquette, colonne « pour 100 g » ou « pour 100 ml » ; si l'étiquette n'a que des valeurs par portion, convertis-les pour 100 avec le poids de la portion) :
 - kcal : énergie en kcal, jamais en kJ
 - protein, carbs, sugars, fat, fiber : grammes pour 100
-- salt_g : sel en grammes pour 100
-- sodium_mg : sodium en mg pour 100, seulement s'il est écrit
+- salt_g : sel en grammes pour 100, seulement s'il est écrit (sinon null)
+- sodium_mg : sodium en mg pour 100. S'il est écrit, recopie-le. Si ni le sel ni le sodium ne sont écrits, donne TOUJOURS ton estimation d'après ce type de produit (jamais null)
+- sodium_source : "label" si le sel ou le sodium est écrit sur l'étiquette, "estimate" si tu l'as estimé
 - potassium_mg : potassium en mg pour 100. S'il est écrit, recopie-le. Sinon, donne TOUJOURS ton estimation d'après ce type de produit (jamais null)
 - potassium_source : "label" si le potassium est écrit sur l'étiquette, "estimate" si tu l'as estimé
 
 Si mode = "estimate" (aucun tableau lisible) : estime ce qu'il y a dans l'image, pour TOUT ce qui est visible :
 - total_kcal, total_protein, total_carbs, total_fat : totaux pour toute la quantité visible (kcal et grammes)
+- total_sodium_mg : sodium total estimé en mg pour toute la quantité visible (jamais null)
 - total_potassium_mg : potassium total estimé en mg pour toute la quantité visible (jamais null)
 
 Mets null pour tout ce qui n'est pas visible ou pas certain. Des nombres avec un point décimal, sans unité.`;
@@ -49,6 +51,8 @@ export interface LabelResult {
   potassium?: number;
   /** Vrai quand le potassium a été estimé par l'IA et non lu sur l'étiquette */
   potassiumEstimated?: boolean;
+  /** Vrai quand le sodium a été estimé par l'IA et non lu sur l'étiquette */
+  sodiumEstimated?: boolean;
 }
 
 export class LabelReadError extends Error {}
@@ -142,13 +146,15 @@ export function parseLabelResponse(text: string): LabelResult | null {
       ['protein', raw.total_protein],
       ['carbs', raw.total_carbs],
       ['fat', raw.total_fat],
+      ['sodium', raw.total_sodium_mg],
       ['potassium', raw.total_potassium_mg]
     ];
     for (const [key, value] of totals) {
       const number = per100(value);
-      if (number !== undefined && number <= LIMITS[key]) result[key] = key === 'kcal' || key === 'potassium' ? Math.round(number) : number;
+      if (number !== undefined && number <= LIMITS[key]) result[key] = key === 'kcal' || key === 'potassium' || key === 'sodium' ? Math.round(number) : number;
     }
     if (result.potassium !== undefined) result.potassiumEstimated = true;
+    if (result.sodium !== undefined) result.sodiumEstimated = true;
   } else {
     const fields: [keyof typeof LIMITS, unknown][] = [
       ['kcal', raw.kcal],
@@ -165,8 +171,12 @@ export function parseLabelResponse(text: string): LabelResult | null {
       const number = toNumber(value, LIMITS[key]);
       if (number !== undefined) result[key] = number;
     }
-    // Le sel prime : le formulaire en déduit le sodium
-    if (result.salt !== undefined) delete result.sodium;
+    // Le sel écrit sur l'étiquette prime : le formulaire en déduit le sodium
+    if (result.salt !== undefined) {
+      delete result.sodium;
+    } else if (result.sodium !== undefined && raw.sodium_source !== 'label') {
+      result.sodiumEstimated = true;
+    }
     if (result.potassium !== undefined && raw.potassium_source !== 'label') result.potassiumEstimated = true;
   }
 

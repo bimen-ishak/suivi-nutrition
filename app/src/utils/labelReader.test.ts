@@ -125,6 +125,25 @@ describe('parseLabelResponse : poids et estimation', () => {
     expect(result).toMatchObject({ potassium: 300, potassiumEstimated: true });
   });
 
+  it("estime le sodium quand ni le sel ni le sodium ne sont écrits", () => {
+    const result = parseLabelResponse('{"kcal":120,"protein":3,"carbs":20,"fat":2,"sodium_mg":250,"sodium_source":"estimate"}');
+    expect(result).toMatchObject({ sodium: 250, sodiumEstimated: true });
+  });
+
+  it("garde le sel de l'étiquette et ignore un sodium estimé en plus", () => {
+    const result = parseLabelResponse('{"kcal":120,"protein":3,"carbs":20,"fat":2,"salt_g":1.2,"sodium_mg":480,"sodium_source":"estimate"}');
+    expect(result?.salt).toBe(1.2);
+    expect(result?.sodium).toBeUndefined();
+    expect(result?.sodiumEstimated).toBeUndefined();
+  });
+
+  it("estime aussi le sodium d'un repas photographié, ramené à 100 g", () => {
+    const result = parseLabelResponse(
+      JSON.stringify({ mode: 'estimate', total_kcal: 600, total_protein: 30, total_carbs: 60, total_fat: 25, total_sodium_mg: 1500, weight_g: 300 })
+    );
+    expect(result).toMatchObject({ sodium: 500, sodiumEstimated: true });
+  });
+
   it('refuse une estimation sans poids', () => {
     const result = parseLabelResponse(JSON.stringify({ mode: 'estimate', total_kcal: 600, total_protein: 30, total_carbs: 60, total_fat: 25 }));
     expect(result).toBeNull();

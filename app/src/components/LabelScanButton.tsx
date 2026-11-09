@@ -24,7 +24,9 @@ const describe = (result: LabelResult): string => {
   if (result.weight !== undefined) {
     parts.push(`${result.estimated ? t('Poids estimé') : t('Poids lu sur la balance')} : ${result.weight} ${unitLabel(result.unit)}.`);
   }
-  if (result.potassiumEstimated) parts.push(t('Potassium estimé par l\'IA.'));
+  if (result.sodiumEstimated && result.potassiumEstimated) parts.push(t('Sodium et potassium estimés par l\'IA.'));
+  else if (result.potassiumEstimated) parts.push(t('Potassium estimé par l\'IA.'));
+  else if (result.sodiumEstimated) parts.push(t('Sodium estimé par l\'IA.'));
   if (result.barcode) parts.push(t('Code-barres trouvé : {code}.', { code: result.barcode }));
   parts.push(t("Vérifie avant d'enregistrer."));
   return parts.join(' ');

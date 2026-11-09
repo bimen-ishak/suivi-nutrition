@@ -385,6 +385,8 @@ export const AR: Record<string, ArabicEntry> = {
   'Poids estimé': 'الوزن التقديري',
   'Poids lu sur la balance': 'الوزن من الميزان',
   'Code-barres trouvé : {code}.': 'لقينا الباركود : {code}.',
+  "Sodium et potassium estimés par l'IA.": 'الصوديوم والبوتاسيوم تقديريين من الذكاء الاصطناعي.',
+  "Sodium estimé par l'IA.": 'الصوديوم تقديري من الذكاء الاصطناعي.',
   "Potassium estimé par l'IA.": 'البوتاسيوم تقديري من الذكاء الاصطناعي.',
   "Vérifie avant d'enregistrer.": 'راجع قبل ما تحفظ.',
   'Impossible de lire ces photos. Réessaie.': 'مقدرتش أقرا الصور دي. جرّب تاني.',
