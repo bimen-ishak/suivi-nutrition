@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getCutHistoryDay, getJournalEntriesByDate, getDailySummary, recalculateDailySummary } from '../db';
+import { getCutHistoryDay, getJournalEntriesByDate, getDailySummary, recalculateDailySummary, updateDailySummary } from '../db';
+import { DailySummaryModal } from '../components/DailySummaryModal';
 import type { JournalEntry, DailySummary } from '../types';
 import { CutCard } from '../components/CutCard';
 import { importedDayToView } from '../utils/cut';
@@ -25,6 +26,7 @@ export function History() {
   const [days, setDays] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [editingSummary, setEditingSummary] = useState(false);
 
   useEffect(() => {
     loadHistory();
@@ -129,6 +131,22 @@ export function History() {
     const mealGroups = groupEntriesByMeal(day.entries);
     const net = getNetBalance(day);
 
+    // Saisie à la main de la dépense, du poids ou du sommeil d'un jour passé
+    if (editingSummary) {
+      return (
+        <DailySummaryModal
+          date={day.date}
+          existingSummary={day.summary ?? null}
+          onSave={async (summary) => {
+            await updateDailySummary(summary);
+            await loadHistory();
+            setEditingSummary(false);
+          }}
+          onCancel={() => setEditingSummary(false)}
+        />
+      );
+    }
+
     return (
       <div className="history-page">
         <div className="history-header">
@@ -183,6 +201,10 @@ export function History() {
               {day.summary.sleepDuration && <span><Icon name="moon" />{day.summary.sleepDuration}{unitLabel('h')}</span>}
             </div>
           )}
+
+          <button className="btn btn-primary day-edit-btn" onClick={() => setEditingSummary(true)}>
+            {day.summary?.caloriesBurned ? ti('✏️ Modifier le bilan') : ti('📊 Saisir ma dépense')}
+          </button>
         </div>
 
         {/* Aliments par repas */}
