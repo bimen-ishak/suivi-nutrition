@@ -52,6 +52,8 @@ export interface OneOffValues {
   protein: number;
   carbs: number;
   fat: number;
+  sodium?: number;               // mg pour 100
+  potassium?: number;            // mg pour 100
 }
 
 export const ONE_OFF_FOOD_ID = 'ponctuel';

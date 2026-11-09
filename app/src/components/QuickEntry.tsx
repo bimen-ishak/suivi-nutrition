@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { MealType, OneOffValues } from '../types';
 import { MEAL_TYPES } from '../types';
-import { calculateNutrition } from '../utils/calculations';
+import { calculateNutrition, calculateSodiumFromSalt } from '../utils/calculations';
 import { LabelScanButton } from './LabelScanButton';
 import type { LabelResult } from '../utils/labelReader';
-import { estimateMissingValues, needsEstimate } from '../utils/estimates';
+import { estimateMissingValues } from '../utils/estimates';
 import './QuickEntry.css';
 import { t, unitLabel } from '../i18n';
 import { ti } from './Icon';
@@ -35,13 +35,17 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
+  const [sodium, setSodium] = useState('');
+  const [potassium, setPotassium] = useState('');
   const [estimated, setEstimated] = useState(false);
 
   const values: OneOffValues = {
     kcal_per_100g: toNumber(kcal),
     protein: toNumber(protein),
     carbs: toNumber(carbs),
-    fat: toNumber(fat)
+    fat: toNumber(fat),
+    sodium: sodium.trim() !== '' ? toNumber(sodium) : undefined,
+    potassium: potassium.trim() !== '' ? toNumber(potassium) : undefined
   };
   const eaten = toNumber(quantity);
   const canSave = kcal.trim() !== '' && eaten > 0;
@@ -55,19 +59,26 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
     setProtein(text(result.protein, protein));
     setCarbs(text(result.carbs, carbs));
     setFat(text(result.fat, fat));
+    setPotassium(text(result.potassium, potassium));
+    // Le sel (g) donne le sodium (mg) : 1 g de sel = 400 mg de sodium
+    if (result.salt !== undefined) setSodium(String(calculateSodiumFromSalt(result.salt)));
+    else setSodium(text(result.sodium, sodium));
     // Le poids lu sur la balance (ou estimé) devient la quantité mangée
     if (result.weight !== undefined) setQuantity(String(result.weight));
   };
 
-  // Calories saisies sans aucune macro : on propose des valeurs moyennes
-  const showEstimate = needsEstimate({ kcal: toNumber(kcal), protein, carbs, fat, potassium: '0' }) &&
-    [protein, carbs, fat].every(value => value.trim() === '');
+  // Calories connues mais macros ou potassium absents : on propose des valeurs moyennes
+  const macrosEmpty = [protein, carbs, fat].every(value => value.trim() === '');
+  const showEstimate = toNumber(kcal) > 0 && (macrosEmpty || potassium.trim() === '');
 
   const handleEstimate = () => {
     const estimate = estimateMissingValues(name, toNumber(kcal));
-    setProtein(String(estimate.protein));
-    setCarbs(String(estimate.carbs));
-    setFat(String(estimate.fat));
+    if (macrosEmpty) {
+      setProtein(String(estimate.protein));
+      setCarbs(String(estimate.carbs));
+      setFat(String(estimate.fat));
+    }
+    if (potassium.trim() === '') setPotassium(String(estimate.potassium));
     setEstimated(true);
   };
 
@@ -155,9 +166,20 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
         </label>
       </div>
 
+      <div className="quick-pair">
+        <label className="quick-field">
+          {t('Sodium (mg)')}
+          <input type="number" inputMode="decimal" min="0" step="any" value={sodium} onChange={(e) => setSodium(e.target.value)} />
+        </label>
+        <label className="quick-field">
+          {t('Potassium (mg)')}
+          <input type="number" inputMode="decimal" min="0" step="any" value={potassium} onChange={(e) => setPotassium(e.target.value)} />
+        </label>
+      </div>
+
       {showEstimate && (
         <div className="quick-estimate">
-          <p>{t('Pas de macros ? Je peux proposer des valeurs moyennes, marquées « estimation ».')}</p>
+          <p>{t('Il manque des macros ou le potassium. Je peux proposer des valeurs moyennes, marquées « estimation ».')}</p>
           <button type="button" className="btn btn-secondary btn-sm" onClick={handleEstimate}>
             {ti('💡 Proposer des valeurs moyennes')}
           </button>

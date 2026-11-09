@@ -363,6 +363,7 @@ export const AR: Record<string, ArabicEntry> = {
   "Remplis l'un des deux, l'autre est calculé automatiquement (1g sel = 400mg sodium)": 'املا واحد منهم والتاني بيتحسب لوحده (1 جم ملح = 400 مجم صوديوم)',
   'Sel (g)': 'الملح (جم)',
   'Sodium (mg)': 'الصوديوم (مجم)',
+  'Potassium (mg)': 'البوتاسيوم (مجم)',
   'Potassium (mg) — optionnel': 'البوتاسيوم (مجم) — اختياري',
   'Source des valeurs *': 'مصدر القيم *',
   '🏷️ Étiquette (valeurs lues sur le paquet)': '🏷️ ملصق (قيم متقرية من العلبة)',

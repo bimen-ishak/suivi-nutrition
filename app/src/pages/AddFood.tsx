@@ -203,6 +203,8 @@ export function AddFood({ onComplete }: AddFoodProps) {
         protein: nutrition.protein,
         carbs: nutrition.carbs,
         fat: nutrition.fat,
+        sodium: nutrition.sodium,
+        potassium: nutrition.potassium,
         createdAt: nowISO,
         updatedAt: nowISO
       });
