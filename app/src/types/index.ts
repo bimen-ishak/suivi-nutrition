@@ -96,7 +96,8 @@ export interface DailySummary {
 
 export interface DailyPhoto {
   date: string;                  // YYYY-MM-DD (clé primaire, une photo par jour)
-  image: string;                 // image JPEG compressée, en data URL
+  image: string;                 // image JPEG compressée, en data URL (vide si le jour est marqué sans photo)
+  skipped?: boolean;             // vrai quand l'utilisateur a choisi « pas de photo ce jour-là »
   createdAt: string;
 }
 

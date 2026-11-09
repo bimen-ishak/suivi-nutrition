@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DailyPhoto } from '../types';
 import { deletePhoto, getAllPhotos, savePhoto } from '../db';
-import { compressPhoto, localDateKey } from '../utils/photo';
+import { compressPhoto } from '../utils/photo';
 import './Photos.css';
 import { t, locale, isRtl } from '../i18n';
 import { ti, Icon } from '../components/Icon';
+import { PhotoCalendar } from '../components/PhotoCalendar';
 
 const SWIPE_DISTANCE = 50;
 
@@ -17,9 +18,9 @@ const formatDate = (date: string) =>
   });
 
 export function Photos() {
-  const today = localDateKey();
   const [photos, setPhotos] = useState<DailyPhoto[]>([]);
-  const [date, setDate] = useState(today);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarDate, setCalendarDate] = useState<string | undefined>(undefined);
   const [saving, setSaving] = useState(false);
   const [viewing, setViewing] = useState<DailyPhoto | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -28,16 +29,29 @@ export function Photos() {
     setPhotos(await getAllPhotos());
   };
 
+  // Seules les vraies photos s'ouvrent dans la visionneuse
+  const realPhotos = photos.filter(p => !p.skipped);
+  const markSkipped = async (day: string) => {
+    await savePhoto({ date: day, image: '', skipped: true, createdAt: new Date().toISOString() });
+    await loadPhotos();
+  };
+
+  const clearSkipped = async (day: string) => {
+    await deletePhoto(day);
+    await loadPhotos();
+  };
+
+  const openCalendar = (day?: string) => {
+    setCalendarDate(day);
+    setCalendarOpen(true);
+  };
+
   useEffect(() => {
     loadPhotos();
   }, []);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>, targetDate: string = date) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-
-    const exists = photos.some(p => p.date === targetDate);
+  const saveFileForDate = async (file: File, targetDate: string) => {
+    const exists = photos.some(p => p.date === targetDate && !p.skipped);
     if (exists && !confirm(t('Remplacer la photo du {date} ?', { date: formatDate(targetDate) }))) return;
 
     setSaving(true);
@@ -47,6 +61,7 @@ export function Photos() {
       await savePhoto(photo);
       await loadPhotos();
       setViewing(current => (current && current.date === targetDate ? photo : current));
+      setCalendarOpen(false);
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la photo:', error);
       alert(t('Impossible d\'enregistrer cette photo'));
@@ -64,9 +79,9 @@ export function Photos() {
 
   if (viewing) {
     // La liste va de la plus récente à la plus ancienne
-    const index = photos.findIndex(p => p.date === viewing.date);
-    const older = photos[index + 1];
-    const newer = photos[index - 1];
+    const index = realPhotos.findIndex(p => p.date === viewing.date);
+    const older = realPhotos[index + 1];
+    const newer = realPhotos[index - 1];
 
     // En arabe, on lit de droite à gauche : la photo suivante est à gauche, comme les pages d'un livre
     const leftTarget = isRtl() ? newer : older;
@@ -86,7 +101,11 @@ export function Photos() {
           <button onClick={() => setViewing(null)}>{t('← Retour')}</button>
           <label className={`photo-replace ${saving ? 'disabled' : ''}`}>
             {saving ? t('Enregistrement...') : t('Remplacer cette photo')}
-            <input type="file" accept="image/*" onChange={(e) => handleFile(e, viewing.date)} disabled={saving} hidden />
+            <input type="file" accept="image/*" onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = '';
+                if (file) saveFileForDate(file, viewing.date);
+              }} disabled={saving} hidden />
           </label>
           <button className="photo-delete" onClick={() => handleDelete(viewing)}>{t('Supprimer')}</button>
         </div>
@@ -117,36 +136,33 @@ export function Photos() {
           )}
         </div>
 
-        <p>{formatDate(viewing.date)} · {photos.length - index} / {photos.length}</p>
+        <p>{formatDate(viewing.date)} · {realPhotos.length - index} / {realPhotos.length}</p>
       </div>
     );
   }
 
-  const hasPhotoForDate = photos.some(p => p.date === date);
+  if (calendarOpen) {
+    return (
+      <PhotoCalendar
+        photos={photos}
+        initialDate={calendarDate}
+        saving={saving}
+        onPick={saveFileForDate}
+        onSkip={async (day) => { await markSkipped(day); setCalendarOpen(false); }}
+        onClear={async (day) => { await clearSkipped(day); setCalendarOpen(false); }}
+        onClose={() => setCalendarOpen(false)}
+      />
+    );
+  }
 
   return (
     <div className="photos-page">
       <h1>{ti('📷 Photos')}</h1>
 
       <div className="photo-add">
-        <label className="photo-date">
-          {t('Jour')}
-          <input
-            type="date"
-            value={date}
-            max={today}
-            onChange={(e) => setDate(e.target.value || today)}
-          />
-        </label>
-
-        <label className={`photo-add-btn ${saving ? 'disabled' : ''}`}>
-          {saving
-            ? t('Enregistrement...')
-            : hasPhotoForDate
-              ? t('Remplacer la photo')
-              : date === today ? t('+ Ajouter la photo du jour') : t('+ Ajouter la photo')}
-          <input type="file" accept="image/*" onChange={handleFile} disabled={saving} hidden />
-        </label>
+        <button className="photo-add-btn" onClick={() => openCalendar()}>
+          {t('+ Ajouter une photo')}
+        </button>
       </div>
 
       {photos.length === 0 ? (
@@ -157,12 +173,21 @@ export function Photos() {
         </div>
       ) : (
         <div className="photos-grid">
-          {photos.map(photo => (
-            <button key={photo.date} className="photo-tile" onClick={() => setViewing(photo)}>
-              <img src={photo.image} alt={`Photo du ${formatDate(photo.date)}`} loading="lazy" />
-              <span>{formatDate(photo.date)}</span>
-            </button>
-          ))}
+          {photos.map(photo =>
+            photo.skipped ? (
+              <button key={photo.date} className="photo-slot skipped" onClick={() => openCalendar(photo.date)}>
+                <span className="photo-slot-body">
+                  <strong>{t('Pas de photo ce jour-là')}</strong>
+                </span>
+                <span>{formatDate(photo.date)}</span>
+              </button>
+            ) : (
+              <button key={photo.date} className="photo-tile" onClick={() => setViewing(photo)}>
+                <img src={photo.image} alt={t('Photo du {date}', { date: formatDate(photo.date) })} loading="lazy" />
+                <span>{formatDate(photo.date)}</span>
+              </button>
+            )
+          )}
         </div>
       )}
     </div>

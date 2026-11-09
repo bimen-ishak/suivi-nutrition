@@ -201,3 +201,85 @@
 .photo-viewer-bar .photo-replace.disabled {
   opacity: 0.6;
 }
+
+.photo-slot {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 16px;
+}
+
+.photo-slot.skipped {
+  background: var(--surface-soft);
+  border-style: solid;
+  border-color: var(--border);
+}
+
+.photo-slot-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 10px;
+  aspect-ratio: 3 / 4;
+  text-align: center;
+}
+
+.photo-slot-body strong {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.photo-slot-add {
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-strong);
+  background: var(--primary-soft);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.photo-slot-add.disabled {
+  opacity: 0.6;
+}
+
+.photo-slot-link {
+  padding: 4px;
+  font-size: 0.78rem;
+  color: var(--text-3);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.photo-slot > span {
+  padding: 10px 8px;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+.photos-note {
+  margin-top: 22px;
+  font-size: 0.85rem;
+  color: var(--text-3);
+}
+
+button.photo-slot {
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.photo-add-btn {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+}
