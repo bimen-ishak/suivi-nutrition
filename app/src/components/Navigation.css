@@ -34,14 +34,15 @@
 }
 
 .nav-icon {
-  font-size: 1.3rem;
-  line-height: 1.3;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  width: 24px;
+  height: 24px;
+  color: var(--text-3);
+  transition: color 0.2s, transform 0.2s;
 }
 
 .nav-item.active .nav-icon {
-  opacity: 1;
+  color: var(--primary-strong);
+  transform: translateY(-1px);
 }
 
 .nav-label {
