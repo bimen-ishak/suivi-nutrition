@@ -16,7 +16,8 @@ describe('parseLabelResponse', () => {
         fiber: 7.2,
         salt_g: 0.1,
         sodium_mg: null,
-        potassium_mg: 400
+        potassium_mg: 400,
+        potassium_source: 'label'
       })
     );
     expect(result).toEqual({
@@ -105,6 +106,23 @@ describe('parseLabelResponse : poids et estimation', () => {
     );
     expect(result).toMatchObject({ estimated: true, weight: 300, kcal: 200, protein: 10, carbs: 20 });
     expect(result?.fat).toBeCloseTo(8.3, 1);
+  });
+
+  it("marque le potassium comme estimé quand il ne vient pas de l'étiquette", () => {
+    const result = parseLabelResponse('{"kcal":120,"protein":3,"carbs":20,"fat":2,"potassium_mg":300,"potassium_source":"estimate"}');
+    expect(result).toMatchObject({ potassium: 300, potassiumEstimated: true });
+  });
+
+  it("ne marque pas le potassium lu sur l'étiquette comme estimé", () => {
+    const result = parseLabelResponse('{"kcal":120,"protein":3,"carbs":20,"fat":2,"potassium_mg":300,"potassium_source":"label"}');
+    expect(result?.potassiumEstimated).toBeUndefined();
+  });
+
+  it("estime aussi le potassium d'un repas photographié, ramené à 100 g", () => {
+    const result = parseLabelResponse(
+      JSON.stringify({ mode: 'estimate', total_kcal: 600, total_protein: 30, total_carbs: 60, total_fat: 25, total_potassium_mg: 900, weight_g: 300 })
+    );
+    expect(result).toMatchObject({ potassium: 300, potassiumEstimated: true });
   });
 
   it('refuse une estimation sans poids', () => {
