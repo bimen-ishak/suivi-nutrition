@@ -248,7 +248,10 @@ export async function readFoodPhotos(
       if (timedOut) {
         throw new LabelReadError(t("Google met trop de temps à répondre. Réessaie, ou remplis à la main."));
       }
-      throw new LabelReadError(t('Pas de connexion à Internet. Réessaie avec du réseau.'));
+      // Le détail technique aide à comprendre la panne : on le garde dans le message
+      const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+      console.error('Appel Gemini échoué:', error);
+      throw new LabelReadError(`${t('Pas de connexion à Internet. Réessaie avec du réseau.')} (${detail})`);
     } finally {
       clearTimeout(timer);
     }
