@@ -230,18 +230,27 @@ export async function readFoodPhotos(
   let lastStatus = 0;
   for (const model of MODELS) {
     let response;
+    // AbortSignal.timeout n'existe pas sur les anciens iPhone : on arme le délai à la main
+    const controller = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, REQUEST_TIMEOUT_MS);
     try {
       response = await fetchImpl(`${API_BASE}/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: bodyFor(model),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+        signal: controller.signal
       });
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'TimeoutError') {
+      if (timedOut) {
         throw new LabelReadError(t("Google met trop de temps à répondre. Réessaie, ou remplis à la main."));
       }
       throw new LabelReadError(t('Pas de connexion à Internet. Réessaie avec du réseau.'));
+    } finally {
+      clearTimeout(timer);
     }
 
     if (response.status === 404) {
