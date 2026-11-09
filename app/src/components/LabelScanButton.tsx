@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { compressPhoto } from '../utils/photo';
 import { getApiKey, readFoodPhotos, LabelReadError, type LabelResult } from '../utils/labelReader';
 import './LabelScanButton.css';
@@ -31,20 +31,36 @@ const describe = (result: LabelResult): string => {
 
 export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState<File[]>([]);
   const [message, setMessage] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const hasKey = getApiKey() !== null;
 
-  const handleFiles = async (files: FileList | null) => {
-    const selected = Array.from(files ?? []).slice(0, MAX_PHOTOS);
+  const previews = useMemo(() => pending.map(file => URL.createObjectURL(file)), [pending]);
+  useEffect(() => () => previews.forEach(url => URL.revokeObjectURL(url)), [previews]);
+
+  // Une photo choisie n'est jamais envoyée toute seule : on la met d'abord en attente
+  const addFiles = (files: FileList | null) => {
+    const added = Array.from(files ?? []);
+    if (added.length === 0) return;
+    setMessage(null);
+    setPending(current => [...current, ...added].slice(0, MAX_PHOTOS));
+  };
+
+  const removePhoto = (index: number) => {
+    setPending(current => current.filter((_, i) => i !== index));
+  };
+
+  const analyse = async () => {
     const key = getApiKey();
-    if (selected.length === 0 || !key) return;
+    if (pending.length === 0 || !key) return;
 
     setLoading(true);
     setMessage(null);
     try {
-      const images = await Promise.all(selected.map(file => compressPhoto(file, PHOTO_SIZE, PHOTO_QUALITY)));
+      const images = await Promise.all(pending.map(file => compressPhoto(file, PHOTO_SIZE, PHOTO_QUALITY)));
       const result = await readFoodPhotos(images, key);
       onRead(result);
+      setPending([]);
       setMessage({ kind: 'ok', text: describe(result) });
     } catch (error) {
       console.error('Erreur de lecture des photos:', error);
@@ -65,24 +81,60 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
     );
   }
 
+  const canAddMore = pending.length < MAX_PHOTOS;
+  const fileInput = (
+    <input
+      type="file"
+      accept="image/*"
+      multiple
+      disabled={loading}
+      onChange={(e) => {
+        addFiles(e.target.files);
+        e.target.value = '';
+      }}
+    />
+  );
+
   return (
     <div className="label-scan">
-      <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
-        {loading ? ti('⏳ Analyse en cours...') : ti('📷 Photos du produit (IA)')}
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          disabled={loading}
-          onChange={(e) => {
-            handleFiles(e.target.files);
-            e.target.value = '';
-          }}
-        />
-      </label>
-      <p className="label-scan-tip">
-        {t('Jusqu\'à 3 photos : le produit sur la balance, et son étiquette ou son code-barres s\'il y en a. Sans étiquette, l\'IA estime les calories d\'après l\'image.')}
-      </p>
+      {pending.length === 0 ? (
+        <>
+          <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
+            {ti('📷 Photos du produit (IA)')}
+            {fileInput}
+          </label>
+          <p className="label-scan-tip">
+            {t('Jusqu\'à 3 photos : le produit sur la balance, et son étiquette ou son code-barres s\'il y en a. Sans étiquette, l\'IA estime les calories d\'après l\'image.')}
+          </p>
+        </>
+      ) : (
+        <div className="label-scan-pending">
+          <p className="label-scan-ask">
+            {canAddMore
+              ? t('{n} photo prête sur {max}. Veux-tu en prendre une autre avant d\'envoyer ?', { n: pending.length, max: MAX_PHOTOS })
+              : t('{n} photos prêtes (maximum). Tu peux envoyer.', { n: pending.length })}
+          </p>
+          <div className="label-scan-thumbs">
+            {previews.map((url, index) => (
+              <div key={url} className="label-scan-thumb">
+                <img src={url} alt="" />
+                {!loading && (
+                  <button type="button" className="label-scan-remove" aria-label={t('Retirer')} onClick={() => removePhoto(index)}>×</button>
+                )}
+              </div>
+            ))}
+          </div>
+          {canAddMore && (
+            <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
+              {ti('📷 Prendre une autre photo')}
+              {fileInput}
+            </label>
+          )}
+          <button type="button" className="btn btn-primary" disabled={loading} onClick={analyse}>
+            {loading ? ti('⏳ Analyse en cours...') : ti('✨ Envoyer pour analyse')}
+          </button>
+        </div>
+      )}
       {message && <p className={`label-scan-message ${message.kind}`}>{message.text}</p>}
     </div>
   );
