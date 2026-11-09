@@ -6,7 +6,7 @@
 }
 
 .today-header {
-  margin-bottom: 24px;
+  margin-bottom: 36px;
 }
 
 .today-header h1 {
@@ -17,8 +17,8 @@
 .hero-card {
   background: var(--surface);
   border-radius: 24px;
-  padding: 22px 18px 18px;
-  margin-bottom: 16px;
+  padding: 34px 26px 28px;
+  margin-bottom: 28px;
   box-shadow: var(--shadow);
 }
 
@@ -55,8 +55,8 @@
 }
 
 .hero-message {
-  margin: 8px auto 16px;
-  padding: 10px 14px;
+  margin: 18px auto 30px;
+  padding: 14px 20px;
   border-radius: 14px;
   text-align: center;
   font-size: 0.9rem;
@@ -82,8 +82,8 @@
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
 .stat-tile {
@@ -91,7 +91,7 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 12px 6px;
+  padding: 20px 8px;
   background: var(--surface-soft);
   border-radius: 16px;
   text-align: center;
@@ -129,8 +129,8 @@
 /* Boutons côte à côte */
 .action-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .action-row .btn {
@@ -143,8 +143,8 @@
 .macro-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .macro-note {
@@ -171,7 +171,7 @@
 .foods-card {
   background: var(--surface);
   border-radius: 20px;
-  padding: 24px 20px;
+  padding: 32px 26px;
   box-shadow: var(--shadow);
 }
 
@@ -372,8 +372,8 @@
 
 /* Rappel de la dépense oubliée */
 .missing-banner {
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: 28px;
+  padding: 24px;
   background: var(--warning-soft);
   border-radius: 20px;
 }

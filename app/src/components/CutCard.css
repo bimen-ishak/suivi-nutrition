@@ -1,9 +1,9 @@
 .cut-card {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 22px 18px;
-  margin-bottom: 20px;
+  gap: 30px;
+  padding: 34px 26px;
+  margin-bottom: 32px;
   background: var(--surface);
   border-radius: 24px;
   box-shadow: var(--shadow);
@@ -177,7 +177,7 @@
 
 .cut-verdict {
   margin: 0;
-  padding: 11px 14px;
+  padding: 16px 20px;
   font-size: 0.88rem;
   border-radius: 14px;
 }
@@ -201,14 +201,14 @@
 .cut-tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 14px;
 }
 
 .cut-tile {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 12px;
+  padding: 20px 18px;
   background: var(--surface-soft);
   border-radius: 16px;
 }
@@ -223,8 +223,8 @@
 .cut-learning {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px;
+  gap: 12px;
+  padding: 22px;
   background: var(--info-soft);
   border-radius: 16px;
 }

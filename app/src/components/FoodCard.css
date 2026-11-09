@@ -1,8 +1,8 @@
 .food-card {
   background: var(--surface);
   border-radius: 20px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
   box-shadow: var(--shadow);
   transition: box-shadow 0.2s, transform 0.1s;
 }
@@ -15,7 +15,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   gap: 12px;
 }
 
@@ -70,7 +70,7 @@
 }
 
 .food-nutrition {
-  margin-bottom: 8px;
+  margin-bottom: 14px;
 }
 
 .nutrition-row {
@@ -96,7 +96,7 @@
 }
 
 .food-portions {
-  margin-bottom: 8px;
+  margin-bottom: 14px;
 }
 
 .portions-label {

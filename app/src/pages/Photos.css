@@ -4,15 +4,15 @@
 }
 
 .photos-page h1 {
-  margin-bottom: 24px;
+  margin-bottom: 36px;
 }
 
 .photo-add {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
+  gap: 22px;
+  padding: 30px 26px;
+  margin-bottom: 36px;
   background: var(--surface);
   border-radius: 16px;
   box-shadow: var(--shadow);

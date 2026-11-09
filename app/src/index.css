@@ -36,7 +36,7 @@
   --macro-potassium: #d99a8f;
 
   --shadow: 0 2px 14px rgba(70, 62, 45, 0.06);
-  --page-gap: 20px;
+  --page-gap: 28px;
 
   /* Accent : par défaut le vert, le thème Halloween le passe en violet */
   --accent: var(--primary);
