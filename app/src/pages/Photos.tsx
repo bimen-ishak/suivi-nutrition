@@ -4,6 +4,7 @@ import { deletePhoto, getAllPhotos, savePhoto } from '../db';
 import { compressPhoto, localDateKey } from '../utils/photo';
 import './Photos.css';
 import { t, locale, isRtl } from '../i18n';
+import { ti, Icon } from '../components/Icon';
 
 const SWIPE_DISTANCE = 50;
 
@@ -46,7 +47,7 @@ export function Photos() {
       await loadPhotos();
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la photo:', error);
-      alert(t('❌ Impossible d\'enregistrer cette photo'));
+      alert(t('Impossible d\'enregistrer cette photo'));
     } finally {
       setSaving(false);
     }
@@ -119,7 +120,7 @@ export function Photos() {
 
   return (
     <div className="photos-page">
-      <h1>{t('📷 Photos')}</h1>
+      <h1>{ti('📷 Photos')}</h1>
 
       <div className="photo-add">
         <label className="photo-date">
@@ -144,7 +145,7 @@ export function Photos() {
 
       {photos.length === 0 ? (
         <div className="photos-empty">
-          <span className="photos-empty-icon" aria-hidden="true">📷</span>
+          <span className="photos-empty-icon" aria-hidden="true"><Icon name="camera" /></span>
           <strong>{t('Aucune photo pour le moment')}</strong>
           <p>{t('Une photo par jour suffit pour voir ta sèche avancer.')}</p>
         </div>

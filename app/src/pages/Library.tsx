@@ -7,6 +7,7 @@ import { showToast } from '../utils/toast';
 import { pickMessage } from '../utils/messages';
 import './Library.css';
 import { t } from '../i18n';
+import { ti } from '../components/Icon';
 
 export function Library() {
   const [foods, setFoods] = useState<Food[]>([]);
@@ -108,7 +109,7 @@ export function Library() {
   return (
     <div className="library-page">
       <div className="library-header">
-        <h1>{t('📚 Bibliothèque')}</h1>
+        <h1>{ti('📚 Bibliothèque')}</h1>
         <button className="btn btn-primary" onClick={handleCreateFood}>
           {t('+ Nouvel aliment')}
         </button>
@@ -132,7 +133,7 @@ export function Library() {
       <div className="search-bar">
         <input
           type="text"
-          placeholder={t('🔍 Rechercher par nom ou marque...')}
+          placeholder={t('Rechercher par nom ou marque...')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -193,7 +194,7 @@ export function Library() {
               {showDeleteConfirm.brand && ` (${showDeleteConfirm.brand})`}
             </p>
             <p className="warning">
-              {t('⚠️ Cette action est irréversible. L\'historique qui utilise cet aliment ne sera pas supprimé.')}
+              {ti('⚠️ Cette action est irréversible. L\'historique qui utilise cet aliment ne sera pas supprimé.')}
             </p>
             <div className="confirm-actions">
               <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(null)}>

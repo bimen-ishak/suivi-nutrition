@@ -3,6 +3,7 @@ import { compressPhoto } from '../utils/photo';
 import { getApiKey, readFoodPhotos, LabelReadError, type LabelResult } from '../utils/labelReader';
 import './LabelScanButton.css';
 import { t, unitLabel } from '../i18n';
+import { ti } from './Icon';
 
 interface LabelScanButtonProps {
   onRead: (result: LabelResult) => void;
@@ -59,7 +60,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   if (!hasKey) {
     return (
       <p className="label-scan-hint">
-        {t('🤖 Pour remplir tout seul depuis des photos du produit, ajoute ta clé gratuite dans Paramètres → Lecture d\'étiquette.')}
+        {ti('🤖 Pour remplir tout seul depuis des photos du produit, ajoute ta clé gratuite dans Paramètres → Lecture d\'étiquette.')}
       </p>
     );
   }
@@ -67,7 +68,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   return (
     <div className="label-scan">
       <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
-        {loading ? t('⏳ Analyse en cours...') : t('📷 Photos du produit (IA)')}
+        {loading ? ti('⏳ Analyse en cours...') : ti('📷 Photos du produit (IA)')}
         <input
           type="file"
           accept="image/*"

@@ -1,6 +1,7 @@
 import type { Food } from '../types';
 import './FoodCard.css';
 import { t, tn, unitLabel, macroLetter, locale } from '../i18n';
+import { ti, Icon } from './Icon';
 
 interface FoodCardProps {
   food: Food;
@@ -19,11 +20,11 @@ export function FoodCard({ food, onEdit, onDelete, showSource = true, compact = 
         <div className="food-info">
           <h3 className="food-name">{food.name}</h3>
           {food.brand && <span className="food-brand">{food.brand}</span>}
-          {food.barcode && <span className="food-barcode">📱 {food.barcode}</span>}
+          {food.barcode && <span className="food-barcode"><Icon name="scan" />{food.barcode}</span>}
         </div>
         {showSource && (
           <span className={`food-source ${food.source}`}>
-            {food.source === 'étiquette' ? t('🏷️ Étiquette') : t('📊 Estimation')}
+            {food.source === 'étiquette' ? ti('🏷️ Étiquette') : ti('📊 Estimation')}
           </span>
         )}
       </div>
@@ -75,12 +76,12 @@ export function FoodCard({ food, onEdit, onDelete, showSource = true, compact = 
         <div className="food-actions">
           {onEdit && (
             <button className="btn btn-secondary btn-sm" onClick={() => onEdit(food)}>
-              {t('✏️ Modifier')}
+              {ti('✏️ Modifier')}
             </button>
           )}
           {onDelete && (
             <button className="btn btn-danger btn-sm" onClick={() => onDelete(food)}>
-              {t('🗑️ Supprimer')}
+              {ti('🗑️ Supprimer')}
             </button>
           )}
         </div>

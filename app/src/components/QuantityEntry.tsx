@@ -5,6 +5,7 @@ import { convertPortionToGrams, calculateNutrition } from '../utils/calculations
 import { AdvancedCalculationModal } from './AdvancedCalculationModal';
 import './QuantityEntry.css';
 import { t, unitLabel } from '../i18n';
+import { ti, Icon } from './Icon';
 
 interface QuantityEntryProps {
   food: Food;
@@ -169,12 +170,12 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
           className="btn btn-secondary btn-block advanced-calc-btn"
           onClick={() => setShowAdvancedCalc(true)}
         >
-          {t('🧮 Calcul avancé')}
+          {ti('🧮 Calcul avancé')}
         </button>
 
         {calculation && (
           <div className="calculation-display">
-            <span className="calc-icon">🧮</span>
+            <span className="calc-icon"><Icon name="calc" /></span>
             <span className="calc-text">{calculation.description}</span>
           </div>
         )}

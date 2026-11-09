@@ -18,7 +18,7 @@ const unescape = (text: string) => text.replace(/\\(['"\\])/g, '$1');
 function usedKeys(): { key: string; file: string }[] {
   const found: { key: string; file: string }[] = [];
   for (const [file, code] of sourceFiles) {
-    for (const match of code.matchAll(/\bt\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g)) {
+    for (const match of code.matchAll(/\bti?\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g)) {
       found.push({ key: unescape(match[1] ?? match[2]), file });
     }
     for (const match of code.matchAll(/\btn\(\s*(?:'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")\s*,\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g)) {

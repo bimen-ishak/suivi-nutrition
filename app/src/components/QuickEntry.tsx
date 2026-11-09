@@ -7,6 +7,7 @@ import type { LabelResult } from '../utils/labelReader';
 import { estimateMissingValues, needsEstimate } from '../utils/estimates';
 import './QuickEntry.css';
 import { t, unitLabel } from '../i18n';
+import { ti } from './Icon';
 
 export interface QuickEntryData {
   name: string;
@@ -158,11 +159,11 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
         <div className="quick-estimate">
           <p>{t('Pas de macros ? Je peux proposer des valeurs moyennes, marquées « estimation ».')}</p>
           <button type="button" className="btn btn-secondary btn-sm" onClick={handleEstimate}>
-            {t('💡 Proposer des valeurs moyennes')}
+            {ti('💡 Proposer des valeurs moyennes')}
           </button>
         </div>
       )}
-      {estimated && !showEstimate && <p className="quick-estimate-note">{t('📊 Valeurs estimées, à titre indicatif.')}</p>}
+      {estimated && !showEstimate && <p className="quick-estimate-note">{ti('📊 Valeurs estimées, à titre indicatif.')}</p>}
 
       <label className="quick-field">
         {t('Repas')}

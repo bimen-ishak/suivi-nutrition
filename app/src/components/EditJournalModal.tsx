@@ -5,6 +5,7 @@ import { getFood } from '../db';
 import { convertPortionToGrams, calculateNutrition } from '../utils/calculations';
 import './EditJournalModal.css';
 import { t, unitLabel, macroLetter } from '../i18n';
+import { ti, Icon } from './Icon';
 
 interface EditJournalModalProps {
   entry: JournalEntry;
@@ -170,14 +171,14 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
 
           {entry.calculation && (
             <div className="calculation-note">
-              🧮 {entry.calculation.description}
+              <Icon name="calc" />{entry.calculation.description}
             </div>
           )}
         </div>
 
         <div className="modal-actions">
           <button className="btn btn-danger" onClick={handleDelete}>
-            {t('🗑️ Supprimer')}
+            {ti('🗑️ Supprimer')}
           </button>
           <button className="btn btn-secondary" onClick={onCancel}>
             {t('Annuler')}

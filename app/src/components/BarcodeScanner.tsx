@@ -4,6 +4,7 @@ import { getFoodByBarcode } from '../db';
 import type { Food } from '../types';
 import './BarcodeScanner.css';
 import { t } from '../i18n';
+import { Icon } from './Icon';
 
 interface BarcodeScannerProps {
   onScanSuccess: (food: Food) => void;
@@ -106,7 +107,7 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
 
       {error ? (
         <div className="scanner-error">
-          <p>⚠️ {error}</p>
+          <p><Icon name="warning" />{error}</p>
           <p className="hint">{t('Tu peux saisir le code manuellement ci-dessous')}</p>
         </div>
       ) : (

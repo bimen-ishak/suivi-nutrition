@@ -5,6 +5,7 @@ import { CutCard } from '../components/CutCard';
 import { importedDayToView } from '../utils/cut';
 import './History.css';
 import { t, tn, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n';
+import { ti, Icon } from '../components/Icon';
 
 interface DayData {
   date: string;
@@ -178,8 +179,8 @@ export function History() {
 
           {(day.summary?.weight || day.summary?.sleepDuration) && (
             <div className="day-extra">
-              {day.summary.weight && <span>⚖️ {day.summary.weight} {unitLabel('kg')}</span>}
-              {day.summary.sleepDuration && <span>😴 {day.summary.sleepDuration}{unitLabel('h')}</span>}
+              {day.summary.weight && <span><Icon name="scale" />{day.summary.weight} {unitLabel('kg')}</span>}
+              {day.summary.sleepDuration && <span><Icon name="moon" />{day.summary.sleepDuration}{unitLabel('h')}</span>}
             </div>
           )}
         </div>
@@ -216,7 +217,7 @@ export function History() {
   return (
     <div className="history-page">
       <div className="history-header">
-        <h1>{t('📊 Historique')}</h1>
+        <h1>{ti('📊 Historique')}</h1>
       </div>
 
       <CutCard />
@@ -250,7 +251,7 @@ export function History() {
                     {day.summary?.weight && (
                       <>
                         {(!day.imported || day.imported.hasCalories) && ' · '}
-                        <span className="day-weight">⚖️ {day.summary.weight} {unitLabel('kg')}</span>
+                        <span className="day-weight"><Icon name="scale" />{day.summary.weight} {unitLabel('kg')}</span>
                       </>
                     )}
                   </span>

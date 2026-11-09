@@ -6,6 +6,7 @@ import { QuickEntry, type QuickEntryData } from './QuickEntry';
 import { GENERIC_FOODS, GENERIC_CATEGORIES, searchGenericFoods, type GenericFood } from '../data/genericFoods';
 import './FoodSelector.css';
 import { t, unitLabel } from '../i18n';
+import { ti, Icon } from './Icon';
 
 export type SelectorTab = 'frequent' | 'oneoff' | 'scan' | 'search';
 
@@ -87,25 +88,25 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
           className={`tab ${activeTab === 'frequent' ? 'active' : ''}`}
           onClick={() => setActiveTab('frequent')}
         >
-          {t('⭐ Fréquents')}
+          {ti('⭐ Fréquents')}
         </button>
         <button
           className={`tab ${activeTab === 'oneoff' ? 'active' : ''}`}
           onClick={() => setActiveTab('oneoff')}
         >
-          {t('⚡ Ponctuel')}
+          {ti('⚡ Ponctuel')}
         </button>
         <button
           className={`tab ${activeTab === 'scan' ? 'active' : ''}`}
           onClick={() => setActiveTab('scan')}
         >
-          {t('📱 Scanner')}
+          {ti('📱 Scanner')}
         </button>
         <button
           className={`tab ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => setActiveTab('search')}
         >
-          {t('🔍 Rechercher')}
+          {ti('🔍 Rechercher')}
         </button>
       </div>
 
@@ -121,7 +122,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                 <p>{t('Aucun aliment utilisé pour le moment')}</p>
                 <p className="hint">{t('Utilise l\'onglet Rechercher pour trouver un aliment dans la base générique')}</p>
                 <button className="btn btn-primary" onClick={() => setActiveTab('search')}>
-                  {t('🔍 Rechercher un aliment')}
+                  {ti('🔍 Rechercher un aliment')}
                 </button>
               </div>
             ) : (
@@ -146,10 +147,10 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
               <h3>{t('Scanner un code-barres')}</h3>
             </div>
             <div className="scan-cta">
-              <div className="scan-icon">📱</div>
+              <div className="scan-icon"><Icon name="scan" /></div>
               <p>{t('Scanne l\'emballage d\'un produit')}</p>
               <button className="btn btn-primary btn-lg" onClick={() => setShowScanner(true)}>
-                {t('🎥 Ouvrir la caméra')}
+                {ti('🎥 Ouvrir la caméra')}
               </button>
               <p className="hint">{t('Si l\'aliment est déjà dans ta bibliothèque, il sera proposé directement')}</p>
             </div>
@@ -162,7 +163,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
             <div className="search-input-container">
               <input
                 type="text"
-                placeholder={t('🔍 Rechercher un aliment...')}
+                placeholder={t('Rechercher un aliment...')}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -222,7 +223,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                 {/* Mes aliments */}
                 {personalResults.length > 0 && (
                   <>
-                    <h4 className="results-section-title">{t('📚 Mes aliments')}</h4>
+                    <h4 className="results-section-title">{ti('📚 Mes aliments')}</h4>
                     <div className="foods-list">
                       {personalResults.map(food => (
                         <div key={food.id} onClick={() => onSelectFood(food)}>
@@ -236,7 +237,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                 {/* Base générique */}
                 {genericResults.length > 0 && (
                   <>
-                    <h4 className="results-section-title">{t('🌍 Base générique')}</h4>
+                    <h4 className="results-section-title">{ti('🌍 Base générique')}</h4>
                     <div className="generic-foods-list">
                       {genericResults.map((gf, idx) => (
                         <div

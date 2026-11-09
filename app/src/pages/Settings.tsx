@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { exportAllData, importAllData, importHistory, getAllJournalEntries, getAllDailySummaries } from '../db';
 import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
@@ -6,15 +6,16 @@ import { getTheme, setTheme, type ThemeName } from '../utils/theme';
 import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
 import { t, locale, getLanguage, setLanguage, type Language } from '../i18n';
 import './Settings.css';
+import { ti } from '../components/Icon';
 
-const LANGUAGES: { name: Language; label: string }[] = [
+const LANGUAGES: { name: Language; label: ReactNode }[] = [
   { name: 'fr', label: '🇫🇷 Français' },
   { name: 'ar-EG', label: '🇪🇬 عربي مصري' }
 ];
 
-const THEMES: { name: ThemeName; label: string }[] = [
-  { name: 'sauge', label: t('🌿 Sauge') },
-  { name: 'halloween', label: t('🎃 Halloween') }
+const THEMES: { name: ThemeName; label: ReactNode }[] = [
+  { name: 'sauge', label: ti('🌿 Sauge') },
+  { name: 'halloween', label: ti('🎃 Halloween') }
 ];
 
 export function Settings() {
@@ -48,10 +49,10 @@ export function Settings() {
       const now = new Date().toLocaleString(locale());
       setLastBackup(now);
       localStorage.setItem('lastBackupDate', now);
-      alert(t('✅ Sauvegarde téléchargée avec succès !'));
+      alert(t('Sauvegarde téléchargée avec succès !'));
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert(t('❌ Erreur lors de la sauvegarde'));
+      alert(t('Erreur lors de la sauvegarde'));
     } finally {
       setExporting(false);
     }
@@ -65,7 +66,7 @@ export function Settings() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      if (!confirm(t('⚠️ Restaurer cette sauvegarde remplacera TOUTES les données actuelles. Continuer ?'))) {
+      if (!confirm(t('Restaurer cette sauvegarde remplacera TOUTES les données actuelles. Continuer ?'))) {
         return;
       }
 
@@ -80,11 +81,11 @@ export function Settings() {
         }
 
         await importAllData(data);
-        alert(t('✅ Données restaurées avec succès ! Recharge la page.'));
+        alert(t('Données restaurées avec succès ! Recharge la page.'));
         window.location.reload();
       } catch (error) {
         console.error('Erreur lors de la restauration:', error);
-        alert(t('❌ Erreur: fichier invalide ou corrompu'));
+        alert(t('Erreur: fichier invalide ou corrompu'));
       } finally {
         setImporting(false);
       }
@@ -108,10 +109,10 @@ export function Settings() {
         }
 
         const result = await importHistory(data);
-        alert(t('✅ {days} jours ajoutés à Ma sèche et {photos} photos ajoutées.', { days: result.days, photos: result.photos }));
+        alert(t('{days} jours ajoutés à Ma sèche et {photos} photos ajoutées.', { days: result.days, photos: result.photos }));
       } catch (error) {
         console.error('Erreur lors de l\'import de l\'historique:', error);
-        alert(t('❌ Ce fichier n\'est pas un historique à importer'));
+        alert(t('Ce fichier n\'est pas un historique à importer'));
       } finally {
         setImporting(false);
       }
@@ -132,7 +133,7 @@ export function Settings() {
 
   const handleSaveObjective = () => {
     setObjective(objective);
-    alert(t('✅ Objectif enregistré !'));
+    alert(t('Objectif enregistré !'));
   };
 
   const handleExportExcel = async () => {
@@ -145,7 +146,7 @@ export function Settings() {
       await exportToExcel(journal, summaries, exportPeriod);
     } catch (error) {
       console.error('Erreur lors de l\'export Excel:', error);
-      alert(t('❌ Erreur lors de l\'export Excel'));
+      alert(t('Erreur lors de l\'export Excel'));
     } finally {
       setExporting(false);
     }
@@ -154,12 +155,12 @@ export function Settings() {
   return (
     <div className="settings-page">
       <div className="settings-header">
-        <h1>{t('⚙️ Paramètres')}</h1>
+        <h1>{ti('⚙️ Paramètres')}</h1>
       </div>
 
       {/* Section Sauvegarde */}
       <div className="settings-section">
-        <h2>{t('💾 Sauvegarde et restauration')}</h2>
+        <h2>{ti('💾 Sauvegarde et restauration')}</h2>
         <p className="section-desc">
           {t('Sauvegarde tes données en JSON pour les protéger contre la perte (effacement Safari après 7 jours d\'inactivité).')}
         </p>
@@ -174,21 +175,21 @@ export function Settings() {
             onClick={handleBackup}
             disabled={exporting}
           >
-            {exporting ? t('⏳ Export en cours...') : t('📥 Sauvegarder toutes mes données (JSON)')}
+            {exporting ? ti('⏳ Export en cours...') : ti('📥 Sauvegarder toutes mes données (JSON)')}
           </button>
           <button
             className="btn btn-secondary btn-block"
             onClick={handleRestore}
             disabled={importing}
           >
-            {importing ? t('⏳ Import en cours...') : t('📤 Restaurer mes données (JSON)')}
+            {importing ? ti('⏳ Import en cours...') : ti('📤 Restaurer mes données (JSON)')}
           </button>
         </div>
       </div>
 
       {/* Section Export Excel */}
       <div className="settings-section">
-        <h2>{t('📊 Export Excel')}</h2>
+        <h2>{ti('📊 Export Excel')}</h2>
         <p className="section-desc">
           {t('Exporte tes données au format .xlsx compatible avec ton tableau existant (3 feuilles : Bilan quotidien, Journal, Photos).')}
         </p>
@@ -217,13 +218,13 @@ export function Settings() {
           onClick={handleExportExcel}
           disabled={exporting}
         >
-          {exporting ? t('⏳ Export en cours...') : t('📥 Exporter en Excel (.xlsx)')}
+          {exporting ? ti('⏳ Export en cours...') : ti('📥 Exporter en Excel (.xlsx)')}
         </button>
       </div>
 
       {/* Section Objectif */}
       <div className="settings-section">
-        <h2>{t('🎯 Objectif calorique')}</h2>
+        <h2>{ti('🎯 Objectif calorique')}</h2>
         <p className="section-desc">
           {t('Déficit calorique quotidien souhaité (en kcal, négatif = déficit).')}
         </p>
@@ -254,7 +255,7 @@ export function Settings() {
 
       {/* Section Thème */}
       <div className="settings-section">
-        <h2>{t('🎨 Thème')}</h2>
+        <h2>{ti('🎨 Thème')}</h2>
         <p className="section-desc">{t('Choisis l\'ambiance de l\'application.')}</p>
         <div className="objective-presets">
           {THEMES.map(({ name, label }) => (
@@ -275,7 +276,7 @@ export function Settings() {
 
       {/* Section Langue des messages drôles */}
       <div className="settings-section">
-        <h2>{t('😏 Messages drôles')}</h2>
+        <h2>{ti('😏 Messages drôles')}</h2>
         <p className="section-desc">
           {t('L\'app te charrie gentiment quand tu ajoutes un aliment ou dépasses ton budget. Choisis la langue de ses phrases.')}
         </p>
@@ -299,7 +300,7 @@ export function Settings() {
 
       {/* Section Lecture d'étiquette */}
       <div className="settings-section">
-        <h2>{t('🤖 Lecture d\'étiquette')}</h2>
+        <h2>{ti('🤖 Lecture d\'étiquette')}</h2>
         <p className="section-desc">
           {t("Prends en photo le tableau nutritionnel d'un produit : l'IA Gemini de Google remplit les valeurs pour toi. Il faut une clé gratuite, créée sur")}{' '}
           <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">{t('Google AI Studio')}</a>
@@ -310,9 +311,9 @@ export function Settings() {
         </p>
         {hasApiKey ? (
           <>
-            <p className="key-status">{t('✅ Clé enregistrée sur ce téléphone')}</p>
+            <p className="key-status">{ti('✅ Clé enregistrée sur ce téléphone')}</p>
             <button className="btn btn-secondary btn-block" onClick={handleRemoveKey}>
-              {t('🗑️ Supprimer la clé')}
+              {ti('🗑️ Supprimer la clé')}
             </button>
           </>
         ) : (
@@ -342,12 +343,12 @@ export function Settings() {
 
       {/* Section Import */}
       <div className="settings-section">
-        <h2>{t('📥 Importer mon historique')}</h2>
+        <h2>{ti('📥 Importer mon historique')}</h2>
         <p className="section-desc">
           {t('Ajoute tes anciennes journées à Ma sèche et tes anciennes photos. Ton journal et tes données actuelles ne changent pas.')}
         </p>
         <button className="btn btn-secondary btn-block" onClick={handleImportHistory} disabled={importing}>
-          {importing ? t('⏳ Import en cours...') : t('📥 Choisir le fichier')}
+          {importing ? ti('⏳ Import en cours...') : ti('📥 Choisir le fichier')}
         </button>
       </div>
 

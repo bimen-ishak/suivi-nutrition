@@ -16,6 +16,7 @@ import {
 } from '../utils/cut';
 import './CutCard.css';
 import { t, unitLabel, locale, ltr } from '../i18n';
+import { ti } from './Icon';
 
 const HISTORY_DAYS = 60;
 const MAINTENANCE_DAYS_NEEDED = 14;
@@ -68,7 +69,7 @@ export function CutCard() {
   return (
     <section className="cut-card">
       <div className="cut-head">
-        <h2>{t('🔥 Ma sèche')}</h2>
+        <h2>{ti('🔥 Ma sèche')}</h2>
         {latest && (
           <div className="range-tabs" role="group" aria-label={t('Période du graphique')}>
             {RANGES.map(({ days, label }) => (

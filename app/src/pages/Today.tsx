@@ -12,6 +12,7 @@ import { showToast } from '../utils/toast';
 import { pickMessage, getLanguage, isRtl, type MessageEvent } from '../utils/messages';
 import './Today.css';
 import { t, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n';
+import { ti, Icon } from '../components/Icon';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
@@ -136,7 +137,7 @@ export function Today({ onAddFood }: TodayProps) {
       };
     } else {
       return {
-        message: t('Objectif atteint exactement ! 🎯'),
+        message: t('Objectif atteint exactement !'),
         type: 'success'
       };
     }
@@ -189,7 +190,7 @@ export function Today({ onAddFood }: TodayProps) {
       await updateDailySummary(summary);
       await loadTodayData();
       const when = targetDate === today ? '' : ` ${t('pour le {date}', { date: targetDate.split('-').reverse().join('/') })}`;
-      showToast(`${t('✅ Importé')}${when} : ${found.join(', ')}\n${pickMessage('healthImported')}`);
+      showToast(`${t('Importé')}${when} : ${found.join(', ')}\n${pickMessage('healthImported')}`);
     } catch (error) {
       console.error('Erreur lors de l\'import depuis Santé:', error);
       alert(t('Impossible de lire ce qui est copié. Autorise le collage si iPhone te le demande, puis réessaie.'));
@@ -279,10 +280,10 @@ export function Today({ onAddFood }: TodayProps) {
           <p>{pickMessage('missingBurned', language, yesterday)}</p>
           <div className="missing-actions">
             <button className="btn btn-primary btn-sm" onClick={handleImportHealth}>
-              {t('❤️ Importer depuis Santé')}
+              {ti('❤️ Importer depuis Santé')}
             </button>
             <button className="btn btn-secondary btn-sm" onClick={() => openSummary(yesterday)}>
-              {t('✏️ Saisir à la main')}
+              {ti('✏️ Saisir à la main')}
             </button>
             <button className="btn btn-secondary btn-sm" onClick={dismissMissing}>
               {t('Plus tard')}
@@ -298,10 +299,10 @@ export function Today({ onAddFood }: TodayProps) {
           {(dailySummary?.weight || dailySummary?.sleepDuration) && (
             <div className="secondary-data">
               {dailySummary.weight && (
-                <span className="data-badge">⚖️ {dailySummary.weight} {unitLabel('kg')}</span>
+                <span className="data-badge"><Icon name="scale" />{dailySummary.weight} {unitLabel('kg')}</span>
               )}
               {dailySummary.sleepDuration && (
-                <span className="data-badge">😴 {dailySummary.sleepDuration}{unitLabel('h')}</span>
+                <span className="data-badge"><Icon name="moon" />{dailySummary.sleepDuration}{unitLabel('h')}</span>
               )}
             </div>
           )}
@@ -342,10 +343,10 @@ export function Today({ onAddFood }: TodayProps) {
 
         <div className="action-row">
           <button className="btn btn-primary" onClick={() => openSummary(today)}>
-            {dailySummary?.caloriesBurned ? t('✏️ Modifier le bilan') : t('📊 Saisir ma dépense')}
+            {dailySummary?.caloriesBurned ? ti('✏️ Modifier le bilan') : ti('📊 Saisir ma dépense')}
           </button>
           <button className="btn btn-secondary" onClick={handleImportHealth}>
-            {t('❤️ Importer depuis Santé')}
+            {ti('❤️ Importer depuis Santé')}
           </button>
         </div>
       </section>
@@ -411,7 +412,7 @@ export function Today({ onAddFood }: TodayProps) {
                             {macroLetter('L')} {Math.round(entry.fat * 10) / 10}{unitLabel('g')}
                           </div>
                           <div className="entry-actions">
-                            <button className="btn-icon" title={t('Modifier')} onClick={() => setEditingEntry(entry)}>✏️</button>
+                            <button className="btn-icon" title={t('Modifier')} onClick={() => setEditingEntry(entry)} aria-label={t('Modifier')}><Icon name="pencil" /></button>
                             <button
                               className="btn-icon"
                               title={t('Supprimer')}
@@ -420,7 +421,7 @@ export function Today({ onAddFood }: TodayProps) {
                                   handleDeleteEntry(entry.id);
                                 }
                               }}
-                            >🗑️</button>
+                             aria-label={t('Supprimer')}><Icon name="trash" /></button>
                           </div>
                         </div>
                       ))}

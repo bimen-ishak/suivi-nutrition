@@ -6,6 +6,7 @@ import type { LabelResult } from '../utils/labelReader';
 import { estimateMissingValues, needsEstimate } from '../utils/estimates';
 import './FoodForm.css';
 import { t, unitLabel } from '../i18n';
+import { ti } from './Icon';
 
 interface FoodFormProps {
   initialFood?: Food | null;
@@ -332,12 +333,12 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                   {t('Il manque des macros ou le potassium. Je peux proposer des valeurs moyennes, marquées « estimation ».')}
                 </p>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={handleEstimate}>
-                  {t('💡 Proposer des valeurs moyennes')}
+                  {ti('💡 Proposer des valeurs moyennes')}
                 </button>
               </div>
             )}
             {estimateNote && !showEstimate && form.source === 'estimation' && (
-              <p className="estimate-note">{t('📊 Valeurs estimées.')} {estimateNote}</p>
+              <p className="estimate-note">{ti('📊 Valeurs estimées.')} {estimateNote}</p>
             )}
 
             <div className="form-grid">
@@ -424,7 +425,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                 />
                 <span className="radio-custom">
                   <span className="radio-dot"></span>
-                  {t('🏷️ Étiquette (valeurs lues sur le paquet)')}
+                  {ti('🏷️ Étiquette (valeurs lues sur le paquet)')}
                 </span>
               </label>
               <label className="radio-label">
@@ -437,7 +438,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                 />
                 <span className="radio-custom">
                   <span className="radio-dot"></span>
-                  {t('📊 Estimation (base générique, restaurant, etc.)')}
+                  {ti('📊 Estimation (base générique, restaurant, etc.)')}
                 </span>
               </label>
             </div>

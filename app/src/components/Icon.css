@@ -1,0 +1,21 @@
+.icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  margin-inline-end: 0.45em;
+  vertical-align: -0.2em;
+  flex-shrink: 0;
+}
+
+/* Une icône seule dans un bouton ou une pastille n'a pas besoin de marge */
+.icon-only .icon,
+.icon-alone {
+  margin-inline-end: 0;
+}
+
+/* Dans un bouton, l'icône et le texte restent groupés au centre */
+.btn:has(> .icon),
+.tab:has(> .icon),
+.chip:has(> .icon) {
+  gap: 0.1em;
+}
