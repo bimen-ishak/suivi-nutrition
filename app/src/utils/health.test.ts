@@ -32,6 +32,20 @@ describe('parseHealthText', () => {
   });
 });
 
+describe('parseHealthText : date', () => {
+  it('lit la date au format AAAA-MM-JJ', () => {
+    expect(parseHealthText('date: 2026-11-08\npoids: 83\nrepos: 1800')).toEqual({ date: '2026-11-08', weight: 83, rest: 1800 });
+  });
+
+  it('lit la date au format JJ/MM/AAAA du raccourci', () => {
+    expect(parseHealthText('Date : 08/11/2026\nRepos : 1800')).toEqual({ date: '2026-11-08', rest: 1800 });
+  });
+
+  it('ignore une date impossible', () => {
+    expect(parseHealthText('date: 2026-13-45\nrepos: 1800')).toEqual({ rest: 1800 });
+  });
+});
+
 describe('applyHealthToSummary', () => {
   const now = '2026-11-07T10:00:00.000Z';
 
@@ -60,6 +74,17 @@ describe('applyHealthToSummary', () => {
     const summary = applyHealthToSummary(undefined, '2026-11-07', parseHealthText('Poids : 83\nRepos : 570,16\nActives : '), now);
     expect(summary).toMatchObject({ weight: 83, caloriesBurned: 570, caloriesRest: 570.16, caloriesBurnedProvisional: true });
     expect(summary.caloriesActivity).toBeUndefined();
+  });
+
+  it('ne marque pas provisoire la dépense d\'un jour passé', () => {
+    const summary = applyHealthToSummary(undefined, '2026-11-06', { rest: 1850, activity: 540 }, now, '2026-11-07');
+    expect(summary.caloriesBurned).toBe(2390);
+    expect(summary.caloriesBurnedProvisional).toBe(false);
+  });
+
+  it('marque provisoire la dépense du jour même', () => {
+    const summary = applyHealthToSummary(undefined, '2026-11-07', { rest: 1850 }, now, '2026-11-07');
+    expect(summary.caloriesBurnedProvisional).toBe(true);
   });
 
   it('utilise la dépense totale donnée directement', () => {

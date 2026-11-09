@@ -81,3 +81,25 @@
 .quick-entry .btn-primary:disabled {
   opacity: 0.5;
 }
+
+.quick-estimate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--warning-soft);
+  border-radius: 14px;
+}
+
+.quick-estimate p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--warning);
+}
+
+.quick-estimate-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-3);
+}

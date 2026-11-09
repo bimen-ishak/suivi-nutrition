@@ -1,6 +1,3 @@
-/* Import calculateSodiumFromSalt depuis utils/calculations */
-export { calculateSodiumFromSalt } from '../utils/calculations';
-
 // Types TypeScript pour l'application de suivi nutritionnel
 
 export interface Portion {

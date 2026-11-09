@@ -360,3 +360,33 @@
 .balance-card .btn {
   width: 100%;
 }
+
+/* Phrase drôle du jour */
+.hero-quip {
+  margin: -6px 0 16px;
+  font-size: 0.85rem;
+  font-style: italic;
+  text-align: center;
+  color: var(--text-2);
+}
+
+/* Rappel de la dépense oubliée */
+.missing-banner {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--warning-soft);
+  border-radius: 20px;
+}
+
+.missing-banner p {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--warning);
+}
+
+.missing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

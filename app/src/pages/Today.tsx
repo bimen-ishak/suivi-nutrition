@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getJournalEntriesByDate, getDailySummary, getWeightsSince, recalculateDailySummary, createDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
+import { getJournalEntriesByDate, getDailySummary, getWeightsSince, getCutHistoryDay, recalculateDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
@@ -8,10 +8,15 @@ import { MacroCard } from '../components/MacroCard';
 import { getObjective, onObjectiveChange } from '../utils/objective';
 import { getWeightTrend, proteinTarget, carbLimit, SODIUM_LIMIT_MG, POTASSIUM_TARGET_MG } from '../utils/cut';
 import { parseHealthText, applyHealthToSummary } from '../utils/health';
+import { showToast } from '../utils/toast';
+import { pickMessage, getLanguage, isRtl, type MessageEvent } from '../utils/messages';
 import './Today.css';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
+const DISMISSED_KEY = 'dismissedMissingBurned';
+
+const dateKey = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString().split('T')[0];
 
 interface TodayProps {
   onAddFood: () => void;
@@ -33,8 +38,21 @@ export function Today({ onAddFood }: TodayProps) {
   const [objective, setObjective] = useState<number>(getObjective());
   const [proteinGoal, setProteinGoal] = useState(DEFAULT_PROTEIN_GOAL);
   const [carbMax, setCarbMax] = useState(DEFAULT_CARB_LIMIT);
+  // Hier : des repas notés mais pas de dépense, donc le raccourci Santé a sans doute été oublié
+  const [yesterdaySummary, setYesterdaySummary] = useState<DailySummary | null>(null);
+  const [yesterdayMissing, setYesterdayMissing] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(DISMISSED_KEY);
+    } catch {
+      return null;
+    }
+  });
+  // Jour dont on saisit le bilan à la main : aujourd'hui, ou hier quand la dépense manque
+  const [summaryDate, setSummaryDate] = useState<string | null>(null);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = dateKey(0);
+  const yesterday = dateKey(1);
 
   useEffect(() => {
     loadTodayData();
@@ -57,12 +75,20 @@ export function Today({ onAddFood }: TodayProps) {
   const loadTodayData = async () => {
     try {
       const twoWeeksAgo = new Date(Date.now() - 14 * 86_400_000).toISOString().split('T')[0];
-      const [entries, summary, calculatedTotals, weights] = await Promise.all([
+      const [entries, summary, calculatedTotals, weights, yesterdayEntries, yesterdayDaily, yesterdayHistory] = await Promise.all([
         getJournalEntriesByDate(today),
         getDailySummary(today),
         recalculateDailySummary(today),
-        getWeightsSince(twoWeeksAgo)
+        getWeightsSince(twoWeeksAgo),
+        getJournalEntriesByDate(yesterday),
+        getDailySummary(yesterday),
+        getCutHistoryDay(yesterday)
       ]);
+
+      const ateYesterday = yesterdayEntries.length > 0 || (yesterdayHistory?.kcal ?? 0) > 0;
+      const knowsBurned = !!yesterdayDaily?.caloriesBurned || !!yesterdayHistory?.burned;
+      setYesterdaySummary(yesterdayDaily ?? null);
+      setYesterdayMissing(ateYesterday && !knowsBurned);
 
       const latestTrend = getWeightTrend(weights).at(-1)?.trend;
       setProteinGoal(latestTrend ? proteinTarget(latestTrend) : DEFAULT_PROTEIN_GOAL);
@@ -117,13 +143,8 @@ export function Today({ onAddFood }: TodayProps) {
 
   const handleSaveSummary = async (summary: DailySummary) => {
     try {
-      if (dailySummary) {
-        // Mise à jour
-        await updateDailySummary(summary);
-      } else {
-        // Création
-        await createDailySummary(summary);
-      }
+      // put : crée le bilan du jour ou met à jour celui qui existe déjà
+      await updateDailySummary(summary);
       await loadTodayData();
       setShowSummaryModal(false);
     } catch (error) {
@@ -132,11 +153,28 @@ export function Today({ onAddFood }: TodayProps) {
     }
   };
 
+  const openSummary = (date: string) => {
+    setSummaryDate(date);
+    setShowSummaryModal(true);
+  };
+
+  const dismissMissing = () => {
+    setDismissed(yesterday);
+    try {
+      localStorage.setItem(DISMISSED_KEY, yesterday);
+    } catch {
+      // Sans stockage, le rappel reviendra à la prochaine ouverture : rien de grave
+    }
+  };
+
   const handleImportHealth = async () => {
     try {
       const text = await navigator.clipboard.readText();
       const data = parseHealthText(text);
-      const summary = applyHealthToSummary(dailySummary ?? undefined, today, data);
+      // Le raccourci peut donner la date du jour concerné : un oubli d'hier se rattrape ainsi
+      const targetDate = data.date && data.date <= today ? data.date : today;
+      const existing = targetDate === today ? dailySummary : await getDailySummary(targetDate);
+      const summary = applyHealthToSummary(existing ?? undefined, targetDate, data, undefined, today);
       const found = [
         data.weight !== undefined && `poids ${data.weight} kg`,
         summary.caloriesBurned !== undefined && `dépense ${summary.caloriesBurned} kcal`
@@ -147,10 +185,10 @@ export function Today({ onAddFood }: TodayProps) {
         return;
       }
 
-      if (dailySummary) await updateDailySummary(summary);
-      else await createDailySummary(summary);
+      await updateDailySummary(summary);
       await loadTodayData();
-      alert(`✅ Importé depuis Santé : ${found.join(', ')}.`);
+      const when = targetDate === today ? '' : ` pour le ${targetDate.split('-').reverse().join('/')}`;
+      showToast(`✅ Importé${when} : ${found.join(', ')}\n${pickMessage('healthImported')}`);
     } catch (error) {
       console.error('Erreur lors de l\'import depuis Santé:', error);
       alert('Impossible de lire ce qui est copié. Autorise le collage si iPhone te le demande, puis réessaie.');
@@ -198,21 +236,59 @@ export function Today({ onAddFood }: TodayProps) {
   }
 
   if (showSummaryModal) {
+    const modalDate = summaryDate ?? today;
     return (
       <DailySummaryModal
-        date={today}
-        existingSummary={dailySummary}
+        date={modalDate}
+        existingSummary={modalDate === today ? dailySummary : yesterdaySummary}
         onSave={handleSaveSummary}
         onCancel={() => setShowSummaryModal(false)}
       />
     );
   }
 
+  // Une phrase drôle selon la journée, la même toute la journée pour ne pas changer à chaque affichage
+  const language = getLanguage();
+  const quipEvent: MessageEvent | null =
+    journalEntries.length === 0
+      ? 'emptyDay'
+      : budget !== null && totals.caloriesEaten > budget
+        ? 'overBudget'
+        : totals.carbs > carbMax
+          ? 'carbsOver'
+          : totals.sodium > SODIUM_LIMIT_MG
+            ? 'sodiumOver'
+            : totals.protein >= proteinGoal
+              ? 'proteinGoal'
+              : remaining !== null && remaining > 0
+                ? 'underBudget'
+                : null;
+  const quip = quipEvent ? pickMessage(quipEvent, language, today) : null;
+  const showMissingBanner = yesterdayMissing && dismissed !== yesterday;
+
   return (
     <div className="today-page">
       <div className="today-header">
         <h1>{formatDate(today)}</h1>
       </div>
+
+      {/* Rappel : la dépense d'hier manque */}
+      {showMissingBanner && (
+        <section className="missing-banner" dir={isRtl(language) ? 'rtl' : 'ltr'}>
+          <p>{pickMessage('missingBurned', language, yesterday)}</p>
+          <div className="missing-actions">
+            <button className="btn btn-primary btn-sm" onClick={handleImportHealth}>
+              ❤️ Importer depuis Santé
+            </button>
+            <button className="btn btn-secondary btn-sm" onClick={() => openSummary(yesterday)}>
+              ✏️ Saisir à la main
+            </button>
+            <button className="btn btn-secondary btn-sm" onClick={dismissMissing}>
+              Plus tard
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Carte Bilan du jour */}
       <section className="hero-card">
@@ -233,6 +309,11 @@ export function Today({ onAddFood }: TodayProps) {
         <CalorieRing eaten={totals.caloriesEaten} budget={budget} />
 
         <p className={`hero-message ${balance.type}`}>{balance.message}</p>
+        {quip && (
+          <p className="hero-quip" dir={isRtl(language) ? 'rtl' : 'ltr'}>
+            {quip}
+          </p>
+        )}
 
         <div className="stat-tiles">
           <div className="stat-tile">
@@ -259,7 +340,7 @@ export function Today({ onAddFood }: TodayProps) {
         </div>
 
         <div className="action-row">
-          <button className="btn btn-primary" onClick={() => setShowSummaryModal(true)}>
+          <button className="btn btn-primary" onClick={() => openSummary(today)}>
             {dailySummary?.caloriesBurned ? '✏️ Modifier le bilan' : '📊 Saisir ma dépense'}
           </button>
           <button className="btn btn-secondary" onClick={handleImportHealth}>

@@ -4,7 +4,14 @@ import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
 import { getTheme, setTheme, type ThemeName } from '../utils/theme';
 import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
+import { getLanguage, setLanguage, pickMessage, type Language } from '../utils/messages';
+import { showToast } from '../utils/toast';
 import './Settings.css';
+
+const LANGUAGES: { name: Language; label: string }[] = [
+  { name: 'fr', label: '🇫🇷 Français' },
+  { name: 'ar-EG', label: '🇪🇬 عربي مصري' }
+];
 
 const THEMES: { name: ThemeName; label: string }[] = [
   { name: 'sauge', label: '🌿 Sauge' },
@@ -17,6 +24,7 @@ export function Settings() {
   );
   const [objective, setObjectiveState] = useState<number>(getObjective());
   const [theme, setThemeState] = useState<ThemeName>(getTheme());
+  const [language, setLanguageState] = useState<Language>(getLanguage());
   const [hasApiKey, setHasApiKey] = useState(getApiKey() !== null);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -258,6 +266,30 @@ export function Settings() {
               onClick={() => {
                 setTheme(name);
                 setThemeState(name);
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Section Langue des messages drôles */}
+      <div className="settings-section">
+        <h2>😏 Messages drôles</h2>
+        <p className="section-desc">
+          L'app te charrie gentiment quand tu ajoutes un aliment ou dépasses ton budget. Choisis la langue de ses phrases.
+        </p>
+        <div className="objective-presets">
+          {LANGUAGES.map(({ name, label }) => (
+            <button
+              key={name}
+              className={`preset-btn ${language === name ? 'active' : ''}`}
+              aria-pressed={language === name}
+              onClick={() => {
+                setLanguage(name);
+                setLanguageState(name);
+                showToast(pickMessage('entryAdded', name));
               }}
             >
               {label}

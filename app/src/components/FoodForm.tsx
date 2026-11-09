@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { Food, Portion } from '../types';
-import { calculateSodiumFromSalt } from '../types';
+import { calculateSodiumFromSalt } from '../utils/calculations';
 import { LabelScanButton } from './LabelScanButton';
 import type { LabelResult } from '../utils/labelReader';
+import { estimateMissingValues, needsEstimate } from '../utils/estimates';
 import './FoodForm.css';
 
 interface FoodFormProps {
@@ -51,6 +52,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [estimateNote, setEstimateNote] = useState<string | null>(null);
   const [showPortions, setShowPortions] = useState(false);
   const [newPortion, setNewPortion] = useState({ name: '', grams: '' });
   const [portions, setPortions] = useState<Portion[]>([]);
@@ -94,8 +96,9 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
     const text = (value: number | undefined, previous: string) => (value !== undefined ? String(value) : previous);
     setForm(prev => ({
       ...prev,
-      name: result.name ?? prev.name,
+      name: result.name ?? (prev.name || (result.estimated ? 'Repas (estimation IA)' : prev.name)),
       brand: result.brand ?? prev.brand,
+      barcode: result.barcode ?? prev.barcode,
       baseUnit: result.unit,
       kcal_per_100g: text(result.kcal, prev.kcal_per_100g),
       protein: text(result.protein, prev.protein),
@@ -109,7 +112,36 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
           ? String(calculateSodiumFromSalt(result.salt))
           : text(result.sodium, prev.sodium),
       potassium: text(result.potassium, prev.potassium),
-      source: 'étiquette'
+      source: result.estimated ? 'estimation' : 'étiquette'
+    }));
+    setErrors({});
+  };
+
+  // Calories connues mais macros ou potassium absents : on propose des valeurs moyennes
+  const kcalValue = Number(form.kcal_per_100g) || 0;
+  const showEstimate = needsEstimate({
+    kcal: kcalValue,
+    protein: form.protein,
+    carbs: form.carbs,
+    fat: form.fat,
+    potassium: form.potassium
+  });
+
+  const handleEstimate = () => {
+    const estimate = estimateMissingValues(form.name, kcalValue);
+    const macrosEmpty = [form.protein, form.carbs, form.fat].every(value => value.trim() === '');
+    setEstimateNote(
+      estimate.basis === 'generic'
+        ? `Basé sur « ${estimate.matchedName} » de la base générique.`
+        : 'Répartition moyenne des calories (15 % protéines, 50 % glucides, 35 % lipides).'
+    );
+    setForm(prev => ({
+      ...prev,
+      protein: macrosEmpty ? String(estimate.protein) : prev.protein,
+      carbs: macrosEmpty ? String(estimate.carbs) : prev.carbs,
+      fat: macrosEmpty ? String(estimate.fat) : prev.fat,
+      potassium: prev.potassium.trim() === '' ? String(estimate.potassium) : prev.potassium,
+      source: 'estimation'
     }));
     setErrors({});
   };
@@ -292,6 +324,20 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                 {errors.fat && <span className="error">{errors.fat}</span>}
               </div>
             </div>
+
+            {showEstimate && (
+              <div className="estimate-box">
+                <p>
+                  Il manque des macros ou le potassium. Je peux proposer des valeurs moyennes, marquées « estimation ».
+                </p>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={handleEstimate}>
+                  💡 Proposer des valeurs moyennes
+                </button>
+              </div>
+            )}
+            {estimateNote && !showEstimate && form.source === 'estimation' && (
+              <p className="estimate-note">📊 Valeurs estimées. {estimateNote}</p>
+            )}
 
             <div className="form-grid">
               <div className="form-row">

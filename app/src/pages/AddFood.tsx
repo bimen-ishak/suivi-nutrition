@@ -8,6 +8,8 @@ import { FoodForm } from '../components/FoodForm';
 import { QuantityEntry } from '../components/QuantityEntry';
 import { convertPortionToGrams, calculateNutrition } from '../utils/calculations';
 import type { GenericFood } from '../data/genericFoods';
+import { showToast } from '../utils/toast';
+import { pickMessage } from '../utils/messages';
 import './AddFood.css';
 
 interface AddFoodProps {
@@ -63,6 +65,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
       await createFood(newFood);
       await loadFoods();
       setSelectedFood(newFood);
+      showToast(pickMessage('newFood'));
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'aliment générique:', error);
       alert('Erreur lors de l\'ajout de l\'aliment');
@@ -97,6 +100,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
 
       // Sélectionner automatiquement l'aliment créé
       setSelectedFood(newFood);
+      showToast(pickMessage('newFood'));
     } catch (error) {
       console.error('Erreur lors de la création:', error);
       alert('Erreur lors de la création de l\'aliment');
@@ -165,6 +169,8 @@ export function AddFood({ onComplete }: AddFoodProps) {
         updatedAt: nowISO
       });
 
+      showToast(pickMessage('entryAdded'));
+
       // Retour à Today
       if (onComplete) {
         onComplete();
@@ -200,6 +206,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
         updatedAt: nowISO
       });
 
+      showToast(pickMessage('oneOff'));
       onComplete?.();
     } catch (error) {
       console.error('Erreur lors de l\'ajout ponctuel:', error);

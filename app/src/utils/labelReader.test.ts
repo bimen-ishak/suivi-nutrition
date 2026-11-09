@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseLabelResponse, readLabel, LabelReadError } from './labelReader';
+import { parseLabelResponse, readLabel, readFoodPhotos, LabelReadError } from './labelReader';
 
 describe('parseLabelResponse', () => {
   it('lit un JSON de valeurs pour 100 g', () => {
@@ -20,6 +20,7 @@ describe('parseLabelResponse', () => {
       })
     );
     expect(result).toEqual({
+      estimated: false,
       name: 'Muesli croustillant',
       brand: 'Lidl',
       unit: 'g',
@@ -67,6 +68,51 @@ describe('parseLabelResponse', () => {
   });
 });
 
+describe('parseLabelResponse : code-barres', () => {
+  const base = { kcal: 100, protein: 1, carbs: 1, fat: 1 };
+
+  it('garde un EAN-13 valide', () => {
+    expect(parseLabelResponse(JSON.stringify({ ...base, barcode: '3017620422003' }))?.barcode).toBe('3017620422003');
+  });
+
+  it('garde un EAN-8 et un UPC-A valides', () => {
+    expect(parseLabelResponse(JSON.stringify({ ...base, barcode: '96385074' }))?.barcode).toBe('96385074');
+    expect(parseLabelResponse(JSON.stringify({ ...base, barcode: '036000291452' }))?.barcode).toBe('036000291452');
+  });
+
+  it('nettoie les espaces écrits dans le code', () => {
+    expect(parseLabelResponse(JSON.stringify({ ...base, barcode: '3 017620 422003' }))?.barcode).toBe('3017620422003');
+  });
+
+  it('écarte un code dont la clé de contrôle est fausse', () => {
+    expect(parseLabelResponse(JSON.stringify({ ...base, barcode: '3017620422004' }))?.barcode).toBeUndefined();
+  });
+
+  it('écarte un code de longueur impossible', () => {
+    expect(parseLabelResponse(JSON.stringify({ ...base, barcode: '12345' }))?.barcode).toBeUndefined();
+  });
+});
+
+describe('parseLabelResponse : poids et estimation', () => {
+  it('lit le poids affiché sur la balance quand il y a une étiquette', () => {
+    const result = parseLabelResponse('{"kcal":450,"protein":10,"carbs":50,"fat":20,"weight_g":85}');
+    expect(result).toMatchObject({ weight: 85, estimated: false });
+  });
+
+  it('convertit une estimation de repas en valeurs pour 100 g', () => {
+    const result = parseLabelResponse(
+      JSON.stringify({ mode: 'estimate', total_kcal: 600, total_protein: 30, total_carbs: 60, total_fat: 25, weight_g: 300 })
+    );
+    expect(result).toMatchObject({ estimated: true, weight: 300, kcal: 200, protein: 10, carbs: 20 });
+    expect(result?.fat).toBeCloseTo(8.3, 1);
+  });
+
+  it('refuse une estimation sans poids', () => {
+    const result = parseLabelResponse(JSON.stringify({ mode: 'estimate', total_kcal: 600, total_protein: 30, total_carbs: 60, total_fat: 25 }));
+    expect(result).toBeNull();
+  });
+});
+
 const okResponse = (payload: object) => ({
   ok: true,
   status: 200,
@@ -87,6 +133,15 @@ describe('readLabel', () => {
     expect(options.headers['x-goog-api-key']).toBe('ma-cle');
     const body = JSON.parse(options.body);
     expect(body.contents[0].parts[1].inline_data).toEqual({ mime_type: 'image/jpeg', data: 'QUJD' });
+  });
+
+  it('envoie plusieurs photos dans la même demande', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okResponse({ kcal: 450, protein: 10, carbs: 50, fat: 20 }));
+    await readFoodPhotos([image, 'data:image/jpeg;base64,REVG'], 'ma-cle', fetchMock);
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const images = body.contents[0].parts.filter((part: { inline_data?: unknown }) => part.inline_data);
+    expect(images).toHaveLength(2);
+    expect(images[1].inline_data.data).toBe('REVG');
   });
 
   it('essaie le modèle suivant quand le premier n\'existe plus', async () => {

@@ -3,6 +3,8 @@ import type { Food } from '../types';
 import { getAllFoods, createFood, updateFood, deleteFood } from '../db';
 import { FoodCard } from '../components/FoodCard';
 import { FoodForm } from '../components/FoodForm';
+import { showToast } from '../utils/toast';
+import { pickMessage } from '../utils/messages';
 import './Library.css';
 
 export function Library() {
@@ -59,6 +61,7 @@ export function Library() {
           updatedAt: now
         };
         await createFood(newFood);
+        showToast(pickMessage('newFood'));
       }
 
       await loadFoods();

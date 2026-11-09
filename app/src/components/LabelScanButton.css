@@ -52,3 +52,9 @@
   background: var(--surface-soft);
   border-radius: 14px;
 }
+
+.label-scan-tip {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
