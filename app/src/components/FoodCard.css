@@ -41,7 +41,7 @@
   padding: 2px 8px;
   border-radius: 16px;
   display: inline-block;
-  margin-right: 8px;
+  margin-inline-end: 8px;
 }
 
 .food-barcode {

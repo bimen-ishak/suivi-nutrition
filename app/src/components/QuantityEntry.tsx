@@ -4,6 +4,7 @@ import { MEAL_TYPES } from '../types';
 import { convertPortionToGrams, calculateNutrition } from '../utils/calculations';
 import { AdvancedCalculationModal } from './AdvancedCalculationModal';
 import './QuantityEntry.css';
+import { t, unitLabel } from '../i18n';
 
 interface QuantityEntryProps {
   food: Food;
@@ -96,7 +97,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
   const handleSubmit = () => {
     const qty = parseFloat(quantity);
     if (isNaN(qty) || qty <= 0) {
-      alert('Veuillez saisir une quantité valide');
+      alert(t('Veuillez saisir une quantité valide'));
       return;
     }
 
@@ -123,9 +124,9 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
     <div className="quantity-entry">
       <div className="quantity-header">
         <button className="back-btn" onClick={onCancel}>
-          ← Retour
+          {t('← Retour')}
         </button>
-        <h2>Quantité</h2>
+        <h2>{t('Quantité')}</h2>
         <div style={{ width: '40px' }}></div> {/* Spacer for centering */}
       </div>
 
@@ -138,7 +139,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
 
         {/* Saisie de quantité */}
         <div className="quantity-input-section">
-          <label htmlFor="quantity-input">Quantité</label>
+          <label htmlFor="quantity-input">{t('Quantité')}</label>
           <div className="quantity-input-group">
             <input
               id="quantity-input"
@@ -168,7 +169,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
           className="btn btn-secondary btn-block advanced-calc-btn"
           onClick={() => setShowAdvancedCalc(true)}
         >
-          🧮 Calcul avancé
+          {t('🧮 Calcul avancé')}
         </button>
 
         {calculation && (
@@ -180,7 +181,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
 
         {/* Sélecteur de repas */}
         <div className="meal-selector-section">
-          <label htmlFor="meal-select">Repas</label>
+          <label htmlFor="meal-select">{t('Repas')}</label>
           <select
             id="meal-select"
             value={selectedMeal}
@@ -189,7 +190,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
           >
             {MEAL_TYPES.map(meal => (
               <option key={meal} value={meal}>
-                {meal}
+                {t(meal)}
               </option>
             ))}
           </select>
@@ -198,25 +199,25 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
         {/* Aperçu nutrition */}
         {preview && (
           <div className="nutrition-preview">
-            <h4>Aperçu nutrition</h4>
+            <h4>{t('Aperçu nutrition')}</h4>
             <div className="preview-main">
               <div className="preview-calories">
                 <span className="preview-value">{preview.kcal}</span>
-                <span className="preview-label">kcal</span>
+                <span className="preview-label">{t('kcal')}</span>
               </div>
             </div>
             <div className="preview-macros">
               <div className="preview-macro">
-                <span className="macro-label">Protéines</span>
-                <span className="macro-value">{Math.round(preview.protein * 10) / 10}g</span>
+                <span className="macro-label">{t('Protéines')}</span>
+                <span className="macro-value">{Math.round(preview.protein * 10) / 10}{unitLabel('g')}</span>
               </div>
               <div className="preview-macro">
-                <span className="macro-label">Glucides</span>
-                <span className="macro-value">{Math.round(preview.carbs * 10) / 10}g</span>
+                <span className="macro-label">{t('Glucides')}</span>
+                <span className="macro-value">{Math.round(preview.carbs * 10) / 10}{unitLabel('g')}</span>
               </div>
               <div className="preview-macro">
-                <span className="macro-label">Lipides</span>
-                <span className="macro-value">{Math.round(preview.fat * 10) / 10}g</span>
+                <span className="macro-label">{t('Lipides')}</span>
+                <span className="macro-value">{Math.round(preview.fat * 10) / 10}{unitLabel('g')}</span>
               </div>
             </div>
           </div>
@@ -229,14 +230,14 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
           className="btn btn-secondary"
           onClick={onCancel}
         >
-          Annuler
+          {t('Annuler')}
         </button>
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
           disabled={!quantity || parseFloat(quantity) <= 0}
         >
-          Valider
+          {t('Valider')}
         </button>
       </div>
     </div>

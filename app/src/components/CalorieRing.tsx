@@ -1,4 +1,5 @@
 import './CalorieRing.css';
+import { t } from '../i18n';
 
 interface CalorieRingProps {
   eaten: number;
@@ -17,7 +18,7 @@ export function CalorieRing({ eaten, budget }: CalorieRingProps) {
     <div
       className="calorie-ring"
       role="img"
-      aria-label={budget !== null ? `${eaten} kcal mangées sur ${budget}` : `${eaten} kcal mangées`}
+      aria-label={budget !== null ? t('{eaten} kcal mangées sur {budget}', { eaten, budget }) : t('{eaten} kcal mangées', { eaten })}
     >
       <svg viewBox="0 0 160 160" aria-hidden="true">
         <circle className="ring-track" cx="80" cy="80" r={RADIUS} />
@@ -32,8 +33,8 @@ export function CalorieRing({ eaten, budget }: CalorieRingProps) {
       </svg>
       <div className="ring-center">
         <span className="ring-value">{eaten}</span>
-        <span className="ring-label">kcal mangées</span>
-        {budget !== null && <span className="ring-goal">sur {budget}</span>}
+        <span className="ring-label">{t('kcal mangées')}</span>
+        {budget !== null && <span className="ring-goal">{t('sur {budget}', { budget })}</span>}
       </div>
     </div>
   );

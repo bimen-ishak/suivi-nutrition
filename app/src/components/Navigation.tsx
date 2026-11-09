@@ -1,4 +1,5 @@
 import './Navigation.css';
+import { t } from '../i18n';
 
 export type NavigationTab = 'today' | 'history' | 'photos' | 'library' | 'settings';
 
@@ -15,7 +16,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         onClick={() => onTabChange('today')}
       >
         <span className="nav-icon">🏠</span>
-        <span className="nav-label">Aujourd'hui</span>
+        <span className="nav-label">{t('Aujourd\'hui')}</span>
       </button>
 
       <button
@@ -23,7 +24,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         onClick={() => onTabChange('history')}
       >
         <span className="nav-icon">📊</span>
-        <span className="nav-label">Historique</span>
+        <span className="nav-label">{t('Historique')}</span>
       </button>
 
       <button
@@ -31,7 +32,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         onClick={() => onTabChange('photos')}
       >
         <span className="nav-icon">📷</span>
-        <span className="nav-label">Photos</span>
+        <span className="nav-label">{t('Photos')}</span>
       </button>
 
       <button
@@ -39,7 +40,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         onClick={() => onTabChange('library')}
       >
         <span className="nav-icon">📚</span>
-        <span className="nav-label">Bibliothèque</span>
+        <span className="nav-label">{t('Bibliothèque')}</span>
       </button>
 
       <button
@@ -47,7 +48,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         onClick={() => onTabChange('settings')}
       >
         <span className="nav-icon">⚙️</span>
-        <span className="nav-label">Paramètres</span>
+        <span className="nav-label">{t('Paramètres')}</span>
       </button>
     </nav>
   );

@@ -1,4 +1,5 @@
 import './MacroCard.css';
+import { t, unitLabel } from '../i18n';
 
 export type MacroKind = 'protein' | 'carbs' | 'fat' | 'sodium' | 'potassium';
 
@@ -23,7 +24,7 @@ export function MacroCard({ label, kind, value, goal, unit, isLimit = false, wid
       <div className="macro-card-figures">
         <span className={`macro-card-value ${over ? 'over' : ''}`}>{Math.round(value)}</span>
         <span className="macro-card-goal">
-          / {isLimit ? 'max ' : ''}{goal} {unit}
+          / {isLimit ? `${t('max')} ` : ''}{goal} {unitLabel(unit as 'g' | 'mg')}
         </span>
       </div>
       <div className="macro-card-track">

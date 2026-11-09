@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { CalculationType } from '../types';
 import { calculateTare, calculateRemaining, generateCalculationDescription } from '../utils/calculations';
 import './AdvancedCalculationModal.css';
+import { t, unitLabel } from '../i18n';
 
 interface AdvancedCalculationModalProps {
   onComplete: (result: {
@@ -57,7 +58,7 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
   const handleSubmit = () => {
     const result = calculateResult();
     if (result === null || result <= 0) {
-      alert('Veuillez saisir des valeurs valides');
+      alert(t('Veuillez saisir des valeurs valides'));
       return;
     }
 
@@ -83,7 +84,7 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
     <div className="modal-overlay">
       <div className="modal-content advanced-calc-modal">
         <div className="modal-header">
-          <h3>Calcul avancé</h3>
+          <h3>{t('Calcul avancé')}</h3>
           <button className="close-btn" onClick={onCancel}>×</button>
         </div>
 
@@ -94,19 +95,19 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
               className={`mode-btn ${mode === 'tare' ? 'active' : ''}`}
               onClick={() => setMode('tare')}
             >
-              Tare
+              {t('Tare')}
             </button>
             <button
               className={`mode-btn ${mode === 'remaining' ? 'active' : ''}`}
               onClick={() => setMode('remaining')}
             >
-              Restant
+              {t('Restant')}
             </button>
             <button
               className={`mode-btn ${mode === 'difference' ? 'active' : ''}`}
               onClick={() => setMode('difference')}
             >
-              Différence
+              {t('Différence')}
             </button>
           </div>
 
@@ -115,29 +116,29 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
             {mode === 'tare' && (
               <>
                 <div className="calc-field">
-                  <label htmlFor="gross">Poids brut (g)</label>
+                  <label htmlFor="gross">{t('Poids brut (g)')}</label>
                   <input
                     id="gross"
                     type="number"
                     inputMode="decimal"
                     value={values.gross}
                     onChange={(e) => handleValueChange('gross', e.target.value)}
-                    placeholder="Ex: 250"
+                    placeholder={t('Ex: 250')}
                     autoFocus
                   />
-                  <p className="field-hint">Poids total avec le contenant</p>
+                  <p className="field-hint">{t('Poids total avec le contenant')}</p>
                 </div>
                 <div className="calc-field">
-                  <label htmlFor="tare">Tare (g)</label>
+                  <label htmlFor="tare">{t('Tare (g)')}</label>
                   <input
                     id="tare"
                     type="number"
                     inputMode="decimal"
                     value={values.tare}
                     onChange={(e) => handleValueChange('tare', e.target.value)}
-                    placeholder="Ex: 50"
+                    placeholder={t('Ex: 50')}
                   />
-                  <p className="field-hint">Poids du contenant vide</p>
+                  <p className="field-hint">{t('Poids du contenant vide')}</p>
                 </div>
               </>
             )}
@@ -145,29 +146,29 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
             {mode === 'remaining' && (
               <>
                 <div className="calc-field">
-                  <label htmlFor="initial">Poids servi (g)</label>
+                  <label htmlFor="initial">{t('Poids servi (g)')}</label>
                   <input
                     id="initial"
                     type="number"
                     inputMode="decimal"
                     value={values.initial}
                     onChange={(e) => handleValueChange('initial', e.target.value)}
-                    placeholder="Ex: 675"
+                    placeholder={t('Ex: 675')}
                     autoFocus
                   />
-                  <p className="field-hint">Poids total servi</p>
+                  <p className="field-hint">{t('Poids total servi')}</p>
                 </div>
                 <div className="calc-field">
-                  <label htmlFor="remaining">Restes (g)</label>
+                  <label htmlFor="remaining">{t('Restes (g)')}</label>
                   <input
                     id="remaining"
                     type="number"
                     inputMode="decimal"
                     value={values.remaining}
                     onChange={(e) => handleValueChange('remaining', e.target.value)}
-                    placeholder="Ex: 119"
+                    placeholder={t('Ex: 119')}
                   />
-                  <p className="field-hint">Ce qui reste dans l'assiette</p>
+                  <p className="field-hint">{t('Ce qui reste dans l\'assiette')}</p>
                 </div>
               </>
             )}
@@ -175,29 +176,29 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
             {mode === 'difference' && (
               <>
                 <div className="calc-field">
-                  <label htmlFor="value1">Valeur 1 (g)</label>
+                  <label htmlFor="value1">{t('Valeur 1 (g)')}</label>
                   <input
                     id="value1"
                     type="number"
                     inputMode="decimal"
                     value={values.value1}
                     onChange={(e) => handleValueChange('value1', e.target.value)}
-                    placeholder="Ex: 500"
+                    placeholder={t('Ex: 500')}
                     autoFocus
                   />
                 </div>
                 <div className="calc-field">
-                  <label htmlFor="value2">Valeur 2 (g)</label>
+                  <label htmlFor="value2">{t('Valeur 2 (g)')}</label>
                   <input
                     id="value2"
                     type="number"
                     inputMode="decimal"
                     value={values.value2}
                     onChange={(e) => handleValueChange('value2', e.target.value)}
-                    placeholder="Ex: 300"
+                    placeholder={t('Ex: 300')}
                   />
                 </div>
-                <p className="field-hint">Calcule |Valeur 1 - Valeur 2|</p>
+                <p className="field-hint">{t('Calcule |Valeur 1 - Valeur 2|')}</p>
               </>
             )}
           </div>
@@ -205,22 +206,22 @@ export function AdvancedCalculationModal({ onComplete, onCancel }: AdvancedCalcu
           {/* Résultat */}
           {result !== null && result > 0 && (
             <div className="calc-result">
-              <span className="result-label">Résultat:</span>
-              <span className="result-value">{Math.round(result * 10) / 10} g</span>
+              <span className="result-label">{t('Résultat:')}</span>
+              <span className="result-value">{Math.round(result * 10) / 10} {unitLabel('g')}</span>
             </div>
           )}
         </div>
 
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onCancel}>
-            Annuler
+            {t('Annuler')}
           </button>
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
             disabled={result === null || result <= 0}
           >
-            Utiliser ce résultat
+            {t('Utiliser ce résultat')}
           </button>
         </div>
       </div>

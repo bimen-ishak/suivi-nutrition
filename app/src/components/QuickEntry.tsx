@@ -6,6 +6,7 @@ import { LabelScanButton } from './LabelScanButton';
 import type { LabelResult } from '../utils/labelReader';
 import { estimateMissingValues, needsEstimate } from '../utils/estimates';
 import './QuickEntry.css';
+import { t, unitLabel } from '../i18n';
 
 export interface QuickEntryData {
   name: string;
@@ -73,7 +74,7 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
     e.preventDefault();
     if (!canSave) return;
     onSave({
-      name: name.trim() || 'Aliment ponctuel',
+      name: name.trim() || t('Aliment ponctuel'),
       quantity: eaten,
       unit,
       meal,
@@ -84,24 +85,24 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
   return (
     <form className="quick-entry" onSubmit={handleSubmit}>
       <p className="quick-intro">
-        Pour un aliment que tu ne manges pas souvent. Il compte dans ta journée, sans aller dans ta bibliothèque.
+        {t('Pour un aliment que tu ne manges pas souvent. Il compte dans ta journée, sans aller dans ta bibliothèque.')}
       </p>
 
       <LabelScanButton onRead={handleLabelRead} />
 
       <label className="quick-field">
-        Nom (optionnel)
+        {t('Nom (optionnel)')}
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex : biscuit d'un pote"
+          placeholder={t('Ex : biscuit d\'un pote')}
         />
       </label>
 
       <div className="quick-pair">
         <label className="quick-field">
-          Calories pour 100{unit}
+          {t('Calories pour 100 {unit}', { unit: unitLabel(unit) })}
           <input
             type="number"
             inputMode="decimal"
@@ -109,12 +110,12 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
             step="any"
             value={kcal}
             onChange={(e) => setKcal(e.target.value)}
-            placeholder="Ex : 450"
+            placeholder={t('Ex : 450')}
           />
         </label>
 
         <label className="quick-field">
-          J'ai mangé
+          {t("J'ai mangé")}
           <span className="quick-quantity">
             <input
               type="number"
@@ -123,63 +124,63 @@ export function QuickEntry({ onSave }: QuickEntryProps) {
               step="any"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Ex : 30"
+              placeholder={t('Ex : 30')}
             />
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value as 'g' | 'ml')}
-              aria-label="Unité"
+              aria-label={t('Unité')}
             >
-              <option value="g">g</option>
-              <option value="ml">ml</option>
+              <option value="g">{t('g')}</option>
+              <option value="ml">{t('ml')}</option>
             </select>
           </span>
         </label>
       </div>
 
-      <p className="quick-subtitle">Pour 100{unit}, si tu les as (optionnel)</p>
+      <p className="quick-subtitle">{t('Pour 100 {unit}, si tu les as (optionnel)', { unit: unitLabel(unit) })}</p>
       <div className="quick-macros">
         <label className="quick-field">
-          Protéines
+          {t('Protéines')}
           <input type="number" inputMode="decimal" min="0" step="any" value={protein} onChange={(e) => setProtein(e.target.value)} />
         </label>
         <label className="quick-field">
-          Glucides
+          {t('Glucides')}
           <input type="number" inputMode="decimal" min="0" step="any" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
         </label>
         <label className="quick-field">
-          Lipides
+          {t('Lipides')}
           <input type="number" inputMode="decimal" min="0" step="any" value={fat} onChange={(e) => setFat(e.target.value)} />
         </label>
       </div>
 
       {showEstimate && (
         <div className="quick-estimate">
-          <p>Pas de macros ? Je peux proposer des valeurs moyennes, marquées « estimation ».</p>
+          <p>{t('Pas de macros ? Je peux proposer des valeurs moyennes, marquées « estimation ».')}</p>
           <button type="button" className="btn btn-secondary btn-sm" onClick={handleEstimate}>
-            💡 Proposer des valeurs moyennes
+            {t('💡 Proposer des valeurs moyennes')}
           </button>
         </div>
       )}
-      {estimated && !showEstimate && <p className="quick-estimate-note">📊 Valeurs estimées, à titre indicatif.</p>}
+      {estimated && !showEstimate && <p className="quick-estimate-note">{t('📊 Valeurs estimées, à titre indicatif.')}</p>}
 
       <label className="quick-field">
-        Repas
+        {t('Repas')}
         <select value={meal} onChange={(e) => setMeal(e.target.value as MealType)}>
           {MEAL_TYPES.map(m => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>{t(m)}</option>
           ))}
         </select>
       </label>
 
       {preview && (
         <p className="quick-preview">
-          <strong>{preview.kcal} kcal</strong> pour {eaten}{unit}
+          <strong>{preview.kcal} {unitLabel('kcal')}</strong> {t('pour')} {eaten}{unitLabel(unit)}
         </p>
       )}
 
       <button type="submit" className="btn btn-primary btn-block" disabled={!canSave}>
-        Ajouter à ma journée
+        {t('Ajouter à ma journée')}
       </button>
     </form>
   );

@@ -1,6 +1,6 @@
 .photos-page {
   padding: var(--page-gap);
-  text-align: left;
+  text-align: start;
 }
 
 .photos-page h1 {

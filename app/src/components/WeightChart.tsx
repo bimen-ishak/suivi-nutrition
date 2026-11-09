@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { TrendPoint } from '../utils/cut';
+import { t, unitLabel, locale } from '../i18n';
 
 interface WeightChartProps {
   points: TrendPoint[];
@@ -10,9 +11,9 @@ const HEIGHT = 170;
 const PAD = { top: 10, right: 12, bottom: 22, left: 34 };
 
 const dayNumber = (date: string) => Date.parse(`${date}T00:00:00Z`) / 86_400_000;
-const kg = (value: number) => value.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+const kg = (value: number) => value.toLocaleString(locale(), { maximumFractionDigits: 1 });
 const shortDate = (date: string) =>
-  new Date(`${date}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  new Date(`${date}T12:00:00`).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 
 export function WeightChart({ points }: WeightChartProps) {
   const [selected, setSelected] = useState<number | null>(null);
@@ -46,13 +47,13 @@ export function WeightChart({ points }: WeightChartProps) {
   return (
     <div className="weight-chart">
       <p className="weight-readout">
-        <strong>{shortDate(active.date)}</strong> · pesée {kg(active.weight)} kg · tendance {kg(active.trend)} kg
+        <strong>{shortDate(active.date)}</strong> · {t('pesée')} {kg(active.weight)} {unitLabel('kg')} · {t('tendance')} {kg(active.trend)} {unitLabel('kg')}
       </p>
 
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
-        aria-label={`Poids du ${shortDate(points[0].date)} au ${shortDate(active.date)} : tendance de ${kg(points[0].trend)} à ${kg(points[points.length - 1].trend)} kg`}
+        aria-label={t('Poids du {from} au {to} : tendance de {a} à {b} kg', { from: shortDate(points[0].date), to: shortDate(active.date), a: kg(points[0].trend), b: kg(points[points.length - 1].trend) })}
         onPointerDown={handlePointer}
         onPointerMove={handlePointer}
       >
@@ -86,8 +87,8 @@ export function WeightChart({ points }: WeightChartProps) {
       </svg>
 
       <div className="chart-legend">
-        <span><i className="legend-line" /> Tendance</span>
-        <span><i className="legend-dot" /> Pesées</span>
+        <span><i className="legend-line" /> {t('Tendance')}</span>
+        <span><i className="legend-dot" /> {t('Pesées')}</span>
       </div>
     </div>
   );

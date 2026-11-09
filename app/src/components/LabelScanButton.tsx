@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { compressPhoto } from '../utils/photo';
 import { getApiKey, readFoodPhotos, LabelReadError, type LabelResult } from '../utils/labelReader';
 import './LabelScanButton.css';
+import { t, unitLabel } from '../i18n';
 
 interface LabelScanButtonProps {
   onRead: (result: LabelResult) => void;
@@ -15,15 +16,15 @@ const MAX_PHOTOS = 3;
 const describe = (result: LabelResult): string => {
   const parts: string[] = [];
   if (result.estimated) {
-    parts.push('Pas d\'étiquette lisible : estimation faite d\'après l\'image, donc approximative.');
+    parts.push(t("Pas d'étiquette lisible : estimation faite d'après l'image, donc approximative."));
   } else {
-    parts.push('Valeurs lues sur l\'étiquette.');
+    parts.push(t("Valeurs lues sur l'étiquette."));
   }
   if (result.weight !== undefined) {
-    parts.push(`${result.estimated ? 'Poids estimé' : 'Poids lu sur la balance'} : ${result.weight} ${result.unit}.`);
+    parts.push(`${result.estimated ? t('Poids estimé') : t('Poids lu sur la balance')} : ${result.weight} ${unitLabel(result.unit)}.`);
   }
-  if (result.barcode) parts.push(`Code-barres trouvé : ${result.barcode}.`);
-  parts.push('Vérifie avant d\'enregistrer.');
+  if (result.barcode) parts.push(t('Code-barres trouvé : {code}.', { code: result.barcode }));
+  parts.push(t("Vérifie avant d'enregistrer."));
   return parts.join(' ');
 };
 
@@ -48,7 +49,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
       console.error('Erreur de lecture des photos:', error);
       setMessage({
         kind: 'error',
-        text: error instanceof LabelReadError ? error.message : 'Impossible de lire ces photos. Réessaie.'
+        text: error instanceof LabelReadError ? error.message : t('Impossible de lire ces photos. Réessaie.')
       });
     } finally {
       setLoading(false);
@@ -58,7 +59,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   if (!hasKey) {
     return (
       <p className="label-scan-hint">
-        🤖 Pour remplir tout seul depuis des photos du produit, ajoute ta clé gratuite dans Paramètres → Lecture d'étiquette.
+        {t('🤖 Pour remplir tout seul depuis des photos du produit, ajoute ta clé gratuite dans Paramètres → Lecture d\'étiquette.')}
       </p>
     );
   }
@@ -66,7 +67,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   return (
     <div className="label-scan">
       <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
-        {loading ? '⏳ Analyse en cours...' : '📷 Photos du produit (IA)'}
+        {loading ? t('⏳ Analyse en cours...') : t('📷 Photos du produit (IA)')}
         <input
           type="file"
           accept="image/*"
@@ -79,7 +80,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
         />
       </label>
       <p className="label-scan-tip">
-        Jusqu'à 3 photos : le produit sur la balance, et son étiquette ou son code-barres s'il y en a. Sans étiquette, l'IA estime les calories d'après l'image.
+        {t('Jusqu\'à 3 photos : le produit sur la balance, et son étiquette ou son code-barres s\'il y en a. Sans étiquette, l\'IA estime les calories d\'après l\'image.')}
       </p>
       {message && <p className={`label-scan-message ${message.kind}`}>{message.text}</p>}
     </div>

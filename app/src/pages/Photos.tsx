@@ -3,11 +3,12 @@ import type { DailyPhoto } from '../types';
 import { deletePhoto, getAllPhotos, savePhoto } from '../db';
 import { compressPhoto, localDateKey } from '../utils/photo';
 import './Photos.css';
+import { t, locale, isRtl } from '../i18n';
 
 const SWIPE_DISTANCE = 50;
 
 const formatDate = (date: string) =>
-  new Date(`${date}T12:00:00`).toLocaleDateString('fr-FR', {
+  new Date(`${date}T12:00:00`).toLocaleDateString(locale(), {
     weekday: 'short',
     day: 'numeric',
     month: 'long',
@@ -36,7 +37,7 @@ export function Photos() {
     if (!file) return;
 
     const exists = photos.some(p => p.date === date);
-    if (exists && !confirm(`Remplacer la photo du ${formatDate(date)} ?`)) return;
+    if (exists && !confirm(t('Remplacer la photo du {date} ?', { date: formatDate(date) }))) return;
 
     setSaving(true);
     try {
@@ -45,14 +46,14 @@ export function Photos() {
       await loadPhotos();
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la photo:', error);
-      alert('❌ Impossible d\'enregistrer cette photo');
+      alert(t('❌ Impossible d\'enregistrer cette photo'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (photo: DailyPhoto) => {
-    if (!confirm(`Supprimer la photo du ${formatDate(photo.date)} ?`)) return;
+    if (!confirm(t('Supprimer la photo du {date} ?', { date: formatDate(photo.date) }))) return;
     await deletePhoto(photo.date);
     setViewing(null);
     await loadPhotos();
@@ -64,19 +65,23 @@ export function Photos() {
     const older = photos[index + 1];
     const newer = photos[index - 1];
 
+    // En arabe, on lit de droite à gauche : la photo suivante est à gauche, comme les pages d'un livre
+    const leftTarget = isRtl() ? newer : older;
+    const rightTarget = isRtl() ? older : newer;
+
     const handleTouchEnd = (e: React.TouchEvent) => {
       if (touchStartX.current === null) return;
       const distance = e.changedTouches[0].clientX - touchStartX.current;
       touchStartX.current = null;
-      if (distance > SWIPE_DISTANCE && older) setViewing(older);
-      if (distance < -SWIPE_DISTANCE && newer) setViewing(newer);
+      if (distance > SWIPE_DISTANCE && leftTarget) setViewing(leftTarget);
+      if (distance < -SWIPE_DISTANCE && rightTarget) setViewing(rightTarget);
     };
 
     return (
       <div className="photo-viewer">
         <div className="photo-viewer-bar">
-          <button onClick={() => setViewing(null)}>← Retour</button>
-          <button className="photo-delete" onClick={() => handleDelete(viewing)}>Supprimer</button>
+          <button onClick={() => setViewing(null)}>{t('← Retour')}</button>
+          <button className="photo-delete" onClick={() => handleDelete(viewing)}>{t('Supprimer')}</button>
         </div>
 
         <div
@@ -84,12 +89,24 @@ export function Photos() {
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
           onTouchEnd={handleTouchEnd}
         >
-          <img src={viewing.image} alt={`Photo du ${formatDate(viewing.date)}`} />
-          {older && (
-            <button className="photo-arrow left" onClick={() => setViewing(older)} aria-label="Photo précédente">‹</button>
+          <img src={viewing.image} alt={t('Photo du {date}', { date: formatDate(viewing.date) })} />
+          {leftTarget && (
+            <button
+              className="photo-arrow left"
+              onClick={() => setViewing(leftTarget)}
+              aria-label={leftTarget === older ? t('Photo précédente') : t('Photo suivante')}
+            >
+              ‹
+            </button>
           )}
-          {newer && (
-            <button className="photo-arrow right" onClick={() => setViewing(newer)} aria-label="Photo suivante">›</button>
+          {rightTarget && (
+            <button
+              className="photo-arrow right"
+              onClick={() => setViewing(rightTarget)}
+              aria-label={rightTarget === older ? t('Photo précédente') : t('Photo suivante')}
+            >
+              ›
+            </button>
           )}
         </div>
 
@@ -102,11 +119,11 @@ export function Photos() {
 
   return (
     <div className="photos-page">
-      <h1>📷 Photos</h1>
+      <h1>{t('📷 Photos')}</h1>
 
       <div className="photo-add">
         <label className="photo-date">
-          Jour
+          {t('Jour')}
           <input
             type="date"
             value={date}
@@ -117,10 +134,10 @@ export function Photos() {
 
         <label className={`photo-add-btn ${saving ? 'disabled' : ''}`}>
           {saving
-            ? 'Enregistrement...'
+            ? t('Enregistrement...')
             : hasPhotoForDate
-              ? 'Remplacer la photo'
-              : date === today ? '+ Ajouter la photo du jour' : '+ Ajouter la photo'}
+              ? t('Remplacer la photo')
+              : date === today ? t('+ Ajouter la photo du jour') : t('+ Ajouter la photo')}
           <input type="file" accept="image/*" onChange={handleFile} disabled={saving} hidden />
         </label>
       </div>
@@ -128,8 +145,8 @@ export function Photos() {
       {photos.length === 0 ? (
         <div className="photos-empty">
           <span className="photos-empty-icon" aria-hidden="true">📷</span>
-          <strong>Aucune photo pour le moment</strong>
-          <p>Une photo par jour suffit pour voir ta sèche avancer.</p>
+          <strong>{t('Aucune photo pour le moment')}</strong>
+          <p>{t('Une photo par jour suffit pour voir ta sèche avancer.')}</p>
         </div>
       ) : (
         <div className="photos-grid">

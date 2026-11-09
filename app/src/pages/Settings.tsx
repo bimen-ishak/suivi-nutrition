@@ -4,8 +4,7 @@ import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
 import { getTheme, setTheme, type ThemeName } from '../utils/theme';
 import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
-import { getLanguage, setLanguage, pickMessage, type Language } from '../utils/messages';
-import { showToast } from '../utils/toast';
+import { t, locale, getLanguage, setLanguage, type Language } from '../i18n';
 import './Settings.css';
 
 const LANGUAGES: { name: Language; label: string }[] = [
@@ -14,8 +13,8 @@ const LANGUAGES: { name: Language; label: string }[] = [
 ];
 
 const THEMES: { name: ThemeName; label: string }[] = [
-  { name: 'sauge', label: '🌿 Sauge' },
-  { name: 'halloween', label: '🎃 Halloween' }
+  { name: 'sauge', label: t('🌿 Sauge') },
+  { name: 'halloween', label: t('🎃 Halloween') }
 ];
 
 export function Settings() {
@@ -24,7 +23,7 @@ export function Settings() {
   );
   const [objective, setObjectiveState] = useState<number>(getObjective());
   const [theme, setThemeState] = useState<ThemeName>(getTheme());
-  const [language, setLanguageState] = useState<Language>(getLanguage());
+  const language = getLanguage();
   const [hasApiKey, setHasApiKey] = useState(getApiKey() !== null);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -46,13 +45,13 @@ export function Settings() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      const now = new Date().toLocaleString('fr-FR');
+      const now = new Date().toLocaleString(locale());
       setLastBackup(now);
       localStorage.setItem('lastBackupDate', now);
-      alert('✅ Sauvegarde téléchargée avec succès !');
+      alert(t('✅ Sauvegarde téléchargée avec succès !'));
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('❌ Erreur lors de la sauvegarde');
+      alert(t('❌ Erreur lors de la sauvegarde'));
     } finally {
       setExporting(false);
     }
@@ -66,7 +65,7 @@ export function Settings() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      if (!confirm('⚠️ Restaurer cette sauvegarde remplacera TOUTES les données actuelles. Continuer ?')) {
+      if (!confirm(t('⚠️ Restaurer cette sauvegarde remplacera TOUTES les données actuelles. Continuer ?'))) {
         return;
       }
 
@@ -81,11 +80,11 @@ export function Settings() {
         }
 
         await importAllData(data);
-        alert('✅ Données restaurées avec succès ! Recharge la page.');
+        alert(t('✅ Données restaurées avec succès ! Recharge la page.'));
         window.location.reload();
       } catch (error) {
         console.error('Erreur lors de la restauration:', error);
-        alert('❌ Erreur: fichier invalide ou corrompu');
+        alert(t('❌ Erreur: fichier invalide ou corrompu'));
       } finally {
         setImporting(false);
       }
@@ -109,10 +108,10 @@ export function Settings() {
         }
 
         const result = await importHistory(data);
-        alert(`✅ ${result.days} jours ajoutés à Ma sèche et ${result.photos} photos ajoutées.`);
+        alert(t('✅ {days} jours ajoutés à Ma sèche et {photos} photos ajoutées.', { days: result.days, photos: result.photos }));
       } catch (error) {
         console.error('Erreur lors de l\'import de l\'historique:', error);
-        alert('❌ Ce fichier n\'est pas un historique à importer');
+        alert(t('❌ Ce fichier n\'est pas un historique à importer'));
       } finally {
         setImporting(false);
       }
@@ -133,7 +132,7 @@ export function Settings() {
 
   const handleSaveObjective = () => {
     setObjective(objective);
-    alert('✅ Objectif enregistré !');
+    alert(t('✅ Objectif enregistré !'));
   };
 
   const handleExportExcel = async () => {
@@ -146,7 +145,7 @@ export function Settings() {
       await exportToExcel(journal, summaries, exportPeriod);
     } catch (error) {
       console.error('Erreur lors de l\'export Excel:', error);
-      alert('❌ Erreur lors de l\'export Excel');
+      alert(t('❌ Erreur lors de l\'export Excel'));
     } finally {
       setExporting(false);
     }
@@ -155,18 +154,18 @@ export function Settings() {
   return (
     <div className="settings-page">
       <div className="settings-header">
-        <h1>⚙️ Paramètres</h1>
+        <h1>{t('⚙️ Paramètres')}</h1>
       </div>
 
       {/* Section Sauvegarde */}
       <div className="settings-section">
-        <h2>💾 Sauvegarde et restauration</h2>
+        <h2>{t('💾 Sauvegarde et restauration')}</h2>
         <p className="section-desc">
-          Sauvegarde tes données en JSON pour les protéger contre la perte (effacement Safari après 7 jours d'inactivité).
+          {t('Sauvegarde tes données en JSON pour les protéger contre la perte (effacement Safari après 7 jours d\'inactivité).')}
         </p>
 
         {lastBackup && (
-          <p className="last-backup">Dernière sauvegarde : {lastBackup}</p>
+          <p className="last-backup">{t('Dernière sauvegarde :')} {lastBackup}</p>
         )}
 
         <div className="settings-buttons">
@@ -175,42 +174,42 @@ export function Settings() {
             onClick={handleBackup}
             disabled={exporting}
           >
-            {exporting ? '⏳ Export en cours...' : '📥 Sauvegarder toutes mes données (JSON)'}
+            {exporting ? t('⏳ Export en cours...') : t('📥 Sauvegarder toutes mes données (JSON)')}
           </button>
           <button
             className="btn btn-secondary btn-block"
             onClick={handleRestore}
             disabled={importing}
           >
-            {importing ? '⏳ Import en cours...' : '📤 Restaurer mes données (JSON)'}
+            {importing ? t('⏳ Import en cours...') : t('📤 Restaurer mes données (JSON)')}
           </button>
         </div>
       </div>
 
       {/* Section Export Excel */}
       <div className="settings-section">
-        <h2>📊 Export Excel</h2>
+        <h2>{t('📊 Export Excel')}</h2>
         <p className="section-desc">
-          Exporte tes données au format .xlsx compatible avec ton tableau existant (3 feuilles : Bilan quotidien, Journal, Photos).
+          {t('Exporte tes données au format .xlsx compatible avec ton tableau existant (3 feuilles : Bilan quotidien, Journal, Photos).')}
         </p>
         <div className="period-selector">
           <button
             className={`period-btn ${exportPeriod === '7d' ? 'active' : ''}`}
             onClick={() => setExportPeriod('7d')}
           >
-            7 derniers jours
+            {t('7 derniers jours')}
           </button>
           <button
             className={`period-btn ${exportPeriod === '30d' ? 'active' : ''}`}
             onClick={() => setExportPeriod('30d')}
           >
-            30 derniers jours
+            {t('30 derniers jours')}
           </button>
           <button
             className={`period-btn ${exportPeriod === 'all' ? 'active' : ''}`}
             onClick={() => setExportPeriod('all')}
           >
-            Tout
+            {t('Tout')}
           </button>
         </div>
         <button
@@ -218,15 +217,15 @@ export function Settings() {
           onClick={handleExportExcel}
           disabled={exporting}
         >
-          {exporting ? '⏳ Export en cours...' : '📥 Exporter en Excel (.xlsx)'}
+          {exporting ? t('⏳ Export en cours...') : t('📥 Exporter en Excel (.xlsx)')}
         </button>
       </div>
 
       {/* Section Objectif */}
       <div className="settings-section">
-        <h2>🎯 Objectif calorique</h2>
+        <h2>{t('🎯 Objectif calorique')}</h2>
         <p className="section-desc">
-          Déficit calorique quotidien souhaité (en kcal, négatif = déficit).
+          {t('Déficit calorique quotidien souhaité (en kcal, négatif = déficit).')}
         </p>
         <div className="objective-input">
           <input
@@ -235,9 +234,9 @@ export function Settings() {
             onChange={(e) => setObjectiveState(parseInt(e.target.value) || 0)}
             step={50}
           />
-          <span className="unit">kcal/jour</span>
+          <span className="unit">{t('kcal/jour')}</span>
           <button className="btn btn-primary" onClick={handleSaveObjective}>
-            Enregistrer
+            {t('Enregistrer')}
           </button>
         </div>
         <div className="objective-presets">
@@ -255,8 +254,8 @@ export function Settings() {
 
       {/* Section Thème */}
       <div className="settings-section">
-        <h2>🎨 Thème</h2>
-        <p className="section-desc">Choisis l'ambiance de l'application.</p>
+        <h2>{t('🎨 Thème')}</h2>
+        <p className="section-desc">{t('Choisis l\'ambiance de l\'application.')}</p>
         <div className="objective-presets">
           {THEMES.map(({ name, label }) => (
             <button
@@ -276,9 +275,9 @@ export function Settings() {
 
       {/* Section Langue des messages drôles */}
       <div className="settings-section">
-        <h2>😏 Messages drôles</h2>
+        <h2>{t('😏 Messages drôles')}</h2>
         <p className="section-desc">
-          L'app te charrie gentiment quand tu ajoutes un aliment ou dépasses ton budget. Choisis la langue de ses phrases.
+          {t('L\'app te charrie gentiment quand tu ajoutes un aliment ou dépasses ton budget. Choisis la langue de ses phrases.')}
         </p>
         <div className="objective-presets">
           {LANGUAGES.map(({ name, label }) => (
@@ -288,8 +287,8 @@ export function Settings() {
               aria-pressed={language === name}
               onClick={() => {
                 setLanguage(name);
-                setLanguageState(name);
-                showToast(pickMessage('entryAdded', name));
+                // Recharge la page : tous les textes et le sens d'écriture changent d'un coup
+                window.location.reload();
               }}
             >
               {label}
@@ -300,20 +299,20 @@ export function Settings() {
 
       {/* Section Lecture d'étiquette */}
       <div className="settings-section">
-        <h2>🤖 Lecture d'étiquette</h2>
+        <h2>{t('🤖 Lecture d\'étiquette')}</h2>
         <p className="section-desc">
-          Prends en photo le tableau nutritionnel d'un produit : l'IA Gemini de Google remplit les valeurs pour toi. Il faut une clé gratuite, créée sur{' '}
-          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
-          {' '}avec ton compte Google.
+          {t("Prends en photo le tableau nutritionnel d'un produit : l'IA Gemini de Google remplit les valeurs pour toi. Il faut une clé gratuite, créée sur")}{' '}
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">{t('Google AI Studio')}</a>
+          {' '}{t('avec ton compte Google.')}
         </p>
         <p className="section-desc">
-          La clé reste sur ce téléphone, et n'est pas dans tes sauvegardes. Seules les photos d'étiquettes sont envoyées à Google, et seulement quand tu lances une lecture.
+          {t('La clé reste sur ce téléphone, et n\'est pas dans tes sauvegardes. Seules les photos d\'étiquettes sont envoyées à Google, et seulement quand tu lances une lecture.')}
         </p>
         {hasApiKey ? (
           <>
-            <p className="key-status">✅ Clé enregistrée sur ce téléphone</p>
+            <p className="key-status">{t('✅ Clé enregistrée sur ce téléphone')}</p>
             <button className="btn btn-secondary btn-block" onClick={handleRemoveKey}>
-              🗑️ Supprimer la clé
+              {t('🗑️ Supprimer la clé')}
             </button>
           </>
         ) : (
@@ -323,19 +322,19 @@ export function Settings() {
               className="key-input"
               value={apiKeyInput}
               onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder="Colle ta clé ici"
+              placeholder={t('Colle ta clé ici')}
               autoComplete="off"
               autoCapitalize="off"
               autoCorrect="off"
               spellCheck={false}
-              aria-label="Clé Google AI Studio"
+              aria-label={t('Clé Google AI Studio')}
             />
             <button
               className="btn btn-primary btn-block"
               onClick={handleSaveKey}
               disabled={apiKeyInput.trim() === ''}
             >
-              Enregistrer la clé
+              {t('Enregistrer la clé')}
             </button>
           </>
         )}
@@ -343,34 +342,34 @@ export function Settings() {
 
       {/* Section Import */}
       <div className="settings-section">
-        <h2>📥 Importer mon historique</h2>
+        <h2>{t('📥 Importer mon historique')}</h2>
         <p className="section-desc">
-          Ajoute tes anciennes journées à Ma sèche et tes anciennes photos. Ton journal et tes données actuelles ne changent pas.
+          {t('Ajoute tes anciennes journées à Ma sèche et tes anciennes photos. Ton journal et tes données actuelles ne changent pas.')}
         </p>
         <button className="btn btn-secondary btn-block" onClick={handleImportHistory} disabled={importing}>
-          {importing ? '⏳ Import en cours...' : '📥 Choisir le fichier'}
+          {importing ? t('⏳ Import en cours...') : t('📥 Choisir le fichier')}
         </button>
       </div>
 
       {/* Section Infos */}
       <div className="settings-section">
-        <h2>ℹ️ Informations</h2>
+        <h2>{t('ℹ️ Informations')}</h2>
         <div className="info-list">
           <div className="info-item">
-            <span className="info-label">Version</span>
+            <span className="info-label">{t('Version')}</span>
             <span className="info-value">1.0.0</span>
           </div>
           <div className="info-item">
-            <span className="info-label">Base générique</span>
-            <span className="info-value">~150 aliments hors ligne</span>
+            <span className="info-label">{t('Base générique')}</span>
+            <span className="info-value">{t('~150 aliments hors ligne')}</span>
           </div>
           <div className="info-item">
-            <span className="info-label">Stockage</span>
-            <span className="info-value">100% local (IndexedDB)</span>
+            <span className="info-label">{t('Stockage')}</span>
+            <span className="info-value">{t('100% local (IndexedDB)')}</span>
           </div>
           <div className="info-item">
-            <span className="info-label">Coût</span>
-            <span className="info-value">0 € — aucun serveur</span>
+            <span className="info-label">{t('Coût')}</span>
+            <span className="info-value">{t('0 € — aucun serveur')}</span>
           </div>
         </div>
       </div>

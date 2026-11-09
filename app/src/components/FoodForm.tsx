@@ -5,6 +5,7 @@ import { LabelScanButton } from './LabelScanButton';
 import type { LabelResult } from '../utils/labelReader';
 import { estimateMissingValues, needsEstimate } from '../utils/estimates';
 import './FoodForm.css';
+import { t, unitLabel } from '../i18n';
 
 interface FoodFormProps {
   initialFood?: Food | null;
@@ -96,7 +97,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
     const text = (value: number | undefined, previous: string) => (value !== undefined ? String(value) : previous);
     setForm(prev => ({
       ...prev,
-      name: result.name ?? (prev.name || (result.estimated ? 'Repas (estimation IA)' : prev.name)),
+      name: result.name ?? (prev.name || (result.estimated ? t('Repas (estimation IA)') : prev.name)),
       brand: result.brand ?? prev.brand,
       barcode: result.barcode ?? prev.barcode,
       baseUnit: result.unit,
@@ -132,8 +133,8 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
     const macrosEmpty = [form.protein, form.carbs, form.fat].every(value => value.trim() === '');
     setEstimateNote(
       estimate.basis === 'generic'
-        ? `Basé sur « ${estimate.matchedName} » de la base générique.`
-        : 'Répartition moyenne des calories (15 % protéines, 50 % glucides, 35 % lipides).'
+        ? t('Basé sur « {name} » de la base générique.', { name: estimate.matchedName ?? '' })
+        : t('Répartition moyenne des calories (15 % protéines, 50 % glucides, 35 % lipides).')
     );
     setForm(prev => ({
       ...prev,
@@ -154,15 +155,15 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!form.name?.trim()) newErrors.name = 'Le nom est obligatoire';
+    if (!form.name?.trim()) newErrors.name = t('Le nom est obligatoire');
     if (form.kcal_per_100g === '' || isNaN(Number(form.kcal_per_100g)) || Number(form.kcal_per_100g) < 0)
-      newErrors.kcal_per_100g = 'Calories obligatoires (nombre positif)';
+      newErrors.kcal_per_100g = t('Calories obligatoires (nombre positif)');
     if (form.protein === '' || isNaN(Number(form.protein)) || Number(form.protein) < 0)
-      newErrors.protein = 'Protéines obligatoires';
+      newErrors.protein = t('Protéines obligatoires');
     if (form.carbs === '' || isNaN(Number(form.carbs)) || Number(form.carbs) < 0)
-      newErrors.carbs = 'Glucides obligatoires';
+      newErrors.carbs = t('Glucides obligatoires');
     if (form.fat === '' || isNaN(Number(form.fat)) || Number(form.fat) < 0)
-      newErrors.fat = 'Lipides obligatoires';
+      newErrors.fat = t('Lipides obligatoires');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -207,57 +208,57 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
     <div className="food-form-overlay">
       <div className="food-form-modal">
         <div className="food-form-header">
-          <h2>{isEditing ? 'Modifier l\'aliment' : 'Nouvel aliment'}</h2>
-          <button className="close-btn" onClick={onCancel} aria-label="Fermer">×</button>
+          <h2>{isEditing ? t("Modifier l'aliment") : t('Nouvel aliment')}</h2>
+          <button className="close-btn" onClick={onCancel} aria-label={t('Fermer')}>×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="food-form">
           {!isEditing && <LabelScanButton onRead={handleLabelRead} />}
 
           <div className="form-section">
-            <h3>Informations de base</h3>
+            <h3>{t('Informations de base')}</h3>
 
             <div className="form-row">
-              <label htmlFor="name">Nom *</label>
+              <label htmlFor="name">{t('Nom *')}</label>
               <input
                 id="name"
                 type="text"
                 value={form.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                placeholder="Ex: Céréales Lidl chocolat noix cajou"
+                placeholder={t('Ex: Céréales Lidl chocolat noix cajou')}
                 autoFocus
               />
               {errors.name && <span className="error">{errors.name}</span>}
             </div>
 
             <div className="form-row">
-              <label htmlFor="brand">Marque (optionnel)</label>
+              <label htmlFor="brand">{t('Marque (optionnel)')}</label>
               <input
                 id="brand"
                 type="text"
                 value={form.brand}
                 onChange={(e) => handleChange('brand', e.target.value)}
-                placeholder="Ex: Lidl"
+                placeholder={t('Ex: Lidl')}
               />
             </div>
 
             <div className="form-row">
-              <label htmlFor="barcode">Code-barres (optionnel)</label>
+              <label htmlFor="barcode">{t('Code-barres (optionnel)')}</label>
               <input
                 id="barcode"
                 type="text"
                 value={form.barcode}
                 onChange={(e) => handleChange('barcode', e.target.value)}
-                placeholder="Ex: 1234567890123"
+                placeholder={t('Ex: 1234567890123')}
                 pattern="[0-9]*"
               />
             </div>
           </div>
 
           <div className="form-section">
-            <h3>Valeurs nutritionnelles pour 100{form.baseUnit} *</h3>
+            <h3>{t('Valeurs nutritionnelles pour 100 {unit} *', { unit: unitLabel(form.baseUnit) })}</h3>
 
-            <div className="base-unit-toggle" role="group" aria-label="Unité de référence">
+            <div className="base-unit-toggle" role="group" aria-label={t('Unité de référence')}>
               {(['g', 'ml'] as const).map(unit => (
                 <button
                   key={unit}
@@ -266,14 +267,14 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                   aria-pressed={form.baseUnit === unit}
                   onClick={() => handleChange('baseUnit', unit)}
                 >
-                  {unit === 'g' ? 'Solide (100 g)' : 'Liquide (100 ml)'}
+                  {unit === 'g' ? t('Solide (100 g)') : t('Liquide (100 ml)')}
                 </button>
               ))}
             </div>
 
             <div className="form-grid">
               <div className="form-row">
-                <label htmlFor="kcal">Calories (kcal) *</label>
+                <label htmlFor="kcal">{t('Calories (kcal) *')}</label>
                 <input
                   id="kcal"
                   type="number"
@@ -286,7 +287,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
               </div>
 
               <div className="form-row">
-                <label htmlFor="protein">Protéines (g) *</label>
+                <label htmlFor="protein">{t('Protéines (g) *')}</label>
                 <input
                   id="protein"
                   type="number"
@@ -299,7 +300,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
               </div>
 
               <div className="form-row">
-                <label htmlFor="carbs">Glucides (g) *</label>
+                <label htmlFor="carbs">{t('Glucides (g) *')}</label>
                 <input
                   id="carbs"
                   type="number"
@@ -312,7 +313,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
               </div>
 
               <div className="form-row">
-                <label htmlFor="fat">Lipides (g) *</label>
+                <label htmlFor="fat">{t('Lipides (g) *')}</label>
                 <input
                   id="fat"
                   type="number"
@@ -328,20 +329,20 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
             {showEstimate && (
               <div className="estimate-box">
                 <p>
-                  Il manque des macros ou le potassium. Je peux proposer des valeurs moyennes, marquées « estimation ».
+                  {t('Il manque des macros ou le potassium. Je peux proposer des valeurs moyennes, marquées « estimation ».')}
                 </p>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={handleEstimate}>
-                  💡 Proposer des valeurs moyennes
+                  {t('💡 Proposer des valeurs moyennes')}
                 </button>
               </div>
             )}
             {estimateNote && !showEstimate && form.source === 'estimation' && (
-              <p className="estimate-note">📊 Valeurs estimées. {estimateNote}</p>
+              <p className="estimate-note">{t('📊 Valeurs estimées.')} {estimateNote}</p>
             )}
 
             <div className="form-grid">
               <div className="form-row">
-                <label htmlFor="sugars">Sucres (g) — optionnel</label>
+                <label htmlFor="sugars">{t('Sucres (g) — optionnel')}</label>
                 <input
                   id="sugars"
                   type="number"
@@ -353,7 +354,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
               </div>
 
               <div className="form-row">
-                <label htmlFor="fiber">Fibres (g) — optionnel</label>
+                <label htmlFor="fiber">{t('Fibres (g) — optionnel')}</label>
                 <input
                   id="fiber"
                   type="number"
@@ -366,12 +367,12 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
             </div>
 
             <div className="form-section salt-section">
-              <h4>Sel / Sodium</h4>
-              <p className="hint">Remplis l'un des deux, l'autre est calculé automatiquement (1g sel = 400mg sodium)</p>
+              <h4>{t('Sel / Sodium')}</h4>
+              <p className="hint">{t('Remplis l\'un des deux, l\'autre est calculé automatiquement (1g sel = 400mg sodium)')}</p>
 
               <div className="form-grid">
                 <div className="form-row">
-                  <label htmlFor="salt">Sel (g)</label>
+                  <label htmlFor="salt">{t('Sel (g)')}</label>
                   <input
                     id="salt"
                     type="number"
@@ -383,7 +384,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                 </div>
 
                 <div className="form-row">
-                  <label htmlFor="sodium">Sodium (mg)</label>
+                  <label htmlFor="sodium">{t('Sodium (mg)')}</label>
                   <input
                     id="sodium"
                     type="number"
@@ -398,7 +399,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
             </div>
 
             <div className="form-row">
-              <label htmlFor="potassium">Potassium (mg) — optionnel</label>
+              <label htmlFor="potassium">{t('Potassium (mg) — optionnel')}</label>
               <input
                 id="potassium"
                 type="number"
@@ -411,7 +412,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
           </div>
 
           <div className="form-section">
-            <h3>Source des valeurs *</h3>
+            <h3>{t('Source des valeurs *')}</h3>
             <div className="radio-group">
               <label className="radio-label">
                 <input
@@ -423,7 +424,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                 />
                 <span className="radio-custom">
                   <span className="radio-dot"></span>
-                  🏷️ Étiquette (valeurs lues sur le paquet)
+                  {t('🏷️ Étiquette (valeurs lues sur le paquet)')}
                 </span>
               </label>
               <label className="radio-label">
@@ -436,7 +437,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                 />
                 <span className="radio-custom">
                   <span className="radio-dot"></span>
-                  📊 Estimation (base générique, restaurant, etc.)
+                  {t('📊 Estimation (base générique, restaurant, etc.)')}
                 </span>
               </label>
             </div>
@@ -444,13 +445,13 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
 
           <div className="form-section">
             <div className="section-header">
-              <h3>Portions rapides (optionnel)</h3>
+              <h3>{t('Portions rapides (optionnel)')}</h3>
               <button
                 type="button"
                 className="btn-toggle"
                 onClick={() => setShowPortions(!showPortions)}
               >
-                {showPortions ? 'Masquer' : 'Ajouter des portions'}
+                {showPortions ? t('Masquer') : t('Ajouter des portions')}
               </button>
             </div>
 
@@ -458,18 +459,18 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
               <div className="portions-form">
                 <div className="form-grid">
                   <div className="form-row">
-                    <label htmlFor="portionName">Nom (ex: biscuit, bol, carré)</label>
+                    <label htmlFor="portionName">{t('Nom (ex: biscuit, bol, carré)')}</label>
                     <input
                       id="portionName"
                       type="text"
                       value={newPortion.name}
                       onChange={e => setNewPortion(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Ex: biscuit"
+                      placeholder={t('Ex: biscuit')}
                     />
                   </div>
 
                   <div className="form-row">
-                    <label htmlFor="portionGrams">{form.baseUnit === 'ml' ? 'Volume (ml)' : 'Poids (g)'}</label>
+                    <label htmlFor="portionGrams">{form.baseUnit === 'ml' ? t('Volume (ml)') : t('Poids (g)')}</label>
                     <input
                       id="portionGrams"
                       type="number"
@@ -477,7 +478,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                       step="0.1"
                       value={newPortion.grams}
                       onChange={e => setNewPortion(prev => ({ ...prev, grams: e.target.value }))}
-                      placeholder="Ex: 12.5"
+                      placeholder={t('Ex: 12.5')}
                     />
                   </div>
                 </div>
@@ -488,7 +489,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                   onClick={addPortion}
                   disabled={!newPortion.name.trim() || newPortion.grams === '' || isNaN(Number(newPortion.grams))}
                 >
-                  + Ajouter
+                  {t('+ Ajouter')}
                 </button>
 
                 {portions.length > 0 && (
@@ -514,10 +515,10 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
 
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={isLoading}>
-              Annuler
+              {t('Annuler')}
             </button>
             <button type="submit" className="btn btn-primary" disabled={isLoading}>
-              {isLoading ? 'Enregistrement...' : (isEditing ? 'Enregistrer' : 'Créer')}
+              {isLoading ? t('Enregistrement...') : (isEditing ? t('Enregistrer') : t('Créer'))}
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 // Fonctions de calcul pur (sans effets de bord) - à tester unitairement
 
 import type { Food, Portion, NutritionResult, BalanceResult } from '../types';
+import { t } from '../i18n';
 
 /**
  * Calcule le sodium (mg) à partir du sel (g)
@@ -104,11 +105,11 @@ export function calculateDailyBalance(
 
   let message: string;
   if (remainingToObjective > 0) {
-    message = `Il faut brûler ${remainingToObjective} kcal de plus pour atteindre ${objective} kcal`;
+    message = t('Il faut brûler {n} kcal de plus pour atteindre {objectif} kcal', { n: remainingToObjective, objectif: objective });
   } else if (remainingToObjective < 0) {
-    message = `Il te reste ${Math.abs(remainingToObjective)} kcal à manger pour atteindre ${objective} kcal`;
+    message = t('Il te reste {n} kcal à manger pour atteindre {objectif} kcal', { n: Math.abs(remainingToObjective), objectif: objective });
   } else {
-    message = `Objectif atteint exactement !`;
+    message = t('Objectif atteint exactement !');
   }
 
   return {
@@ -127,11 +128,11 @@ export function generateCalculationDescription(
 ): string {
   switch (type) {
     case 'tare':
-      return `${values[0]} g − ${values[1]} g = ${values[0] - values[1]} g (tare)`;
+      return t('{a} g − {b} g = {r} g (tare)', { a: values[0], b: values[1], r: values[0] - values[1] });
     case 'difference':
-      return `${values[0]} g − ${values[1]} g = ${values[0] - values[1]} g (différence)`;
+      return t('{a} g − {b} g = {r} g (différence)', { a: values[0], b: values[1], r: values[0] - values[1] });
     case 'remaining':
-      return `${values[0]} g − ${values[1]} g = ${values[0] - values[1]} g mangés (restes)`;
+      return t('{a} g − {b} g = {r} g mangés (restes)', { a: values[0], b: values[1], r: values[0] - values[1] });
     default:
       return '';
   }

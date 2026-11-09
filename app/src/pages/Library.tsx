@@ -6,6 +6,7 @@ import { FoodForm } from '../components/FoodForm';
 import { showToast } from '../utils/toast';
 import { pickMessage } from '../utils/messages';
 import './Library.css';
+import { t } from '../i18n';
 
 export function Library() {
   const [foods, setFoods] = useState<Food[]>([]);
@@ -69,7 +70,7 @@ export function Library() {
       setEditingFood(null);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde de l\'aliment');
+      alert(t('Erreur lors de la sauvegarde de l\'aliment'));
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +89,7 @@ export function Library() {
       setShowDeleteConfirm(null);
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
-      alert('Erreur lors de la suppression de l\'aliment');
+      alert(t('Erreur lors de la suppression de l\'aliment'));
     }
   };
 
@@ -107,9 +108,9 @@ export function Library() {
   return (
     <div className="library-page">
       <div className="library-header">
-        <h1>📚 Bibliothèque</h1>
+        <h1>{t('📚 Bibliothèque')}</h1>
         <button className="btn btn-primary" onClick={handleCreateFood}>
-          + Nouvel aliment
+          {t('+ Nouvel aliment')}
         </button>
       </div>
 
@@ -118,20 +119,20 @@ export function Library() {
           className={`tab ${activeTab === 'mine' ? 'active' : ''}`}
           onClick={() => setActiveTab('mine')}
         >
-          Mes aliments ({foods.filter(f => f.source === 'étiquette').length})
+          {t('Mes aliments ({n})', { n: foods.filter(f => f.source === 'étiquette').length })}
         </button>
         <button
           className={`tab ${activeTab === 'generic' ? 'active' : ''}`}
           onClick={() => setActiveTab('generic')}
         >
-          Génériques ({foods.filter(f => f.source === 'estimation').length})
+          {t('Génériques ({n})', { n: foods.filter(f => f.source === 'estimation').length })}
         </button>
       </div>
 
       <div className="search-bar">
         <input
           type="text"
-          placeholder="🔍 Rechercher par nom ou marque..."
+          placeholder={t('🔍 Rechercher par nom ou marque...')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -142,17 +143,17 @@ export function Library() {
           <div className="empty-state">
             {searchQuery ? (
               <>
-                <p>Aucun aliment trouvé pour « {searchQuery} »</p>
+                <p>{t('Aucun aliment trouvé pour « {query} »', { query: searchQuery })}</p>
                 <button className="btn btn-secondary" onClick={() => setSearchQuery('')}>
-                  Effacer la recherche
+                  {t('Effacer la recherche')}
                 </button>
               </>
             ) : (
               <>
-                <p>Aucun aliment dans cette catégorie</p>
+                <p>{t('Aucun aliment dans cette catégorie')}</p>
                 {activeTab === 'mine' && (
                   <button className="btn btn-primary" onClick={handleCreateFood}>
-                    Créer mon premier aliment
+                    {t('Créer mon premier aliment')}
                   </button>
                 )}
               </>
@@ -186,20 +187,20 @@ export function Library() {
       {showDeleteConfirm && (
         <div className="food-form-overlay">
           <div className="confirm-modal">
-            <h3>Supprimer cet aliment ?</h3>
+            <h3>{t('Supprimer cet aliment ?')}</h3>
             <p>
               <strong>{showDeleteConfirm.name}</strong>
               {showDeleteConfirm.brand && ` (${showDeleteConfirm.brand})`}
             </p>
             <p className="warning">
-              ⚠️ Cette action est irréversible. L'historique qui utilise cet aliment ne sera pas supprimé.
+              {t('⚠️ Cette action est irréversible. L\'historique qui utilise cet aliment ne sera pas supprimé.')}
             </p>
             <div className="confirm-actions">
               <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(null)}>
-                Annuler
+                {t('Annuler')}
               </button>
               <button className="btn btn-danger" onClick={confirmDelete}>
-                Supprimer
+                {t('Supprimer')}
               </button>
             </div>
           </div>

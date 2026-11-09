@@ -4,6 +4,7 @@ import { MEAL_TYPES } from '../types';
 import { getFood } from '../db';
 import { convertPortionToGrams, calculateNutrition } from '../utils/calculations';
 import './EditJournalModal.css';
+import { t, unitLabel, macroLetter } from '../i18n';
 
 interface EditJournalModalProps {
   entry: JournalEntry;
@@ -62,7 +63,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
   const handleSave = () => {
     const qty = parseFloat(quantity);
     if (isNaN(qty) || qty <= 0) {
-      alert('Quantité invalide');
+      alert(t('Quantité invalide'));
       return;
     }
 
@@ -93,7 +94,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
   };
 
   const handleDelete = () => {
-    if (confirm('Supprimer cette entrée du journal ?')) {
+    if (confirm(t('Supprimer cette entrée du journal ?'))) {
       onDelete(entry.id);
     }
   };
@@ -102,7 +103,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
     <div className="modal-overlay">
       <div className="modal-content edit-journal-modal">
         <div className="modal-header">
-          <h3>Modifier l'entrée</h3>
+          <h3>{t('Modifier l\'entrée')}</h3>
           <button className="close-btn" onClick={onCancel}>×</button>
         </div>
 
@@ -112,7 +113,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
           </div>
 
           <div className="edit-field">
-            <label htmlFor="edit-time">Heure</label>
+            <label htmlFor="edit-time">{t('Heure')}</label>
             <input
               id="edit-time"
               type="time"
@@ -122,7 +123,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
           </div>
 
           <div className="edit-field">
-            <label htmlFor="edit-quantity">Quantité</label>
+            <label htmlFor="edit-quantity">{t('Quantité')}</label>
             <div className="quantity-input-group">
               <input
                 id="edit-quantity"
@@ -145,7 +146,7 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
           </div>
 
           <div className="edit-field">
-            <label htmlFor="edit-meal">Repas</label>
+            <label htmlFor="edit-meal">{t('Repas')}</label>
             <select
               id="edit-meal"
               value={selectedMeal}
@@ -153,16 +154,16 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
               className="meal-selector"
             >
               {MEAL_TYPES.map(meal => (
-                <option key={meal} value={meal}>{meal}</option>
+                <option key={meal} value={meal}>{t(meal)}</option>
               ))}
             </select>
           </div>
 
           {preview && (
             <div className="nutrition-preview">
-              <span className="preview-kcal">{preview.kcal} kcal</span>
+              <span className="preview-kcal">{preview.kcal} {unitLabel('kcal')}</span>
               <span className="preview-macros">
-                P {preview.protein}g · G {preview.carbs}g · L {preview.fat}g
+                {macroLetter('P')} {preview.protein}{unitLabel('g')} · {macroLetter('G')} {preview.carbs}{unitLabel('g')} · {macroLetter('L')} {preview.fat}{unitLabel('g')}
               </span>
             </div>
           )}
@@ -176,13 +177,13 @@ export function EditJournalModal({ entry, onSave, onDelete, onCancel }: EditJour
 
         <div className="modal-actions">
           <button className="btn btn-danger" onClick={handleDelete}>
-            🗑️ Supprimer
+            {t('🗑️ Supprimer')}
           </button>
           <button className="btn btn-secondary" onClick={onCancel}>
-            Annuler
+            {t('Annuler')}
           </button>
           <button className="btn btn-primary" onClick={handleSave}>
-            Enregistrer
+            {t('Enregistrer')}
           </button>
         </div>
       </div>

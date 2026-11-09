@@ -345,3 +345,14 @@
   background: var(--border-strong);
   border-radius: 50%;
 }
+
+/* La jauge et son échelle se lisent toujours de gauche à droite : le curseur est placé en pourcentage */
+.pace-gauge,
+.pace-scale {
+  direction: ltr;
+}
+
+/* Le graphique du poids garde le temps de gauche à droite */
+.weight-chart svg {
+  direction: ltr;
+}

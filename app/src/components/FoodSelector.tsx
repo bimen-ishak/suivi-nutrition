@@ -5,6 +5,7 @@ import { BarcodeScanner } from './BarcodeScanner';
 import { QuickEntry, type QuickEntryData } from './QuickEntry';
 import { GENERIC_FOODS, GENERIC_CATEGORIES, searchGenericFoods, type GenericFood } from '../data/genericFoods';
 import './FoodSelector.css';
+import { t, unitLabel } from '../i18n';
 
 export type SelectorTab = 'frequent' | 'oneoff' | 'scan' | 'search';
 
@@ -77,7 +78,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
   return (
     <div className="food-selector">
       <div className="selector-header">
-        <h2>Ajouter un aliment</h2>
+        <h2>{t('Ajouter un aliment')}</h2>
         <button className="close-btn" onClick={onClose}>×</button>
       </div>
 
@@ -86,25 +87,25 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
           className={`tab ${activeTab === 'frequent' ? 'active' : ''}`}
           onClick={() => setActiveTab('frequent')}
         >
-          ⭐ Fréquents
+          {t('⭐ Fréquents')}
         </button>
         <button
           className={`tab ${activeTab === 'oneoff' ? 'active' : ''}`}
           onClick={() => setActiveTab('oneoff')}
         >
-          ⚡ Ponctuel
+          {t('⚡ Ponctuel')}
         </button>
         <button
           className={`tab ${activeTab === 'scan' ? 'active' : ''}`}
           onClick={() => setActiveTab('scan')}
         >
-          📱 Scanner
+          {t('📱 Scanner')}
         </button>
         <button
           className={`tab ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => setActiveTab('search')}
         >
-          🔍 Rechercher
+          {t('🔍 Rechercher')}
         </button>
       </div>
 
@@ -113,14 +114,14 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
         {activeTab === 'frequent' && (
           <div className="frequent-tab">
             <div className="tab-header">
-              <h3>Aliments les plus utilisés</h3>
+              <h3>{t('Aliments les plus utilisés')}</h3>
             </div>
             {frequentFoods.length === 0 ? (
               <div className="empty-state">
-                <p>Aucun aliment utilisé pour le moment</p>
-                <p className="hint">Utilise l'onglet Rechercher pour trouver un aliment dans la base générique</p>
+                <p>{t('Aucun aliment utilisé pour le moment')}</p>
+                <p className="hint">{t('Utilise l\'onglet Rechercher pour trouver un aliment dans la base générique')}</p>
                 <button className="btn btn-primary" onClick={() => setActiveTab('search')}>
-                  🔍 Rechercher un aliment
+                  {t('🔍 Rechercher un aliment')}
                 </button>
               </div>
             ) : (
@@ -142,15 +143,15 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
         {activeTab === 'scan' && (
           <div className="scan-tab">
             <div className="tab-header">
-              <h3>Scanner un code-barres</h3>
+              <h3>{t('Scanner un code-barres')}</h3>
             </div>
             <div className="scan-cta">
               <div className="scan-icon">📱</div>
-              <p>Scanne l'emballage d'un produit</p>
+              <p>{t('Scanne l\'emballage d\'un produit')}</p>
               <button className="btn btn-primary btn-lg" onClick={() => setShowScanner(true)}>
-                🎥 Ouvrir la caméra
+                {t('🎥 Ouvrir la caméra')}
               </button>
-              <p className="hint">Si l'aliment est déjà dans ta bibliothèque, il sera proposé directement</p>
+              <p className="hint">{t('Si l\'aliment est déjà dans ta bibliothèque, il sera proposé directement')}</p>
             </div>
           </div>
         )}
@@ -161,7 +162,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
             <div className="search-input-container">
               <input
                 type="text"
-                placeholder="🔍 Rechercher un aliment..."
+                placeholder={t('🔍 Rechercher un aliment...')}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -179,7 +180,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                     className={`chip ${selectedCategory === null ? 'active' : ''}`}
                     onClick={() => setSelectedCategory(null)}
                   >
-                    Tous ({GENERIC_FOODS.length})
+                    {t('Tous ({n})', { n: GENERIC_FOODS.length })}
                   </button>
                   {GENERIC_CATEGORIES.map(cat => (
                     <button
@@ -187,7 +188,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                       className={`chip ${selectedCategory === cat ? 'active' : ''}`}
                       onClick={() => setSelectedCategory(cat)}
                     >
-                      {cat}
+                      {t(cat)}
                     </button>
                   ))}
                 </div>
@@ -201,8 +202,8 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                       onClick={() => onSelectGeneric(gf)}
                     >
                       <div className="generic-food-info">
-                        <span className="generic-name">{gf.name}</span>
-                        <span className="generic-kcal">{gf.kcal} kcal/100g</span>
+                        <span className="generic-name">{t(gf.name)}</span>
+                        <span className="generic-kcal">{gf.kcal} {unitLabel('kcal')}/100{unitLabel('g')}</span>
                       </div>
                       <span className="generic-add">+</span>
                     </div>
@@ -211,9 +212,9 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
               </>
             ) : !hasResults ? (
               <div className="empty-state">
-                <p>Aucun résultat pour « {searchQuery} »</p>
+                <p>{t('Aucun résultat pour « {query} »', { query: searchQuery })}</p>
                 <button className="btn btn-primary" onClick={onCreateNew}>
-                  Créer cet aliment
+                  {t('Créer cet aliment')}
                 </button>
               </div>
             ) : (
@@ -221,7 +222,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                 {/* Mes aliments */}
                 {personalResults.length > 0 && (
                   <>
-                    <h4 className="results-section-title">📚 Mes aliments</h4>
+                    <h4 className="results-section-title">{t('📚 Mes aliments')}</h4>
                     <div className="foods-list">
                       {personalResults.map(food => (
                         <div key={food.id} onClick={() => onSelectFood(food)}>
@@ -235,7 +236,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                 {/* Base générique */}
                 {genericResults.length > 0 && (
                   <>
-                    <h4 className="results-section-title">🌍 Base générique</h4>
+                    <h4 className="results-section-title">{t('🌍 Base générique')}</h4>
                     <div className="generic-foods-list">
                       {genericResults.map((gf, idx) => (
                         <div
@@ -244,8 +245,8 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                           onClick={() => onSelectGeneric(gf)}
                         >
                           <div className="generic-food-info">
-                            <span className="generic-name">{gf.name}</span>
-                            <span className="generic-kcal">{gf.kcal} kcal/100g</span>
+                            <span className="generic-name">{t(gf.name)}</span>
+                            <span className="generic-kcal">{gf.kcal} {unitLabel('kcal')}/100{unitLabel('g')}</span>
                           </div>
                           <span className="generic-add">+</span>
                         </div>
@@ -256,9 +257,9 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
 
                 {personalResults.length === 0 && genericResults.length > 0 && (
                   <div className="create-hint">
-                    <p>Pas dans ma bibliothèque ?</p>
+                    <p>{t('Pas dans ma bibliothèque ?')}</p>
                     <button className="btn btn-secondary" onClick={onCreateNew}>
-                      + Créer « {searchQuery} » manuellement
+                      {t('+ Créer « {query} » manuellement', { query: searchQuery })}
                     </button>
                   </div>
                 )}
@@ -272,7 +273,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
       {activeTab !== 'oneoff' && (
         <div className="selector-footer">
           <button className="btn btn-secondary btn-block" onClick={onCreateNew}>
-            + Créer un nouvel aliment
+            {t('+ Créer un nouvel aliment')}
           </button>
         </div>
       )}

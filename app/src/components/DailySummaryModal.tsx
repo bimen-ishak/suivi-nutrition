@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { DailySummary } from '../types';
 import { calculateSleepDuration } from '../utils/calculations';
 import './DailySummaryModal.css';
+import { t, unitLabel } from '../i18n';
 
 interface DailySummaryModalProps {
   date: string;
@@ -53,14 +54,14 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
     <div className="modal-overlay">
       <div className="modal-content daily-summary-modal">
         <div className="modal-header">
-          <h3>Bilan du jour</h3>
+          <h3>{t('Bilan du jour')}</h3>
           <button className="close-btn" onClick={onCancel}>×</button>
         </div>
 
         <div className="modal-body">
           {/* Calories brûlées */}
           <div className="summary-field">
-            <label htmlFor="calories-burned">Calories brûlées</label>
+            <label htmlFor="calories-burned">{t('Calories brûlées')}</label>
             <div className="input-with-unit">
               <input
                 id="calories-burned"
@@ -68,10 +69,10 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
                 inputMode="decimal"
                 value={caloriesBurned}
                 onChange={(e) => setCaloriesBurned(e.target.value)}
-                placeholder="Ex: 2500"
+                placeholder={t('Ex: 2500')}
                 autoFocus
               />
-              <span className="unit">kcal</span>
+              <span className="unit">{t('kcal')}</span>
             </div>
             <label className="checkbox-label">
               <input
@@ -79,13 +80,13 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
                 checked={caloriesBurnedProvisional}
                 onChange={(e) => setCaloriesBurnedProvisional(e.target.checked)}
               />
-              <span>Valeur provisoire</span>
+              <span>{t('Valeur provisoire')}</span>
             </label>
           </div>
 
           {/* Poids */}
           <div className="summary-field">
-            <label htmlFor="weight">Poids du matin</label>
+            <label htmlFor="weight">{t('Poids du matin')}</label>
             <div className="input-with-unit">
               <input
                 id="weight"
@@ -94,18 +95,18 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
                 step="0.1"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                placeholder="Ex: 75.5"
+                placeholder={t('Ex: 75.5')}
               />
-              <span className="unit">kg</span>
+              <span className="unit">{t('kg')}</span>
             </div>
           </div>
 
           {/* Sommeil */}
           <div className="summary-field">
-            <label>Sommeil</label>
+            <label>{t('Sommeil')}</label>
             <div className="sleep-inputs">
               <div className="sleep-input-group">
-                <label htmlFor="sleep-bedtime" className="sleep-label">Coucher</label>
+                <label htmlFor="sleep-bedtime" className="sleep-label">{t('Coucher')}</label>
                 <input
                   id="sleep-bedtime"
                   type="time"
@@ -114,7 +115,7 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
                 />
               </div>
               <div className="sleep-input-group">
-                <label htmlFor="sleep-wakeup" className="sleep-label">Lever</label>
+                <label htmlFor="sleep-wakeup" className="sleep-label">{t('Lever')}</label>
                 <input
                   id="sleep-wakeup"
                   type="time"
@@ -124,18 +125,18 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
               </div>
             </div>
             {sleepDuration !== null && (
-              <p className="sleep-duration">Durée: {sleepDuration}h</p>
+              <p className="sleep-duration">{t('Durée:')} {sleepDuration}{unitLabel('h')}</p>
             )}
           </div>
 
           {/* Notes */}
           <div className="summary-field">
-            <label htmlFor="notes">Notes</label>
+            <label htmlFor="notes">{t('Notes')}</label>
             <textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes optionnelles..."
+              placeholder={t('Notes optionnelles...')}
               rows={3}
             />
           </div>
@@ -143,10 +144,10 @@ export function DailySummaryModal({ date, existingSummary, onSave, onCancel }: D
 
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onCancel}>
-            Annuler
+            {t('Annuler')}
           </button>
           <button className="btn btn-primary" onClick={handleSubmit}>
-            Enregistrer
+            {t('Enregistrer')}
           </button>
         </div>
       </div>

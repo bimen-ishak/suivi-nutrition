@@ -11,6 +11,7 @@ import type { GenericFood } from '../data/genericFoods';
 import { showToast } from '../utils/toast';
 import { pickMessage } from '../utils/messages';
 import './AddFood.css';
+import { t } from '../i18n';
 
 interface AddFoodProps {
   onComplete?: () => void;
@@ -68,7 +69,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
       showToast(pickMessage('newFood'));
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'aliment générique:', error);
-      alert('Erreur lors de l\'ajout de l\'aliment');
+      alert(t('Erreur lors de l\'ajout de l\'aliment'));
     }
   };
 
@@ -103,7 +104,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
       showToast(pickMessage('newFood'));
     } catch (error) {
       console.error('Erreur lors de la création:', error);
-      alert('Erreur lors de la création de l\'aliment');
+      alert(t('Erreur lors de la création de l\'aliment'));
     }
   };
 
@@ -177,7 +178,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de l\'ajout au journal');
+      alert(t('Erreur lors de l\'ajout au journal'));
     }
   };
 
@@ -210,7 +211,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
       onComplete?.();
     } catch (error) {
       console.error('Erreur lors de l\'ajout ponctuel:', error);
-      alert('Erreur lors de l\'ajout au journal');
+      alert(t('Erreur lors de l\'ajout au journal'));
     }
   };
 

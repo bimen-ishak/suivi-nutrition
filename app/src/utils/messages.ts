@@ -1,7 +1,9 @@
 // Messages drôles de l'application, en français et en arabe égyptien
 // Le ton : direct, franc, taquin sur les choix d'aliments, jamais sur le corps ni la valeur de la personne.
 
-export type Language = 'fr' | 'ar-EG';
+import { getLanguage, setLanguage, isRtl, type Language } from '../i18n';
+
+export type { Language };
 
 export type MessageEvent =
   | 'newFood'
@@ -15,8 +17,6 @@ export type MessageEvent =
   | 'carbsOver'
   | 'sodiumOver'
   | 'missingBurned';
-
-const LANGUAGE_KEY = 'language';
 
 export const MESSAGES: Record<Language, Record<MessageEvent, string[]>> = {
   fr: {
@@ -106,7 +106,7 @@ export const MESSAGES: Record<Language, Record<MessageEvent, string[]>> = {
     ],
     healthImported: [
       'بيانات الصحة وصلت. على الأقل ساعتك بتشتغل هي.',
-      'المصروف اتجاب. كُل في سلام (شوية).',
+      'الحرق اتجاب. كُل في سلام (شوية).',
       'أرقام الصحة وصلت. مفيش غش.',
       'اتستورد! ساعتك تقدر ترتاح دلوقتي.'
     ],
@@ -144,25 +144,13 @@ export const MESSAGES: Record<Language, Record<MessageEvent, string[]>> = {
     missingBurned: [
       'نسيت تستورد الصحة امبارح. ساعتك اشتغلت على الفاضي.',
       'امبارح: سعرات الأكل موجودة والحرق مش لاقيينه. ريحة نسيان.',
-      'مصروف امبارح ناقص. الاختصار زعلان منك.'
+      'حرق امبارح ناقص. الاختصار زعلان منك.'
     ]
   }
 };
 
-export function getLanguage(): Language {
-  try {
-    const stored = localStorage.getItem(LANGUAGE_KEY);
-    return stored === 'ar-EG' ? 'ar-EG' : 'fr';
-  } catch {
-    return 'fr';
-  }
-}
-
-export function setLanguage(language: Language): void {
-  localStorage.setItem(LANGUAGE_KEY, language);
-}
-
-export const isRtl = (language: Language): boolean => language === 'ar-EG';
+// La langue est gérée par le module de traduction ; on la réexporte pour les appels existants
+export { getLanguage, setLanguage, isRtl };
 
 const hash = (seed: string) => {
   let value = 0;

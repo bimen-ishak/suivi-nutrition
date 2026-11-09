@@ -3,6 +3,7 @@ import type { BrowserMultiFormatReader as ZXingReader } from '@zxing/library';
 import { getFoodByBarcode } from '../db';
 import type { Food } from '../types';
 import './BarcodeScanner.css';
+import { t } from '../i18n';
 
 interface BarcodeScannerProps {
   onScanSuccess: (food: Food) => void;
@@ -71,11 +72,11 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
       } catch (err) {
         console.error('Erreur caméra:', err);
         if (err instanceof Error && err.name === 'NotAllowedError') {
-          setError('Accès à la caméra refusé. Autorise la caméra dans les réglages Safari.');
+          setError(t('Accès à la caméra refusé. Autorise la caméra dans les réglages Safari.'));
         } else if (err instanceof Error && err.name === 'NotFoundError') {
-          setError('Aucune caméra détectée');
+          setError(t('Aucune caméra détectée'));
         } else {
-          setError('Impossible d\'accéder à la caméra');
+          setError(t("Impossible d'accéder à la caméra"));
         }
         setLoading(false);
       }
@@ -98,15 +99,15 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
   return (
     <div className="barcode-scanner">
       <div className="scanner-header">
-        <button className="back-btn" onClick={onCancel}>← Retour</button>
-        <h2>Scanner un code-barres</h2>
+        <button className="back-btn" onClick={onCancel}>{t('← Retour')}</button>
+        <h2>{t('Scanner un code-barres')}</h2>
         <div style={{ width: 60 }}></div>
       </div>
 
       {error ? (
         <div className="scanner-error">
           <p>⚠️ {error}</p>
-          <p className="hint">Tu peux saisir le code manuellement ci-dessous</p>
+          <p className="hint">{t('Tu peux saisir le code manuellement ci-dessous')}</p>
         </div>
       ) : (
         <div className="video-container">
@@ -114,24 +115,24 @@ export function BarcodeScanner({ onScanSuccess, onScanNotFound, onCancel }: Barc
           <div className="scan-overlay">
             <div className="scan-frame"></div>
           </div>
-          {loading && <p className="scan-hint">Chargement de la caméra...</p>}
-          {scanning && !loading && <p className="scan-hint">Centre le code-barres, à 15-20 cm du téléphone</p>}
+          {loading && <p className="scan-hint">{t('Chargement de la caméra...')}</p>}
+          {scanning && !loading && <p className="scan-hint">{t('Centre le code-barres, à 15-20 cm du téléphone')}</p>}
         </div>
       )}
 
       <div className="manual-entry">
-        <p>Ou saisis le code manuellement :</p>
+        <p>{t('Ou saisis le code manuellement :')}</p>
         <div className="manual-input-group">
           <input
             type="text"
             inputMode="numeric"
-            placeholder="Code-barres (13 chiffres)"
+            placeholder={t('Code-barres (13 chiffres)')}
             value={manualCode}
             onChange={(e) => setManualCode(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleManualSubmit()}
           />
           <button className="btn btn-primary" onClick={handleManualSubmit} disabled={!manualCode.trim()}>
-            OK
+            {t('OK')}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 // Calculs de suivi de sèche, sans effets de bord
 import type { CutHistoryDay, DailySummary } from '../types';
+import { t } from '../i18n';
 
 const DAY_MS = 86_400_000;
 const KCAL_PER_KG = 7700;
@@ -101,15 +102,15 @@ export function getWeeklyRate(points: WeightPoint[]): WeeklyRate | null {
 /** 0,5 à 1 % du poids par semaine est le repère courant pour préserver le muscle */
 export function getRateVerdict(percentPerWeek: number): RateVerdict {
   if (percentPerWeek >= -0.1) {
-    return { level: 'warning', message: 'Ton poids ne baisse plus : regarde tes calories de la semaine.' };
+    return { level: 'warning', message: t('Ton poids ne baisse plus : regarde tes calories de la semaine.') };
   }
   if (percentPerWeek > -0.5) {
-    return { level: 'neutral', message: 'Rythme doux : ça descend, sans forcer.' };
+    return { level: 'neutral', message: t('Rythme doux : ça descend, sans forcer.') };
   }
   if (percentPerWeek >= -1) {
-    return { level: 'success', message: 'Bon rythme pour perdre du gras en gardant ton muscle.' };
+    return { level: 'success', message: t('Bon rythme pour perdre du gras en gardant ton muscle.') };
   }
-  return { level: 'warning', message: 'Perte rapide : tu risques de perdre du muscle, mange un peu plus.' };
+  return { level: 'warning', message: t('Perte rapide : tu risques de perdre du muscle, mange un peu plus.') };
 }
 
 /** Dépense réelle : ce qui est mangé, corrigé par ce que le poids a réellement fait */

@@ -1,4 +1,6 @@
 // Lecture de photos d'un produit par l'IA Gemini, avec la clé personnelle de l'utilisateur
+import { t } from '../i18n';
+
 const KEY_STORAGE = 'geminiApiKey';
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 // Si un modèle disparaît (erreur 404), on essaie le suivant
@@ -174,12 +176,12 @@ export function parseLabelResponse(text: string): LabelResult | null {
 
 const describeFailure = (status: number): string => {
   if (status === 400 || status === 401 || status === 403) {
-    return 'Clé refusée par Google. Vérifie-la dans Paramètres.';
+    return t('Clé refusée par Google. Vérifie-la dans Paramètres.');
   }
   if (status === 429) {
-    return 'Limite gratuite atteinte pour le moment. Réessaie dans quelques minutes, ou remplis à la main.';
+    return t('Limite gratuite atteinte pour le moment. Réessaie dans quelques minutes, ou remplis à la main.');
   }
-  return `Google n'a pas répondu (erreur ${status}). Réessaie dans un instant.`;
+  return t("Google n'a pas répondu (erreur {status}). Réessaie dans un instant.", { status });
 };
 
 const toInlineData = (imageDataUrl: string) => {
@@ -209,7 +211,7 @@ export async function readFoodPhotos(
         body
       });
     } catch {
-      throw new LabelReadError('Pas de connexion à Internet. Réessaie avec du réseau.');
+      throw new LabelReadError(t('Pas de connexion à Internet. Réessaie avec du réseau.'));
     }
 
     if (response.status === 404) {
@@ -224,7 +226,7 @@ export async function readFoodPhotos(
     const text = payload.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     const result = parseLabelResponse(text);
     if (!result) {
-      throw new LabelReadError('Je ne vois rien d\'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel.');
+      throw new LabelReadError(t("Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel."));
     }
     return result;
   }

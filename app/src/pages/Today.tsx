@@ -11,6 +11,7 @@ import { parseHealthText, applyHealthToSummary } from '../utils/health';
 import { showToast } from '../utils/toast';
 import { pickMessage, getLanguage, isRtl, type MessageEvent } from '../utils/messages';
 import './Today.css';
+import { t, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
@@ -103,7 +104,7 @@ export function Today({ onAddFood }: TodayProps) {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('fr-FR', {
+    return new Intl.DateTimeFormat(locale(), {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -114,28 +115,28 @@ export function Today({ onAddFood }: TodayProps) {
   const getBalanceMessage = () => {
     if (!dailySummary?.caloriesBurned) {
       return {
-        message: 'Saisis ta dépense pour voir le bilan',
+        message: t('Saisis ta dépense pour voir le bilan'),
         type: 'neutral'
       };
     }
 
     const net = totals.caloriesEaten - dailySummary.caloriesBurned;
     const remainingToObjective = net - objective;
-    const objLabel = objective > 0 ? `+${objective}` : `${objective}`;
+    const objLabel = ltr(objective > 0 ? `+${objective}` : `${objective}`);
 
     if (remainingToObjective > 0) {
       return {
-        message: `Il faut brûler ${remainingToObjective} kcal de plus pour atteindre ${objLabel}`,
+        message: t('Il faut brûler {n} kcal de plus pour atteindre {objectif}', { n: remainingToObjective, objectif: objLabel }),
         type: 'warning'
       };
     } else if (remainingToObjective < 0) {
       return {
-        message: `Il te reste ${Math.abs(remainingToObjective)} kcal à manger pour atteindre ${objLabel}`,
+        message: t('Il te reste {n} kcal à manger pour atteindre {objectif}', { n: Math.abs(remainingToObjective), objectif: objLabel }),
         type: 'success'
       };
     } else {
       return {
-        message: 'Objectif atteint exactement ! 🎯',
+        message: t('Objectif atteint exactement ! 🎯'),
         type: 'success'
       };
     }
@@ -149,7 +150,7 @@ export function Today({ onAddFood }: TodayProps) {
       setShowSummaryModal(false);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du bilan:', error);
-      alert('Erreur lors de la sauvegarde');
+      alert(t('Erreur lors de la sauvegarde'));
     }
   };
 
@@ -176,22 +177,22 @@ export function Today({ onAddFood }: TodayProps) {
       const existing = targetDate === today ? dailySummary : await getDailySummary(targetDate);
       const summary = applyHealthToSummary(existing ?? undefined, targetDate, data, undefined, today);
       const found = [
-        data.weight !== undefined && `poids ${data.weight} kg`,
-        summary.caloriesBurned !== undefined && `dépense ${summary.caloriesBurned} kcal`
+        data.weight !== undefined && `${t('poids')} ${data.weight} ${unitLabel('kg')}`,
+        summary.caloriesBurned !== undefined && `${t('dépense')} ${summary.caloriesBurned} ${unitLabel('kcal')}`
       ].filter(Boolean);
 
       if (found.length === 0) {
-        alert('Je ne trouve rien de Santé dans ce qui est copié. Lance d\'abord ton raccourci « Santé → Suivi », puis reviens ici.');
+        alert(t('Je ne trouve rien de Santé dans ce qui est copié. Lance d\'abord ton raccourci « Santé → Suivi », puis reviens ici.'));
         return;
       }
 
       await updateDailySummary(summary);
       await loadTodayData();
-      const when = targetDate === today ? '' : ` pour le ${targetDate.split('-').reverse().join('/')}`;
-      showToast(`✅ Importé${when} : ${found.join(', ')}\n${pickMessage('healthImported')}`);
+      const when = targetDate === today ? '' : ` ${t('pour le {date}', { date: targetDate.split('-').reverse().join('/') })}`;
+      showToast(`${t('✅ Importé')}${when} : ${found.join(', ')}\n${pickMessage('healthImported')}`);
     } catch (error) {
       console.error('Erreur lors de l\'import depuis Santé:', error);
-      alert('Impossible de lire ce qui est copié. Autorise le collage si iPhone te le demande, puis réessaie.');
+      alert(t('Impossible de lire ce qui est copié. Autorise le collage si iPhone te le demande, puis réessaie.'));
     }
   };
 
@@ -202,7 +203,7 @@ export function Today({ onAddFood }: TodayProps) {
       setEditingEntry(null);
     } catch (error) {
       console.error('Erreur lors de la modification:', error);
-      alert('Erreur lors de la modification');
+      alert(t('Erreur lors de la modification'));
     }
   };
 
@@ -213,7 +214,7 @@ export function Today({ onAddFood }: TodayProps) {
       setEditingEntry(null);
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
-      alert('Erreur lors de la suppression');
+      alert(t('Erreur lors de la suppression'));
     }
   };
 
@@ -278,13 +279,13 @@ export function Today({ onAddFood }: TodayProps) {
           <p>{pickMessage('missingBurned', language, yesterday)}</p>
           <div className="missing-actions">
             <button className="btn btn-primary btn-sm" onClick={handleImportHealth}>
-              ❤️ Importer depuis Santé
+              {t('❤️ Importer depuis Santé')}
             </button>
             <button className="btn btn-secondary btn-sm" onClick={() => openSummary(yesterday)}>
-              ✏️ Saisir à la main
+              {t('✏️ Saisir à la main')}
             </button>
             <button className="btn btn-secondary btn-sm" onClick={dismissMissing}>
-              Plus tard
+              {t('Plus tard')}
             </button>
           </div>
         </section>
@@ -293,14 +294,14 @@ export function Today({ onAddFood }: TodayProps) {
       {/* Carte Bilan du jour */}
       <section className="hero-card">
         <div className="hero-top">
-          <h2>Bilan du jour</h2>
+          <h2>{t('Bilan du jour')}</h2>
           {(dailySummary?.weight || dailySummary?.sleepDuration) && (
             <div className="secondary-data">
               {dailySummary.weight && (
-                <span className="data-badge">⚖️ {dailySummary.weight} kg</span>
+                <span className="data-badge">⚖️ {dailySummary.weight} {unitLabel('kg')}</span>
               )}
               {dailySummary.sleepDuration && (
-                <span className="data-badge">😴 {dailySummary.sleepDuration}h</span>
+                <span className="data-badge">😴 {dailySummary.sleepDuration}{unitLabel('h')}</span>
               )}
             </div>
           )}
@@ -319,9 +320,9 @@ export function Today({ onAddFood }: TodayProps) {
           <div className="stat-tile">
             <span className="stat-tile-value">{dailySummary?.caloriesBurned ?? '?'}</span>
             <span className="stat-tile-label">
-              brûlées
+              {t('brûlées')}
               {dailySummary?.caloriesBurnedProvisional && (
-                <span className="provisional-badge">provisoire</span>
+                <span className="provisional-badge">{t('provisoire')}</span>
               )}
             </span>
           </div>
@@ -329,45 +330,45 @@ export function Today({ onAddFood }: TodayProps) {
             <span className={`stat-tile-value ${remaining !== null && remaining < 0 ? 'negative' : ''}`}>
               {remaining !== null ? Math.abs(remaining) : '?'}
             </span>
-            <span className="stat-tile-label">{remaining !== null && remaining < 0 ? 'en trop' : 'restant'}</span>
+            <span className="stat-tile-label">{remaining !== null && remaining < 0 ? t('en trop') : t('restant')}</span>
           </div>
           <div className="stat-tile">
             <span className="stat-tile-value">
-              {net !== null ? `${net > 0 ? '+' : ''}${net}` : '?'}
+              {net !== null ? ltr(`${net > 0 ? '+' : ''}${net}`) : '?'}
             </span>
-            <span className="stat-tile-label">bilan net</span>
+            <span className="stat-tile-label">{t('bilan net')}</span>
           </div>
         </div>
 
         <div className="action-row">
           <button className="btn btn-primary" onClick={() => openSummary(today)}>
-            {dailySummary?.caloriesBurned ? '✏️ Modifier le bilan' : '📊 Saisir ma dépense'}
+            {dailySummary?.caloriesBurned ? t('✏️ Modifier le bilan') : t('📊 Saisir ma dépense')}
           </button>
           <button className="btn btn-secondary" onClick={handleImportHealth}>
-            ❤️ Importer depuis Santé
+            {t('❤️ Importer depuis Santé')}
           </button>
         </div>
       </section>
 
       {/* Macros et minéraux */}
       <section className="macro-grid">
-        <MacroCard label="Protéines" kind="protein" value={totals.protein} goal={proteinGoal} unit="g" />
-        <MacroCard label="Glucides" kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit />
-        <MacroCard label="Lipides" kind="fat" value={totals.fat} goal={70} unit="g" />
-        <MacroCard label="Sodium" kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit />
-        <MacroCard label="Potassium" kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" wide />
+        <MacroCard label={t('Protéines')} kind="protein" value={totals.protein} goal={proteinGoal} unit="g" />
+        <MacroCard label={t('Glucides')} kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit />
+        <MacroCard label={t('Lipides')} kind="fat" value={totals.fat} goal={70} unit="g" />
+        <MacroCard label={t('Sodium')} kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit />
+        <MacroCard label={t('Potassium')} kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" wide />
         <p className="macro-note">
-          Sodium et potassium ne comptent que les aliments où ils sont renseignés.
+          {t('Sodium et potassium ne comptent que les aliments où ils sont renseignés.')}
         </p>
       </section>
 
       {/* Carte Aliments du jour */}
       <div className="foods-card">
-        <h2>Aliments du jour</h2>
+        <h2>{t('Aliments du jour')}</h2>
 
         {journalEntries.length === 0 ? (
           <div className="empty-journal">
-            <p>Aucun aliment enregistré aujourd'hui</p>
+            <p>{t('Aucun aliment enregistré aujourd\'hui')}</p>
           </div>
         ) : (
           <div className="journal-by-meal">
@@ -383,39 +384,39 @@ export function Today({ onAddFood }: TodayProps) {
                 return (
                   <div key={meal} className="meal-section">
                     <div className="meal-header">
-                      <h3>{meal}</h3>
-                      <span className="meal-total">{mealTotal} kcal</span>
+                      <h3>{t(meal)}</h3>
+                      <span className="meal-total">{mealTotal} {unitLabel('kcal')}</span>
                     </div>
                     <div className="journal-list">
                       {entries.map(entry => (
                         <div key={entry.id} className="journal-entry">
                           <div className="entry-time">
-                            {entry.time} · {entry.meal}
+                            {entry.time} · {t(entry.meal)}
                           </div>
                           <div className="entry-main">
                             <div className="entry-food">
                               <strong>{entry.foodName}</strong>
                               <span className="entry-quantity">
-                                {entry.quantity}{entry.unit}
+                                {entry.quantity}{displayUnit(entry.unit)}
                                 {entry.calculation && (
                                   <span className="calculation-note"> · {entry.calculation.description}</span>
                                 )}
                               </span>
                             </div>
-                            <div className="entry-kcal">{entry.kcal} kcal</div>
+                            <div className="entry-kcal">{entry.kcal} {unitLabel('kcal')}</div>
                           </div>
                           <div className="entry-macros">
-                            P {Math.round(entry.protein * 10) / 10}g ·
-                            G {Math.round(entry.carbs * 10) / 10}g ·
-                            L {Math.round(entry.fat * 10) / 10}g
+                            {macroLetter('P')} {Math.round(entry.protein * 10) / 10}{unitLabel('g')} ·
+                            {macroLetter('G')} {Math.round(entry.carbs * 10) / 10}{unitLabel('g')} ·
+                            {macroLetter('L')} {Math.round(entry.fat * 10) / 10}{unitLabel('g')}
                           </div>
                           <div className="entry-actions">
-                            <button className="btn-icon" title="Modifier" onClick={() => setEditingEntry(entry)}>✏️</button>
+                            <button className="btn-icon" title={t('Modifier')} onClick={() => setEditingEntry(entry)}>✏️</button>
                             <button
                               className="btn-icon"
-                              title="Supprimer"
+                              title={t('Supprimer')}
                               onClick={() => {
-                                if (confirm('Supprimer cette entrée ?')) {
+                                if (confirm(t('Supprimer cette entrée ?'))) {
                                   handleDeleteEntry(entry.id);
                                 }
                               }}
@@ -435,7 +436,7 @@ export function Today({ onAddFood }: TodayProps) {
       {/* Bouton principal "Ajouter" */}
       <div className="fab-bar">
         <button className="fab" onClick={onAddFood}>
-          + Ajouter un aliment
+          {t('+ Ajouter un aliment')}
         </button>
       </div>
     </div>

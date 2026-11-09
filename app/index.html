@@ -11,6 +11,13 @@
       try {
         if (localStorage.getItem('theme') === 'halloween') document.documentElement.dataset.theme = 'halloween';
       } catch (e) {}
+      // Langue et sens d'écriture avant l'affichage, pour éviter un flash de gauche à droite
+      try {
+        if (localStorage.getItem('language') === 'ar-EG') {
+          document.documentElement.lang = 'ar-EG';
+          document.documentElement.dir = 'rtl';
+        }
+      } catch (e) {}
     </script>
     <title>Suivi Nutrition</title>
   </head>
