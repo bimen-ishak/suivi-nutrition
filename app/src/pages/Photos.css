@@ -190,3 +190,14 @@
   text-align: center;
   color: #ddd;
 }
+
+.photo-viewer-bar .photo-replace {
+  padding: 8px 12px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+}
+
+.photo-viewer-bar .photo-replace.disabled {
+  opacity: 0.6;
+}

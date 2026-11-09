@@ -32,19 +32,21 @@ export function Photos() {
     loadPhotos();
   }, []);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>, targetDate: string = date) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
 
-    const exists = photos.some(p => p.date === date);
-    if (exists && !confirm(t('Remplacer la photo du {date} ?', { date: formatDate(date) }))) return;
+    const exists = photos.some(p => p.date === targetDate);
+    if (exists && !confirm(t('Remplacer la photo du {date} ?', { date: formatDate(targetDate) }))) return;
 
     setSaving(true);
     try {
       const image = await compressPhoto(file);
-      await savePhoto({ date, image, createdAt: new Date().toISOString() });
+      const photo = { date: targetDate, image, createdAt: new Date().toISOString() };
+      await savePhoto(photo);
       await loadPhotos();
+      setViewing(current => (current && current.date === targetDate ? photo : current));
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la photo:', error);
       alert(t('Impossible d\'enregistrer cette photo'));
@@ -82,6 +84,10 @@ export function Photos() {
       <div className="photo-viewer">
         <div className="photo-viewer-bar">
           <button onClick={() => setViewing(null)}>{t('← Retour')}</button>
+          <label className={`photo-replace ${saving ? 'disabled' : ''}`}>
+            {saving ? t('Enregistrement...') : t('Remplacer cette photo')}
+            <input type="file" accept="image/*" onChange={(e) => handleFile(e, viewing.date)} disabled={saving} hidden />
+          </label>
           <button className="photo-delete" onClick={() => handleDelete(viewing)}>{t('Supprimer')}</button>
         </div>
 

@@ -168,6 +168,7 @@ export const AR: Record<string, ArabicEntry> = {
   'Photo suivante': 'الصورة اللي بعدها',
   'Jour': 'اليوم',
   'Enregistrement...': 'بيحفظ...',
+  'Remplacer cette photo': 'غيّر الصورة دي',
   'Remplacer la photo': 'بدّل الصورة',
   '+ Ajouter la photo du jour': '+ ضيف صورة النهارده',
   '+ Ajouter la photo': '+ ضيف الصورة',
