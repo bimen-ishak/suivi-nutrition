@@ -402,6 +402,7 @@ export const AR: Record<string, ArabicEntry> = {
   'Clé refusée par Google. Vérifie-la dans Paramètres.': 'جوجل رفضت المفتاح. راجعه في الإعدادات.',
   'Limite gratuite atteinte pour le moment. Réessaie dans quelques minutes, ou remplis à la main.': 'الحد المجاني خلص دلوقتي. جرّب كمان شوية، أو اكتب بإيدك.',
   "Google n'a pas répondu (erreur {status}). Réessaie dans un instant.": 'جوجل مردتش (خطأ {status}). جرّب كمان لحظة.',
+  'Google met trop de temps à répondre. Réessaie, ou remplis à la main.': 'جوجل بتتأخر في الرد. جرّب تاني، أو اكتب بإيدك.',
   'Pas de connexion à Internet. Réessaie avec du réseau.': 'مفيش إنترنت. جرّب لما يبقى فيه شبكة.',
   "Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel.": 'مش شايف حاجة تنفع في الصور دي. صوّر المنتج على الميزان أو جدول القيم الغذائية كويس.',
 

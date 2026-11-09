@@ -4,6 +4,8 @@ import { t } from '../i18n';
 const KEY_STORAGE = 'geminiApiKey';
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 // Si un modèle disparaît (erreur 404), on essaie le suivant
+// Au-delà, on abandonne plutôt que de laisser l'écran tourner
+const REQUEST_TIMEOUT_MS = 45_000;
 const MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
 
 const PROMPT = `Tu analyses 1 à 3 photos d'un produit alimentaire ou d'un repas : le produit posé sur une balance, son étiquette nutritionnelle, son emballage.
@@ -57,7 +59,7 @@ export interface LabelResult {
 
 export class LabelReadError extends Error {}
 
-type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{
+type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string; signal?: AbortSignal }) => Promise<{
   ok: boolean;
   status: number;
   json: () => Promise<unknown>;
@@ -213,9 +215,16 @@ export async function readFoodPhotos(
   apiKey: string,
   fetchImpl: FetchLike = fetch as unknown as FetchLike
 ): Promise<LabelResult> {
-  const body = JSON.stringify({
-    contents: [{ parts: [{ text: PROMPT }, ...imageDataUrls.map(toInlineData)] }],
-    generationConfig: { responseMimeType: 'application/json', temperature: 0 }
+  const contents = [{ parts: [{ text: PROMPT }, ...imageDataUrls.map(toInlineData)] }];
+  // Les modèles 2.5 « réfléchissent » avant de répondre, ce qui double le temps d'attente : on coupe cette étape
+  const bodyFor = (model: string) => JSON.stringify({
+    contents,
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0,
+      maxOutputTokens: 600,
+      ...(model.startsWith('gemini-2.5') ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+    }
   });
 
   let lastStatus = 0;
@@ -225,9 +234,13 @@ export async function readFoodPhotos(
       response = await fetchImpl(`${API_BASE}/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body
+        body: bodyFor(model),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'TimeoutError') {
+        throw new LabelReadError(t("Google met trop de temps à répondre. Réessaie, ou remplis à la main."));
+      }
       throw new LabelReadError(t('Pas de connexion à Internet. Réessaie avec du réseau.'));
     }
 
