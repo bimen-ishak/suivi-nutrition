@@ -10,8 +10,8 @@ interface LabelScanButtonProps {
 }
 
 // Une étiquette est petite : on garde plus de détails que pour une photo de journée
-const PHOTO_SIZE = 1280;
-const PHOTO_QUALITY = 0.8;
+const PHOTO_SIZE = 1600;
+const PHOTO_QUALITY = 0.85;
 const MAX_PHOTOS = 3;
 
 const describe = (result: LabelResult): string => {
