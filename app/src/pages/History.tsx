@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getCutHistoryDay, getJournalEntriesByDate, getDailySummary, recalculateDailySummary, updateDailySummary } from '../db';
+import { getCutHistoryDay, getJournalEntriesByDate, getDailySummary, recalculateDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry, putJournalEntry, setImportedDayKcal } from '../db';
+import { EditJournalModal } from '../components/EditJournalModal';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import type { JournalEntry, DailySummary } from '../types';
+import { ONE_OFF_FOOD_ID } from '../types';
 import { CutCard } from '../components/CutCard';
 import { importedDayToView } from '../utils/cut';
 import './History.css';
@@ -27,6 +29,9 @@ export function History() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editingSummary, setEditingSummary] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
+  const [editingTotal, setEditingTotal] = useState(false);
+  const [totalInput, setTotalInput] = useState('');
 
   useEffect(() => {
     loadHistory();
@@ -115,6 +120,57 @@ export function History() {
     return groups;
   };
 
+  const adjustmentId = (date: string) => `ajustement-${date}`;
+
+  // Corrige le total de calories d'un jour : tout le reste (Ma sèche, bilan) se recalcule seul
+  const saveTotal = async (day: DayData) => {
+    const target = Math.round(parseFloat(totalInput));
+    if (!Number.isFinite(target) || target < 0) return;
+    if (day.entries.length === 0 && day.imported) {
+      await setImportedDayKcal(day.date, target);
+    } else {
+      const others = day.entries.filter(e => e.id !== adjustmentId(day.date));
+      const base = others.reduce((sum, e) => sum + e.kcal, 0);
+      const diff = target - base;
+      if (diff === 0) {
+        await deleteJournalEntry(adjustmentId(day.date));
+      } else {
+        const now = new Date().toISOString();
+        await putJournalEntry({
+          id: adjustmentId(day.date),
+          date: day.date,
+          time: '12:00',
+          meal: 'Repas',
+          foodId: ONE_OFF_FOOD_ID,
+          foodName: 'Ajustement manuel',
+          foodSource: 'estimation',
+          quantity: 1,
+          unit: 'g',
+          kcal: diff,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+          createdAt: now,
+          updatedAt: now
+        });
+      }
+    }
+    await loadHistory();
+    setEditingTotal(false);
+  };
+
+  const handleSaveEntry = async (updated: JournalEntry) => {
+    await updateJournalEntry(updated.id, updated);
+    await loadHistory();
+    setEditingEntry(null);
+  };
+
+  const handleDeleteEntry = async (id: string) => {
+    await deleteJournalEntry(id);
+    await loadHistory();
+    setEditingEntry(null);
+  };
+
   if (loading) {
     return (
       <div className="history-page">
@@ -132,6 +188,43 @@ export function History() {
     const net = getNetBalance(day);
 
     // Saisie à la main de la dépense, du poids ou du sommeil d'un jour passé
+    if (editingEntry) {
+      return (
+        <EditJournalModal
+          entry={editingEntry}
+          onSave={handleSaveEntry}
+          onDelete={handleDeleteEntry}
+          onCancel={() => setEditingEntry(null)}
+        />
+      );
+    }
+
+    if (editingTotal) {
+      return (
+        <div className="history-page">
+          <div className="history-header">
+            <button className="back-btn" onClick={() => setEditingTotal(false)}>{t('← Retour')}</button>
+            <h1>{t('Corriger les calories mangées')}</h1>
+          </div>
+          <div className="day-balance-card">
+            <p className="total-edit-hint">
+              {t('Entre le total de la journée. Le reste (bilan, Ma sèche) se recalcule tout seul.')}
+            </p>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              autoFocus
+              value={totalInput}
+              onChange={(e) => setTotalInput(e.target.value)}
+              placeholder={t('kcal mangées')}
+            />
+            <button className="btn btn-primary day-edit-btn" onClick={() => saveTotal(day)}>{t('Enregistrer')}</button>
+          </div>
+        </div>
+      );
+    }
+
     if (editingSummary) {
       return (
         <DailySummaryModal
@@ -202,6 +295,15 @@ export function History() {
             </div>
           )}
 
+          <button
+            className="btn btn-secondary day-edit-btn"
+            onClick={() => {
+              setTotalInput(day.imported && !day.imported.hasCalories ? '' : String(day.totals.caloriesEaten));
+              setEditingTotal(true);
+            }}
+          >
+            {ti('✏️ Corriger les calories mangées')}
+          </button>
           <button className="btn btn-primary day-edit-btn" onClick={() => setEditingSummary(true)}>
             {day.summary?.caloriesBurned ? ti('✏️ Modifier le bilan') : ti('📊 Saisir ma dépense')}
           </button>
@@ -222,10 +324,31 @@ export function History() {
                 <div key={entry.id} className="history-entry">
                   <span className="entry-time">{entry.time}</span>
                   <div className="entry-info">
-                    <strong>{entry.foodName}</strong>
-                    <span className="entry-qty">{entry.quantity}{displayUnit(entry.unit)}</span>
+                    <strong>{entry.id.startsWith('ajustement-') ? t(entry.foodName) : entry.foodName}</strong>
+                    {!entry.id.startsWith('ajustement-') && (
+                      <span className="entry-qty">{entry.quantity}{displayUnit(entry.unit)}</span>
+                    )}
                   </div>
-                  <span className="entry-kcal">{entry.kcal} {unitLabel('kcal')}</span>
+                  <span className="entry-kcal">{ltr(`${entry.kcal}`)} {unitLabel('kcal')}</span>
+                  <button
+                    className="entry-action"
+                    aria-label={t('Modifier')}
+                    onClick={() => {
+                      if (entry.id.startsWith('ajustement-')) {
+                        setTotalInput(String(day.totals.caloriesEaten));
+                        setEditingTotal(true);
+                      } else {
+                        setEditingEntry(entry);
+                      }
+                    }}
+                  ><Icon name="pencil" /></button>
+                  <button
+                    className="entry-action"
+                    aria-label={t('Supprimer')}
+                    onClick={() => {
+                      if (window.confirm(t('Supprimer cet aliment ?'))) handleDeleteEntry(entry.id);
+                    }}
+                  ><Icon name="trash" /></button>
                 </div>
               ))}
             </div>

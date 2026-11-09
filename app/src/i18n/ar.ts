@@ -129,6 +129,10 @@ export const AR: Record<string, ArabicEntry> = {
   // --- Historique
   'Chargement...': 'بيحمّل...',
   '← Retour': '→ رجوع',
+  'Corriger les calories mangées': 'صحّح السعرات المأكولة',
+  '✏️ Corriger les calories mangées': '✏️ صحّح السعرات المأكولة',
+  'Entre le total de la journée. Le reste (bilan, Ma sèche) se recalcule tout seul.': 'اكتب إجمالي اليوم. الباقي (الحصيلة، رحلة التنشيف) بيتحسب لوحده.',
+  'Ajustement manuel': 'تعديل يدوي',
   'Bilan': 'الملخص',
   'kcal brûlées': 'سعرة محروقة',
   'bilan net (kcal)': 'الصافي (سعرة)',

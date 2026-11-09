@@ -302,3 +302,31 @@
   width: 100%;
   margin-top: 16px;
 }
+
+.entry-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--text-3);
+  background: var(--surface-soft);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.entry-action .icon {
+  margin: 0;
+}
+
+.entry-action:active {
+  transform: scale(0.95);
+}
+
+.total-edit-hint {
+  margin-bottom: 18px;
+  font-size: 0.9rem;
+  color: var(--text-2);
+}

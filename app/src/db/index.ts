@@ -146,6 +146,16 @@ export async function deleteJournalEntry(id: string): Promise<void> {
   await db.journal.delete(id);
 }
 
+/** Ajoute ou remplace une entrée du journal (sans toucher aux fréquences) */
+export async function putJournalEntry(entry: JournalEntry): Promise<void> {
+  await db.journal.put(entry);
+}
+
+/** Corrige les calories mangées d'un jour importé, qui n'a que des totaux */
+export async function setImportedDayKcal(date: string, kcal: number): Promise<void> {
+  await db.cutHistory.update(date, { kcal });
+}
+
 export async function getJournalEntry(id: string): Promise<JournalEntry | undefined> {
   return db.journal.get(id);
 }
