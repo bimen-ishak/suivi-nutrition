@@ -9,7 +9,10 @@
     <script>
       // Applique le thème avant l'affichage, pour éviter un flash de l'autre couleur
       try {
-        if (localStorage.getItem('theme') === 'halloween') document.documentElement.dataset.theme = 'halloween';
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0F1319');
+        }
       } catch (e) {}
       // Langue et sens d'écriture avant l'affichage, pour éviter un flash de gauche à droite
       try {

@@ -85,57 +85,45 @@ h2 {
   color: var(--text);
 }
 
-/* ===== Thème Halloween : version douce, parchemin, citrouille et violet ===== */
-:root[data-theme='halloween'] {
-  --bg: #f6efe6;
-  --surface: #fffaf3;
-  --surface-soft: #f0e6d9;
+/* ===== Thème sombre : même identité, fonds bleu nuit et accent cobalt éclairci ===== */
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-  --text: #2f2733;
-  --text-2: #51475a;
-  --text-3: #655b69;
+  --bg: #0f1319;
+  --surface: #181d26;
+  --surface-soft: #222a35;
 
-  --border: #e9dccb;
-  --border-strong: #d9c8b0;
+  --text: #e8ecf2;
+  --text-2: #b4bdca;
+  --text-3: #919cab;
 
-  /* Citrouille brûlée */
-  --primary: #b4531a;
-  --primary-strong: #964512;
-  --primary-soft: #f8e9dc;
-  --primary-border: #efd2b8;
+  --border: #2a323f;
+  --border-strong: #3a4454;
 
-  /* Violet sorcière, réservé aux accents */
-  --accent: #5b3a7a;
+  --primary: #4f6df0;
+  --primary-strong: #93a9ff;
+  --primary-soft: #1d2748;
+  --primary-border: #2f3f75;
 
-  --danger: #b03a48;
-  --danger-soft: #f8e6e8;
-  --danger-border: #eccdd1;
-  --warning: #75540c;
-  --warning-soft: #f6eccb;
+  --danger: #f08272;
+  --danger-soft: #3a2023;
+  --danger-border: #5a2f33;
+  --warning: #e4a74f;
+  --warning-soft: #38291a;
+  --info: #7ab6e3;
+  --info-soft: #1a2d3d;
 
-  --ring: rgba(180, 83, 26, 0.14);
-  --fab-shadow: 0 6px 18px rgba(91, 58, 122, 0.3);
+  --macro-protein: #7b99f5;
+  --macro-carbs: #3cc496;
+  --macro-fat: #f2b15a;
+  --macro-sodium: #b7a2ec;
+  --macro-potassium: #f2907f;
+
+  --shadow: 0 0 0 1px var(--border);
+  --ring: rgba(79, 109, 240, 0.32);
+  --fab-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
 }
 
-/* Bande fine en haut de l'écran */
-:root[data-theme='halloween'] body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 950;
-  height: 5px;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    90deg,
-    #b4531a 0 14px,
-    #3b2a4a 14px 28px,
-    #5b3a7a 28px 42px,
-    #3b2a4a 42px 56px
-  );
-}
-
-:root[data-theme='halloween'] .today-header h1::before {
-  content: '🎃 ';
+:root[data-theme='dark'] .learning-track {
+  background: rgba(255, 255, 255, 0.12);
 }

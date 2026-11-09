@@ -74,6 +74,12 @@ const PATHS = {
   ),
   heart: <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />,
   scale: <path d="M12 4v16M7 20h10M5 7h14M5 7l-2 6a3 3 0 0 0 4 0zM19 7l-2 6a3 3 0 0 0 4 0z" />,
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" />
+    </>
+  ),
   moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />,
   warning: <path d="M12 4l9 16H3zM12 10v4M12 17h.01" />,
   leaf: <path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14M5 19l7-7" />,
@@ -112,7 +118,7 @@ const EMOJI_ICONS: Record<string, IconName> = {
   '⚡': 'bolt', '📱': 'scan', '🔍': 'search', '🎥': 'camera', '📚': 'book', '🌍': 'globe', '🤖': 'sparkles',
   '📷': 'camera', '🧮': 'calc', '📥': 'download', '📤': 'upload', '💾': 'save', '🎯': 'target', '🎨': 'palette',
   '😏': 'smile', 'ℹ': 'info', '❤': 'heart', '⚖': 'scale', '😴': 'moon', '⚠': 'warning', '🌿': 'leaf',
-  '🎃': 'ghost', '⚙': 'sliders'
+  '🎃': 'ghost', '⚙': 'sliders', '☀': 'sun', '🌙': 'moon'
 };
 // Ces emojis n'ont pas d'icône : on les retire simplement (sablier, coches)
 const DROPPED = ['⏳', '✅', '❌'];

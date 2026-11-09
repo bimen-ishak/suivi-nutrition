@@ -1,18 +1,18 @@
-export type ThemeName = 'sauge' | 'halloween';
+export type ThemeName = 'light' | 'dark';
 
 const STORAGE_KEY = 'theme';
 
 // Couleur de la barre d'état du téléphone, alignée sur le fond de chaque thème
 const BAR_COLORS: Record<ThemeName, string> = {
-  sauge: '#EEF1F5',
-  halloween: '#F6EFE6'
+  light: '#EEF1F5',
+  dark: '#0F1319'
 };
 
 export function getTheme(): ThemeName {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'halloween' ? 'halloween' : 'sauge';
+    return localStorage.getItem(STORAGE_KEY) === 'dark' ? 'dark' : 'light';
   } catch {
-    return 'sauge';
+    return 'light';
   }
 }
 
