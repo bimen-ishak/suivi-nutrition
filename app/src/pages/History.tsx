@@ -10,6 +10,9 @@ import './History.css';
 import { t, tn, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n';
 import { ti, Icon } from '../components/Icon';
 
+// Une journée de craquage non comptée vaut au moins ce total
+const BINGE_MIN_KCAL = 4500;
+
 interface DayData {
   date: string;
   entries: JournalEntry[];
@@ -32,6 +35,8 @@ export function History() {
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [editingTotal, setEditingTotal] = useState(false);
   const [totalInput, setTotalInput] = useState('');
+  const [bingePicking, setBingePicking] = useState(false);
+  const [bingeDate, setBingeDate] = useState('');
 
   useEffect(() => {
     loadHistory();
@@ -122,41 +127,64 @@ export function History() {
 
   const adjustmentId = (date: string) => `ajustement-${date}`;
 
-  // Corrige le total de calories d'un jour : tout le reste (Ma sèche, bilan) se recalcule seul
+  // Fixe le total de calories d'un jour : tout le reste (Ma sèche, bilan) se recalcule seul
+  const applyDayTotal = async (date: string, target: number, label: string) => {
+    const [entries, history] = await Promise.all([getJournalEntriesByDate(date), getCutHistoryDay(date)]);
+    if (entries.length === 0 && history) {
+      await setImportedDayKcal(date, target);
+      return;
+    }
+    const others = entries.filter(e => e.id !== adjustmentId(date));
+    const base = others.reduce((sum, e) => sum + e.kcal, 0);
+    const diff = target - base;
+    if (diff === 0) {
+      await deleteJournalEntry(adjustmentId(date));
+      return;
+    }
+    const now = new Date().toISOString();
+    await putJournalEntry({
+      id: adjustmentId(date),
+      date,
+      time: '12:00',
+      meal: 'Repas',
+      foodId: ONE_OFF_FOOD_ID,
+      foodName: label,
+      foodSource: 'estimation',
+      quantity: 1,
+      unit: 'g',
+      kcal: diff,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      createdAt: now,
+      updatedAt: now
+    });
+  };
+
   const saveTotal = async (day: DayData) => {
     const target = Math.round(parseFloat(totalInput));
     if (!Number.isFinite(target) || target < 0) return;
-    if (day.entries.length === 0 && day.imported) {
-      await setImportedDayKcal(day.date, target);
-    } else {
-      const others = day.entries.filter(e => e.id !== adjustmentId(day.date));
-      const base = others.reduce((sum, e) => sum + e.kcal, 0);
-      const diff = target - base;
-      if (diff === 0) {
-        await deleteJournalEntry(adjustmentId(day.date));
-      } else {
-        const now = new Date().toISOString();
-        await putJournalEntry({
-          id: adjustmentId(day.date),
-          date: day.date,
-          time: '12:00',
-          meal: 'Repas',
-          foodId: ONE_OFF_FOOD_ID,
-          foodName: 'Ajustement manuel',
-          foodSource: 'estimation',
-          quantity: 1,
-          unit: 'g',
-          kcal: diff,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          createdAt: now,
-          updatedAt: now
-        });
-      }
-    }
+    await applyDayTotal(day.date, target, 'Ajustement manuel');
     await loadHistory();
     setEditingTotal(false);
+  };
+
+  // Craquage non compté : le jour passe à 4 500 kcal, ou garde son total s'il est déjà plus haut
+  const markBinge = async (date: string) => {
+    const [entries, history] = await Promise.all([getJournalEntriesByDate(date), getCutHistoryDay(date)]);
+    const current = entries.length === 0 && history
+      ? history.kcal ?? 0
+      : entries.reduce((sum, e) => sum + e.kcal, 0);
+    if (current < BINGE_MIN_KCAL) await applyDayTotal(date, BINGE_MIN_KCAL, 'Journée de craquage');
+    await loadHistory();
+    setBingePicking(false);
+    setSelectedDate(date);
+  };
+
+  const localDate = (offset: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    return d.toISOString().split('T')[0];
   };
 
   const handleSaveEntry = async (updated: JournalEntry) => {
@@ -304,6 +332,11 @@ export function History() {
           >
             {ti('✏️ Corriger les calories mangées')}
           </button>
+          {day.totals.caloriesEaten < BINGE_MIN_KCAL && (
+            <button className="btn btn-secondary day-edit-btn" onClick={() => markBinge(day.date)}>
+              {t('Journée de craquage ({n} kcal min.)', { n: BINGE_MIN_KCAL })}
+            </button>
+          )}
           <button className="btn btn-primary day-edit-btn" onClick={() => setEditingSummary(true)}>
             {day.summary?.caloriesBurned ? ti('✏️ Modifier le bilan') : ti('📊 Saisir ma dépense')}
           </button>
@@ -366,6 +399,37 @@ export function History() {
       </div>
 
       <CutCard />
+
+      <div className="binge-card">
+        {bingePicking ? (
+          <>
+            <p className="total-edit-hint">
+              {t("Choisis le jour du craquage. Il comptera au moins {n} kcal, même si tu n'as rien noté.", { n: BINGE_MIN_KCAL })}
+            </p>
+            <input
+              type="date"
+              value={bingeDate}
+              min={localDate(29)}
+              max={localDate(0)}
+              onChange={(e) => setBingeDate(e.target.value)}
+            />
+            <div className="binge-actions">
+              <button className="btn btn-secondary" onClick={() => setBingePicking(false)}>{t('Annuler')}</button>
+              <button className="btn btn-primary" disabled={!bingeDate} onClick={() => markBinge(bingeDate)}>{t('Valider')}</button>
+            </div>
+          </>
+        ) : (
+          <button
+            className="btn btn-secondary binge-open"
+            onClick={() => {
+              setBingeDate(localDate(1));
+              setBingePicking(true);
+            }}
+          >
+            {t('Noter une journée de craquage')}
+          </button>
+        )}
+      </div>
 
       {days.length === 0 ? (
         <div className="empty-history">
