@@ -6,7 +6,7 @@ const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 // Si un modèle disparaît (erreur 404), on essaie le suivant
 const MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
 
-const PROMPT = `Tu analyses 1 à 3 photos d'un produit alimentaire ou d'un repas : le produit posé sur une balance, son étiquette nutritionnelle, son emballage.
+export const PROMPT = `Tu analyses 1 à 3 photos d'un produit alimentaire ou d'un repas : le produit posé sur une balance, son étiquette nutritionnelle, son emballage.
 Réponds UNIQUEMENT par un objet JSON avec ces clés :
 - mode : "label" si un tableau nutritionnel est lisible sur une photo, sinon "estimate"
 - name : nom du produit ou du plat (texte) ou null

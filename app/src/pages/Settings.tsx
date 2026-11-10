@@ -4,6 +4,7 @@ import { exportToExcel } from '../utils/excelExport';
 import { getObjective, setObjective } from '../utils/objective';
 import { getTheme, setTheme, type ThemeName } from '../utils/theme';
 import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
+import { getOpenRouterKey, setOpenRouterKey, clearOpenRouterKey, getProvider, setProvider, type Provider } from '../utils/aiReader';
 import { t, locale, getLanguage, setLanguage, type Language } from '../i18n';
 import './Settings.css';
 import { ti } from '../components/Icon';
@@ -25,7 +26,9 @@ export function Settings() {
   const [objective, setObjectiveState] = useState<number>(getObjective());
   const [theme, setThemeState] = useState<ThemeName>(getTheme());
   const language = getLanguage();
+  const [provider, setProviderState] = useState<Provider>(getProvider());
   const [hasApiKey, setHasApiKey] = useState(getApiKey() !== null);
+  const [hasOpenRouterKey, setHasOpenRouterKey] = useState(getOpenRouterKey() !== null);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -129,6 +132,23 @@ export function Settings() {
   const handleRemoveKey = () => {
     clearApiKey();
     setHasApiKey(false);
+  };
+
+  const handleSaveOpenRouterKey = () => {
+    setOpenRouterKey(apiKeyInput);
+    setApiKeyInput('');
+    setHasOpenRouterKey(true);
+  };
+
+  const handleRemoveOpenRouterKey = () => {
+    clearOpenRouterKey();
+    setHasOpenRouterKey(false);
+  };
+
+  const chooseProvider = (next: Provider) => {
+    setProvider(next);
+    setProviderState(next);
+    setApiKeyInput('');
   };
 
   const handleSaveObjective = () => {
@@ -302,41 +322,105 @@ export function Settings() {
       <div className="settings-section">
         <h2>{ti('🤖 Lecture d\'étiquette')}</h2>
         <p className="section-desc">
-          {t("Prends en photo le tableau nutritionnel d'un produit : l'IA Gemini de Google remplit les valeurs pour toi. Il faut une clé gratuite, créée sur")}{' '}
-          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">{t('Google AI Studio')}</a>
-          {' '}{t('avec ton compte Google.')}
+          {t("Prends en photo un produit ou ton assiette : l'IA remplit les valeurs pour toi. Choisis laquelle utiliser.")}
         </p>
-        <p className="section-desc">
-          {t('La clé reste sur ce téléphone, et n\'est pas dans tes sauvegardes. Seules les photos d\'étiquettes sont envoyées à Google, et seulement quand tu lances une lecture.')}
-        </p>
-        {hasApiKey ? (
+        <div className="objective-presets">
+          <button
+            className={`preset-btn ${provider === 'openrouter' ? 'active' : ''}`}
+            aria-pressed={provider === 'openrouter'}
+            onClick={() => chooseProvider('openrouter')}
+          >
+            {t('OpenRouter (gratuit)')}
+          </button>
+          <button
+            className={`preset-btn ${provider === 'gemini' ? 'active' : ''}`}
+            aria-pressed={provider === 'gemini'}
+            onClick={() => chooseProvider('gemini')}
+          >
+            {t('Gemini (gratuit)')}
+          </button>
+        </div>
+
+        {provider === 'openrouter' ? (
           <>
-            <p className="key-status">{ti('✅ Clé enregistrée sur ce téléphone')}</p>
-            <button className="btn btn-secondary btn-block" onClick={handleRemoveKey}>
-              {ti('🗑️ Supprimer la clé')}
-            </button>
+            <p className="section-desc">
+              {t("OpenRouter donne accès à des IA gratuites qui lisent les images (environ 50 lectures par jour). Il faut un compte gratuit, sans carte bancaire, et une clé créée sur")}{' '}
+              <a href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer">openrouter.ai</a>.
+            </p>
+            <p className="section-desc">
+              {t('La clé reste sur ce téléphone, et n\'est pas dans tes sauvegardes. Seules les photos sont envoyées à OpenRouter, et seulement quand tu lances une lecture.')}
+            </p>
+            {hasOpenRouterKey ? (
+              <>
+                <p className="key-status">{ti('✅ Clé enregistrée sur ce téléphone')}</p>
+                <button className="btn btn-secondary btn-block" onClick={handleRemoveOpenRouterKey}>
+                  {ti('🗑️ Supprimer la clé')}
+                </button>
+              </>
+            ) : (
+              <>
+                <input
+                  type="password"
+                  className="key-input"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder={t('Colle ta clé ici')}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  aria-label={t('Clé OpenRouter')}
+                />
+                <button
+                  className="btn btn-primary btn-block"
+                  onClick={handleSaveOpenRouterKey}
+                  disabled={apiKeyInput.trim() === ''}
+                >
+                  {t('Enregistrer la clé')}
+                </button>
+              </>
+            )}
           </>
         ) : (
           <>
-            <input
-              type="password"
-              className="key-input"
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              placeholder={t('Colle ta clé ici')}
-              autoComplete="off"
-              autoCapitalize="off"
-              autoCorrect="off"
-              spellCheck={false}
-              aria-label={t('Clé Google AI Studio')}
-            />
-            <button
-              className="btn btn-primary btn-block"
-              onClick={handleSaveKey}
-              disabled={apiKeyInput.trim() === ''}
-            >
-              {t('Enregistrer la clé')}
-            </button>
+            <p className="section-desc">
+              {t("L'IA Gemini de Google demande une clé gratuite, créée sur")}{' '}
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">{t('Google AI Studio')}</a>
+              {' '}{t('avec ton compte Google.')}
+            </p>
+            <p className="section-desc">
+              {t('La clé reste sur ce téléphone, et n\'est pas dans tes sauvegardes. Seules les photos d\'étiquettes sont envoyées à Google, et seulement quand tu lances une lecture.')}
+            </p>
+            {hasApiKey ? (
+              <>
+                <p className="key-status">{ti('✅ Clé enregistrée sur ce téléphone')}</p>
+                <button className="btn btn-secondary btn-block" onClick={handleRemoveKey}>
+                  {ti('🗑️ Supprimer la clé')}
+                </button>
+              </>
+            ) : (
+              <>
+                <input
+                  type="password"
+                  className="key-input"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder={t('Colle ta clé ici')}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  aria-label={t('Clé Google AI Studio')}
+                />
+                <button
+                  className="btn btn-primary btn-block"
+                  onClick={handleSaveKey}
+                  disabled={apiKeyInput.trim() === ''}
+                >
+                  {t('Enregistrer la clé')}
+                </button>
+              </>
+            )}
           </>
         )}
       </div>

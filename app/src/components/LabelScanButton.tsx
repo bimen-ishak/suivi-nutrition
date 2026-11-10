@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { compressPhoto } from '../utils/photo';
-import { getApiKey, readFoodPhotos, LabelReadError, type LabelResult } from '../utils/labelReader';
+import { LabelReadError, type LabelResult } from '../utils/labelReader';
+import { getActiveKey, analysePhotos } from '../utils/aiReader';
 import './LabelScanButton.css';
 import { t, unitLabel } from '../i18n';
 import { ti } from './Icon';
@@ -36,7 +37,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<File[]>([]);
   const [message, setMessage] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
-  const hasKey = getApiKey() !== null;
+  const hasKey = getActiveKey() !== null;
 
   const previews = useMemo(() => pending.map(file => URL.createObjectURL(file)), [pending]);
   useEffect(() => () => previews.forEach(url => URL.revokeObjectURL(url)), [previews]);
@@ -54,14 +55,14 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   };
 
   const analyse = async () => {
-    const key = getApiKey();
+    const key = getActiveKey();
     if (pending.length === 0 || !key) return;
 
     setLoading(true);
     setMessage(null);
     try {
       const images = await Promise.all(pending.map(file => compressPhoto(file, PHOTO_SIZE, PHOTO_QUALITY)));
-      const result = await readFoodPhotos(images, key);
+      const result = await analysePhotos(images);
       onRead(result);
       setPending([]);
       setMessage({ kind: 'ok', text: describe(result) });
