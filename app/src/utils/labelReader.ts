@@ -28,6 +28,8 @@ Si mode = "estimate" (aucun tableau lisible) : estime ce qu'il y a dans l'image,
 - total_kcal, total_protein, total_carbs, total_fat : totaux pour toute la quantité visible (kcal et grammes)
 - total_sodium_mg : sodium total estimé en mg pour toute la quantité visible (jamais null)
 - total_potassium_mg : potassium total estimé en mg pour toute la quantité visible (jamais null)
+- kcal, protein, carbs, fat, sodium_mg, potassium_mg : tes estimations POUR 100 g (valeurs typiques de ce produit ou de ce plat), toujours remplies, même sans balance
+Un produit emballé sans tableau visible (par exemple l'avant d'un paquet de biscuits) : reconnais-le et donne ses valeurs typiques pour 100 g. Le poids net imprimé sur l'emballage n'est pas weight_g.
 
 Mets null pour tout ce qui n'est pas visible ou pas certain. Des nombres avec un point décimal, sans unité.`;
 
@@ -56,6 +58,13 @@ export interface LabelResult {
 }
 
 export class LabelReadError extends Error {}
+
+/** Erreur quand la réponse de l'IA ne contient pas de valeurs : on montre le début de ce qu'elle a dit */
+export function unreadableError(text: string): LabelReadError {
+  const base = t("Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel.");
+  const excerpt = text.replace(/\s+/g, ' ').trim().slice(0, 140);
+  return new LabelReadError(excerpt ? `${base} (« ${excerpt} »)` : base);
+}
 
 type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{
   ok: boolean;
@@ -120,11 +129,19 @@ const toBarcode = (value: unknown): string | undefined => {
 /** Transforme la réponse de l'IA en valeurs sûres, ou null si rien d'utile n'a été lu */
 export function parseLabelResponse(text: string): LabelResult | null {
   let raw: Record<string, unknown>;
+  const cleaned = text.replace(/```(?:json)?/gi, '').trim();
   try {
-    const cleaned = text.replace(/```(?:json)?/gi, '').trim();
     raw = JSON.parse(cleaned);
   } catch {
-    return null;
+    // Certaines IA ajoutent une phrase autour du JSON : on garde ce qui est entre accolades
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start === -1 || end <= start) return null;
+    try {
+      raw = JSON.parse(cleaned.slice(start, end + 1));
+    } catch {
+      return null;
+    }
   }
   if (typeof raw !== 'object' || raw === null) return null;
 
@@ -135,23 +152,40 @@ export function parseLabelResponse(text: string): LabelResult | null {
   if (weight !== undefined && weight > 0) result.weight = weight;
 
   if (estimated) {
-    // L'IA donne des totaux pour la quantité visible : on les ramène à 100 g
-    if (result.weight === undefined) return null;
-    const per100 = (total: unknown) => {
-      const value = toNumber(total, 100_000);
-      return value === undefined ? undefined : Math.round((value / result.weight!) * 1000) / 10;
-    };
-    const totals: [keyof typeof LIMITS, unknown][] = [
-      ['kcal', raw.total_kcal],
-      ['protein', raw.total_protein],
-      ['carbs', raw.total_carbs],
-      ['fat', raw.total_fat],
-      ['sodium', raw.total_sodium_mg],
-      ['potassium', raw.total_potassium_mg]
+    const whole = (key: keyof typeof LIMITS, number: number) =>
+      key === 'kcal' || key === 'potassium' || key === 'sodium' ? Math.round(number) : number;
+    // Avec un poids, les totaux de la quantité visible sont ramenés à 100 g
+    if (result.weight !== undefined) {
+      const per100 = (total: unknown) => {
+        const value = toNumber(total, 100_000);
+        return value === undefined ? undefined : Math.round((value / result.weight!) * 1000) / 10;
+      };
+      const totals: [keyof typeof LIMITS, unknown][] = [
+        ['kcal', raw.total_kcal],
+        ['protein', raw.total_protein],
+        ['carbs', raw.total_carbs],
+        ['fat', raw.total_fat],
+        ['sodium', raw.total_sodium_mg],
+        ['potassium', raw.total_potassium_mg]
+      ];
+      for (const [key, value] of totals) {
+        const number = per100(value);
+        if (number !== undefined && number <= LIMITS[key]) result[key] = whole(key, number);
+      }
+    }
+    // Sans poids, ou si un total manque, on prend les valeurs typiques pour 100 g données par l'IA
+    const typical: [keyof typeof LIMITS, unknown][] = [
+      ['kcal', raw.kcal],
+      ['protein', raw.protein],
+      ['carbs', raw.carbs],
+      ['fat', raw.fat],
+      ['sodium', raw.sodium_mg],
+      ['potassium', raw.potassium_mg]
     ];
-    for (const [key, value] of totals) {
-      const number = per100(value);
-      if (number !== undefined && number <= LIMITS[key]) result[key] = key === 'kcal' || key === 'potassium' || key === 'sodium' ? Math.round(number) : number;
+    for (const [key, value] of typical) {
+      if (result[key] !== undefined) continue;
+      const number = toNumber(value, LIMITS[key]);
+      if (number !== undefined) result[key] = whole(key, number);
     }
     if (result.potassium !== undefined) result.potassiumEstimated = true;
     if (result.sodium !== undefined) result.sodiumEstimated = true;
@@ -243,7 +277,7 @@ export async function readFoodPhotos(
     const text = payload.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     const result = parseLabelResponse(text);
     if (!result) {
-      throw new LabelReadError(t("Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel."));
+      throw unreadableError(text);
     }
     return result;
   }

@@ -1,6 +1,6 @@
 // Lecture de photos d'un produit par une IA gratuite d'OpenRouter, avec la clé personnelle de l'utilisateur
 import { t } from '../i18n';
-import { PROMPT, parseLabelResponse, LabelReadError, type LabelResult } from './labelReader';
+import { PROMPT, parseLabelResponse, LabelReadError, unreadableError, type LabelResult } from './labelReader';
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 // OpenRouter essaie ces modèles gratuits dans l'ordre : si l'un est saturé, il passe au suivant tout seul
@@ -81,7 +81,7 @@ export async function readPhotosWithOpenRouter(
   const text = payload.choices?.[0]?.message?.content ?? '';
   const result = parseLabelResponse(text);
   if (!result) {
-    throw new LabelReadError(t("Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel."));
+    throw unreadableError(text);
   }
   return result;
 }
