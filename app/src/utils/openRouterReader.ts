@@ -34,7 +34,8 @@ export async function readPhotosWithOpenRouter(
   const body = JSON.stringify({
     models: OPENROUTER_MODELS,
     temperature: 0,
-    max_tokens: 1500,
+    // Certains modèles gratuits réfléchissent avant de répondre : on leur laisse de la place
+    max_tokens: 4000,
     messages: [{
       role: 'user',
       content: [
@@ -72,16 +73,30 @@ export async function readPhotosWithOpenRouter(
   if (!response.ok) throw new LabelReadError(describeFailure(response.status));
 
   const payload = (await response.json()) as {
-    choices?: { message?: { content?: string | null } }[];
+    model?: string;
+    choices?: {
+      finish_reason?: string | null;
+      message?: { content?: string | { text?: string }[] | null; reasoning?: string | null };
+    }[];
     error?: { code?: number };
   };
   // OpenRouter peut répondre 200 avec une erreur dans le corps
   if (payload.error) throw new LabelReadError(describeFailure(payload.error.code ?? 500));
 
-  const text = payload.choices?.[0]?.message?.content ?? '';
-  const result = parseLabelResponse(text);
-  if (!result) {
-    throw unreadableError(text);
+  const choice = payload.choices?.[0];
+  const content = choice?.message?.content;
+  // Le texte peut arriver en un seul bloc ou en plusieurs morceaux
+  const text = Array.isArray(content) ? content.map(part => part.text ?? '').join('') : (content ?? '');
+  // Un modèle qui a tout dépensé à réfléchir peut laisser le JSON dans son raisonnement
+  const result = parseLabelResponse(text) ?? parseLabelResponse(choice?.message?.reasoning ?? '');
+  if (result) return result;
+
+  if (text.trim() === '') {
+    console.error("Réponse vide d'OpenRouter:", payload);
+    throw new LabelReadError(t("L'IA a renvoyé une réponse vide (modèle {model}, fin : {reason}). Réessaie.", {
+      model: payload.model ?? '?',
+      reason: choice?.finish_reason ?? '?'
+    }));
   }
-  return result;
+  throw unreadableError(text);
 }

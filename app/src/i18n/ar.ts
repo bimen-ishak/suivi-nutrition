@@ -414,6 +414,7 @@ export const AR: Record<string, ArabicEntry> = {
   "La clé reste sur ce téléphone, et n'est pas dans tes sauvegardes. Seules les photos sont envoyées à OpenRouter, et seulement quand tu lances une lecture.": 'المفتاح بيفضل على التليفون ده، ومش في نسخك الاحتياطية. الصور بس هي اللي بتتبعت لأوبن راوتر، ولما تبدأ قراءة بس.',
   'Clé OpenRouter': 'مفتاح أوبن راوتر',
   "L'IA Gemini de Google demande une clé gratuite, créée sur": 'جيميني بتاع جوجل محتاج مفتاح مجاني، بتعمله من',
+  "L'IA a renvoyé une réponse vide (modèle {model}, fin : {reason}). Réessaie.": 'الذكاء الاصطناعي رجّع رد فاضي (موديل {model}، النهاية: {reason}). جرّب تاني.',
   'Pas de connexion à Internet. Réessaie avec du réseau.': 'مفيش إنترنت. جرّب لما يبقى فيه شبكة.',
   "Je ne vois rien d'exploitable sur ces photos. Cadre bien le produit sur la balance ou le tableau nutritionnel.": 'مش شايف حاجة تنفع في الصور دي. صوّر المنتج على الميزان أو جدول القيم الغذائية كويس.',
 

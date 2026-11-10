@@ -44,6 +44,25 @@ describe('readPhotosWithOpenRouter', () => {
     await expect(readPhotosWithOpenRouter([image], 'k', fetchMock as never)).rejects.toThrow(/Clé refusée/);
   });
 
+  it('lit le JSON laissé dans le raisonnement quand la réponse est vide', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ finish_reason: 'length', message: { content: '', reasoning: 'Je pense... {"mode":"estimate","kcal":490,"protein":6,"carbs":63,"fat":24}' } }] })
+    }));
+    const result = await readPhotosWithOpenRouter([image], 'k', fetchMock as never);
+    expect(result).toMatchObject({ kcal: 490, estimated: true });
+  });
+
+  it('explique une réponse vide avec le modèle et la raison', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ model: 'google/gemma-4-31b-it:free', choices: [{ finish_reason: 'length', message: { content: null } }] })
+    }));
+    await expect(readPhotosWithOpenRouter([image], 'k', fetchMock as never)).rejects.toThrow(/gemma-4-31b-it:free.*length/);
+  });
+
   it('signale une réponse sans valeurs exploitables', async () => {
     const fetchMock = vi.fn(async () => okResponse('Désolé.'));
     await expect(readPhotosWithOpenRouter([image], 'k', fetchMock as never)).rejects.toBeInstanceOf(LabelReadError);
