@@ -12,34 +12,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192x192.png', 'icone-ecran-accueil.png'],
-      manifest: {
-        name: 'Suivi Nutrition',
-        short_name: 'Nutrition',
-        description: 'Application personnelle de suivi nutritionnel hors ligne',
-        theme_color: '#EEF1F5',
-        background_color: '#EEF1F5',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/suivi-nutrition/',
-        start_url: '/suivi-nutrition/',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      },
+      manifest: false,
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

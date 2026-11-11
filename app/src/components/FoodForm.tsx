@@ -502,7 +502,7 @@ export function FoodForm({ initialFood, initialBarcode, onSave, onCancel, isLoad
                           type="button"
                           className="btn-remove"
                           onClick={() => removePortion(index)}
-                          aria-label={`Supprimer ${portion.name}`}
+                          aria-label={t('Supprimer {name}', { name: portion.name })}
                         >
                           ×
                         </button>

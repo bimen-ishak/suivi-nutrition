@@ -1,3 +1,4 @@
+import { foodDisplayName } from '../data/genericFoods';
 import type { Food } from '../types';
 import './FoodCard.css';
 import { t, tn, unitLabel, macroLetter, locale } from '../i18n';
@@ -18,7 +19,7 @@ export function FoodCard({ food, onEdit, onDelete, showSource = true, compact = 
     <div className={`food-card ${compact ? 'compact' : ''}`}>
       <div className="food-card-header">
         <div className="food-info">
-          <h3 className="food-name">{food.name}</h3>
+          <h3 className="food-name">{foodDisplayName(food.name, food.source)}</h3>
           {food.brand && <span className="food-brand">{food.brand}</span>}
           {food.barcode && <span className="food-barcode"><Icon name="scan" />{food.barcode}</span>}
         </div>

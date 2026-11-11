@@ -25,19 +25,6 @@ interface BilanRow {
   sommeil: number | '';
 }
 
-interface JournalRow {
-  date: string;
-  repas: string;
-  aliment: string;
-  quantite: string;
-  kcal: number;
-  proteines: number;
-  glucides: number;
-  lipides: number;
-  potassium: number;
-  sodium: number;
-}
-
 /**
  * Formate une quantité avec la méthode de calcul si présente
  * Ex: "143 g mangés (261 pesés − 118 restants)"
@@ -155,25 +142,26 @@ export async function exportToExcel(
   ];
 
   // ===== FEUILLE 2 : Journal =====
-  const journalRows: JournalRow[] = filteredJournal.map(e => ({
-    date: e.date,
-    repas: e.meal,
-    aliment: formatFoodName(e),
-    quantite: formatQuantity(e),
-    kcal: e.kcal,
-    proteines: Math.round(e.protein * 10) / 10,
-    glucides: Math.round(e.carbs * 10) / 10,
-    lipides: Math.round(e.fat * 10) / 10,
-    potassium: e.potassium ? Math.round(e.potassium) : 0,
-    sodium: e.sodium ? Math.round(e.sodium) : 0
-  }));
+  // A-L explicites : I et J restent vides, potassium en K et sodium en L.
+  const journalRows = filteredJournal.map(e => [
+    e.date,
+    e.meal,
+    formatFoodName(e),
+    formatQuantity(e),
+    e.kcal,
+    Math.round(e.protein * 10) / 10,
+    Math.round(e.carbs * 10) / 10,
+    Math.round(e.fat * 10) / 10,
+    '', '',
+    e.potassium !== undefined ? Math.round(e.potassium) : '',
+    e.sodium !== undefined ? Math.round(e.sodium) : ''
+  ]);
 
-  const wsJournal = XLSX.utils.json_to_sheet(journalRows);
-  XLSX.utils.sheet_add_aoa(wsJournal, [[
+  const wsJournal = XLSX.utils.aoa_to_sheet([[
     'Date', 'Repas', 'Aliment', 'Quantité', 'kcal',
     'Protéines (g)', 'Glucides (g)', 'Lipides (g)', '', '',
     'Potassium (mg)', 'Sodium (mg)'
-  ]], { origin: 'A1' });
+  ], ...journalRows]);
 
   wsJournal['!cols'] = [
     { wch: 12 }, { wch: 14 }, { wch: 30 }, { wch: 40 }, { wch: 8 },

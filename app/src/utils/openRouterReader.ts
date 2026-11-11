@@ -29,7 +29,8 @@ const describeFailure = (status: number): string => {
 export async function readPhotosWithOpenRouter(
   imageDataUrls: string[],
   apiKey: string,
-  fetchImpl: FetchLike = fetch as unknown as FetchLike
+  fetchImpl: FetchLike = fetch as unknown as FetchLike,
+  context = ''
 ): Promise<LabelResult> {
   const body = JSON.stringify({
     models: OPENROUTER_MODELS,
@@ -39,7 +40,7 @@ export async function readPhotosWithOpenRouter(
     messages: [{
       role: 'user',
       content: [
-        { type: 'text', text: PROMPT },
+        { type: 'text', text: context ? `${PROMPT}\nInformations fournies par l’utilisateur :\n${context}` : PROMPT },
         ...imageDataUrls.map(url => ({ type: 'image_url', image_url: { url } }))
       ]
     }]

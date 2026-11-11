@@ -1,14 +1,25 @@
-// Traduction de l'application : les textes sont écrits en français dans le code,
-// et le dictionnaire arabe égyptien est indexé par ce texte français.
+// Les dictionnaires sont indexés par les textes français de l'application.
 import { AR, type ArabicEntry } from './ar';
 
-export type Language = 'fr' | 'ar-EG';
+import { EN } from './en';
+
+export const LANGUAGES = [
+  { id: 'fr', label: 'Français', locale: 'fr-FR', name: 'French' },
+  { id: 'ar-EG', label: 'عربي مصري', locale: 'ar-EG-u-nu-latn', name: 'Egyptian Arabic' },
+  { id: 'en', label: 'English', locale: 'en-US', name: 'English' }
+] as const;
+
+export type Language = typeof LANGUAGES[number]['id'];
+
+function languageConfig(language: string | null) {
+  return LANGUAGES.find(option => option.id === language) ?? LANGUAGES[0];
+}
 
 const LANGUAGE_KEY = 'language';
 
 export function getLanguage(): Language {
   try {
-    return localStorage.getItem(LANGUAGE_KEY) === 'ar-EG' ? 'ar-EG' : 'fr';
+    return languageConfig(localStorage.getItem(LANGUAGE_KEY)).id;
   } catch {
     return 'fr';
   }
@@ -22,13 +33,13 @@ export const isRtl = (language: Language = getLanguage()): boolean => language =
 
 /** Format des dates et des nombres : chiffres occidentaux en arabe, plus lisibles pour des calories */
 export function locale(): string {
-  return getLanguage() === 'ar-EG' ? 'ar-EG-u-nu-latn' : 'fr-FR';
+  return languageConfig(getLanguage()).locale;
 }
 
 /** Règle la langue et le sens d'écriture de toute la page */
 export function applyDirection(): void {
   const language = getLanguage();
-  document.documentElement.setAttribute('lang', language === 'ar-EG' ? 'ar-EG' : 'fr');
+  document.documentElement.setAttribute('lang', language);
   document.documentElement.setAttribute('dir', isRtl(language) ? 'rtl' : 'ltr');
 }
 
@@ -39,8 +50,8 @@ const fill = (text: string, params?: Params): string =>
 
 /** Le texte dans la langue choisie, avec les variables {nom} remplacées */
 export function t(fr: string, params?: Params): string {
-  if (getLanguage() === 'fr') return fill(fr, params);
-  const entry = AR[fr];
+  const language = getLanguage();
+  const entry = language === 'ar-EG' ? AR[fr] : language === 'en' ? EN[fr] : undefined;
   return fill(typeof entry === 'string' ? entry : fr, params);
 }
 
@@ -48,7 +59,12 @@ export function t(fr: string, params?: Params): string {
 export function tn(frOne: string, frMany: string, count: number, params?: Params): string {
   // En français, 0 et 1 prennent le singulier
   const french = count < 2 ? frOne : frMany;
-  if (getLanguage() === 'fr') return fill(french, params);
+  const language = getLanguage();
+  if (language === 'fr') return fill(french, params);
+  if (language === 'en') {
+    const key = count === 1 ? frOne : frMany;
+    return fill(EN[key] ?? key, params);
+  }
   const entry: ArabicEntry | undefined = AR[frMany];
   if (entry === undefined) return fill(french, params);
   if (typeof entry === 'string') return fill(entry, params);
@@ -68,14 +84,18 @@ const UNITS: Record<string, { fr: string; ar: string }> = {
 
 /** Abréviation d'une unité (g, kg, mg, ml, kcal, h, j) dans la langue choisie */
 export function unitLabel(name: 'g' | 'kg' | 'mg' | 'ml' | 'kcal' | 'h' | 'j'): string {
-  return UNITS[name][getLanguage() === 'ar-EG' ? 'ar' : 'fr'];
+  const language = getLanguage();
+  if (language === 'en' && name === 'j') return 'd';
+  return UNITS[name][language === 'ar-EG' ? 'ar' : 'fr'];
 }
 
 const MACRO_LETTERS = { P: 'ب', G: 'ك', L: 'د' } as const;
 
 /** Initiale d'un nutriment : P, G, L en français ; ب (بروتين), ك (كربوهيدرات), د (دهون) en arabe */
 export function macroLetter(letter: 'P' | 'G' | 'L'): string {
-  return getLanguage() === 'ar-EG' ? MACRO_LETTERS[letter] : letter;
+  const language = getLanguage();
+  if (language === 'en') return { P: 'P', G: 'C', L: 'F' }[letter];
+  return language === 'ar-EG' ? MACRO_LETTERS[letter] : letter;
 }
 
 /** Unité d'une quantité saisie : g et ml sont traduits, une portion personnalisée (« biscuit ») reste telle quelle */

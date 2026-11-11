@@ -26,6 +26,7 @@ Si mode = "label" (valeurs de l'étiquette, colonne « pour 100 g » ou « pour 
 
 Si mode = "estimate" (aucun tableau lisible) : estime ce qu'il y a dans l'image, pour TOUT ce qui est visible :
 - total_kcal, total_protein, total_carbs, total_fat : totaux pour toute la quantité visible (kcal et grammes)
+- total_sugars : sucres totaux en grammes si connus, sinon null
 - total_sodium_mg : sodium total estimé en mg pour toute la quantité visible (jamais null)
 - total_potassium_mg : potassium total estimé en mg pour toute la quantité visible (jamais null)
 - kcal, protein, carbs, fat, sodium_mg, potassium_mg : tes estimations POUR 100 g (valeurs typiques de ce produit ou de ce plat), toujours remplies, même sans balance
@@ -165,6 +166,7 @@ export function parseLabelResponse(text: string): LabelResult | null {
         ['protein', raw.total_protein],
         ['carbs', raw.total_carbs],
         ['fat', raw.total_fat],
+        ['sugars', raw.total_sugars],
         ['sodium', raw.total_sodium_mg],
         ['potassium', raw.total_potassium_mg]
       ];
@@ -245,10 +247,11 @@ const toInlineData = (imageDataUrl: string) => {
 export async function readFoodPhotos(
   imageDataUrls: string[],
   apiKey: string,
-  fetchImpl: FetchLike = fetch as unknown as FetchLike
+  fetchImpl: FetchLike = fetch as unknown as FetchLike,
+  context = ''
 ): Promise<LabelResult> {
   const body = JSON.stringify({
-    contents: [{ parts: [{ text: PROMPT }, ...imageDataUrls.map(toInlineData)] }],
+    contents: [{ parts: [{ text: context ? `${PROMPT}\nInformations fournies par l’utilisateur :\n${context}` : PROMPT }, ...imageDataUrls.map(toInlineData)] }],
     generationConfig: { responseMimeType: 'application/json', temperature: 0 }
   });
 

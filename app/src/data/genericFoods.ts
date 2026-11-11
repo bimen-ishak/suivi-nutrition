@@ -1,6 +1,9 @@
 // Base de données générique d'aliments courants (hors ligne)
 // Valeurs pour 100g - Source: tables Ciqual / OpenFoodFacts (moyennes)
 
+import { t } from '../i18n';
+import type { Food } from '../types';
+
 export interface GenericFood {
   name: string;
   category: string;
@@ -227,11 +230,19 @@ export const GENERIC_FOODS: GenericFood[] = [
 
 export const GENERIC_CATEGORIES = [...new Set(GENERIC_FOODS.map(f => f.category))];
 
+const genericNames = new Set(GENERIC_FOODS.map(food => food.name));
+
+export function foodDisplayName(name: string, source: Food['source']): string {
+  return source === 'estimation' && genericNames.has(name) ? t(name) : name;
+}
+
 export function searchGenericFoods(query: string): GenericFood[] {
   const q = query.toLowerCase().trim();
   if (!q) return GENERIC_FOODS;
   return GENERIC_FOODS.filter(f =>
     f.name.toLowerCase().includes(q) ||
-    f.category.toLowerCase().includes(q)
+    f.category.toLowerCase().includes(q) ||
+    t(f.name).toLowerCase().includes(q) ||
+    t(f.category).toLowerCase().includes(q)
   );
 }

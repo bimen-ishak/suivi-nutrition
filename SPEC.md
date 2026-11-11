@@ -2,15 +2,16 @@
 
 ## Vue d'ensemble
 
-Application PWA 100% locale pour suivre son alimentation, son poids et son activité dans le cadre d'un régime à −500 kcal/jour.
+Application PWA à stockage local pour suivre son alimentation, son poids et son activité dans le cadre d'un régime à −500 kcal/jour.
 
 **Principe clé** : après le premier scan d'un aliment, le saisir en 2-3 touches maximum.
 
 ## Contraintes techniques
 
 - PWA installable sur iPhone (iOS 17+)
-- Fonctionnement 100% hors ligne (mode avion)
-- Aucun serveur, aucun compte, aucune donnée envoyée
+- Suivi manuel hors ligne après installation et mise en cache (mode avion)
+- Aucun serveur applicatif ni compte requis pour le suivi manuel
+- Analyse IA facultative : les photos sélectionnées sont envoyées à Google Gemini ou OpenRouter (puis au modèle choisi) après appui sur « Envoyer pour analyse ». Internet, un compte fournisseur et une clé personnelle sont nécessaires ; tarifs et limites selon le fournisseur.
 - Données locales (IndexedDB) + sauvegarde/restauration par fichier JSON
 - Pas de notifications push (limitation iOS) → alertes dans l'app uniquement
 - Code-barres via ZXing.js (BarcodeDetector non supporté Safari)
@@ -693,5 +694,5 @@ D'après l'analyse du tableau :
 ## Licence et données
 
 - Code source : MIT (si open-source)
-- Données utilisateur : 100% locales, jamais transmises
+- Données de suivi stockées localement. Exception : les photos sélectionnées pour une analyse IA sont transmises au fournisseur choisi après action explicite ; aucune analyse IA hors ligne.
 - Base générique : OpenFoodFacts (ODbL) ou USDA (domaine public)

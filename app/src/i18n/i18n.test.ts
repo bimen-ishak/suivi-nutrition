@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { searchGenericFoods, foodDisplayName } from '../data/genericFoods';
 import { t, tn, locale, isRtl, getLanguage, setLanguage, applyDirection, unitLabel, macroLetter } from './index';
 
 describe('t', () => {
@@ -106,4 +107,20 @@ describe('unités et initiales', () => {
     expect(unitLabel('h')).toBe('س');
     expect(macroLetter('G')).toBe('ك');
   });
+});
+
+it('uses English for UI, plurals, numbers, and food search', () => {
+  setLanguage('en');
+  applyDirection();
+  expect(t('Aujourd’hui')).toBe('Today');
+  expect(tn('{n} aliment', '{n} aliments', 1, { n: 1 })).toBe('1 food');
+  expect(tn('{n} aliment', '{n} aliments', 0, { n: 0 })).toBe('0 foods');
+  expect(locale()).toBe('en-US');
+  expect(document.documentElement.lang).toBe('en');
+  expect(document.documentElement.dir).toBe('ltr');
+  expect(searchGenericFoods('chicken breast').map(food => food.name)).toContain('Poulet (blanc)');
+  expect(foodDisplayName('Poulet (blanc)', 'estimation')).toBe('Chicken breast');
+  expect(foodDisplayName('Mon sandwich', 'estimation')).toBe('Mon sandwich');
+  setLanguage('fr');
+  applyDirection();
 });

@@ -1,3 +1,4 @@
+import { foodDisplayName } from '../data/genericFoods';
 import { useState, useEffect } from 'react';
 import { getCutHistoryDay, getJournalEntriesByDate, getDailySummary, recalculateDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry, putJournalEntry, setImportedDayKcal } from '../db';
 import { EditJournalModal } from '../components/EditJournalModal';
@@ -9,6 +10,8 @@ import { importedDayToView } from '../utils/cut';
 import './History.css';
 import { t, tn, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n';
 import { ti, Icon } from '../components/Icon';
+import { WeeklySummary } from '../components/WeeklySummary';
+import { localDateKey, localDateKeys } from '../utils/photo';
 
 // Une journée de craquage non comptée vaut au moins ce total
 const BINGE_MIN_KCAL = 4500;
@@ -45,23 +48,17 @@ export function History() {
   const loadHistory = async () => {
     setLoading(true);
     try {
-      // Récupérer toutes les dates uniques du journal (30 derniers jours)
-      const today = new Date();
-      const dates: string[] = [];
-      for (let i = 0; i < 30; i++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        dates.push(d.toISOString().split('T')[0]);
-      }
+      const dates = localDateKeys(30);
 
       const daysData: DayData[] = [];
       for (const date of dates) {
-        const [entries, summary, totals, history] = await Promise.all([
-          getJournalEntriesByDate(date),
+        const [summary, totals, history] = await Promise.all([
           getDailySummary(date),
           recalculateDailySummary(date),
           getCutHistoryDay(date)
         ]);
+
+        const { entries } = totals;
 
         // Un jour sans repas dans l'app peut venir d'un historique importé
         const imported = entries.length === 0 && history ? importedDayToView(history) : null;
@@ -71,7 +68,9 @@ export function History() {
           daysData.push({
             date,
             entries,
-            summary: summary ?? imported?.summary,
+            summary: summary && imported?.summary
+              ? { ...imported.summary, ...summary, caloriesBurned: summary.caloriesBurned ?? imported.summary.caloriesBurned }
+              : summary ?? imported?.summary,
             totals: imported?.totals ?? {
               caloriesEaten: totals.caloriesEaten,
               protein: totals.protein,
@@ -106,13 +105,10 @@ export function History() {
 
   const dayNumber = (dateStr: string) => Number(dateStr.slice(8, 10));
 
-  const isToday = (dateStr: string) => {
-    return dateStr === new Date().toISOString().split('T')[0];
-  };
-
+  const isToday = (dateStr: string) => dateStr === localDateKey();
+  const hasIntake = (day: DayData) => day.entries.length > 0 || !!day.imported?.hasCalories;
   const getNetBalance = (day: DayData) => {
-    if (!day.summary?.caloriesBurned) return null;
-    if (day.imported && !day.imported.hasCalories) return null;
+    if (!day.summary?.caloriesBurned || !hasIntake(day)) return null;
     return day.totals.caloriesEaten - day.summary.caloriesBurned;
   };
 
@@ -283,7 +279,7 @@ export function History() {
           <div className="day-stats">
             <div className="stat">
               <span className="stat-value">
-                {day.imported && !day.imported.hasCalories ? '?' : day.totals.caloriesEaten}
+                {hasIntake(day) ? day.totals.caloriesEaten : '—'}
               </span>
               <span className="stat-label">{t('kcal mangées')}</span>
             </div>
@@ -326,7 +322,7 @@ export function History() {
           <button
             className="btn btn-secondary day-edit-btn"
             onClick={() => {
-              setTotalInput(day.imported && !day.imported.hasCalories ? '' : String(day.totals.caloriesEaten));
+              setTotalInput(hasIntake(day) ? String(day.totals.caloriesEaten) : '');
               setEditingTotal(true);
             }}
           >
@@ -357,7 +353,7 @@ export function History() {
                 <div key={entry.id} className="history-entry">
                   <span className="entry-time">{entry.time}</span>
                   <div className="entry-info">
-                    <strong>{entry.id.startsWith('ajustement-') ? t(entry.foodName) : entry.foodName}</strong>
+                    <strong>{entry.id.startsWith('ajustement-') ? t(entry.foodName) : foodDisplayName(entry.foodName, entry.foodSource)}</strong>
                     {!entry.id.startsWith('ajustement-') && (
                       <span className="entry-qty">{entry.quantity}{displayUnit(entry.unit)}</span>
                     )}
@@ -391,6 +387,19 @@ export function History() {
     );
   }
 
+  const weekDates = new Set(localDateKeys(7));
+  const week = days.reduce((result, day) => {
+    if (!weekDates.has(day.date)) return result;
+    const net = getNetBalance(day);
+    if (net === null) return result;
+    return {
+      count: result.count + 1,
+      net: result.net + net,
+      provisional: result.provisional || !!day.summary?.caloriesBurnedProvisional
+    };
+  }, { count: 0, net: 0, provisional: false });
+  const weekLabel = week.net < 0 ? t('Déficit moyen') : week.net > 0 ? t('Excédent moyen') : t('Bilan moyen');
+
   // Vue liste des jours
   return (
     <div className="history-page">
@@ -398,7 +407,11 @@ export function History() {
         <h1>{ti('📊 Historique')}</h1>
       </div>
 
-      <CutCard />
+      <WeeklySummary count={week.count} metrics={[
+        { label: weekLabel, value: week.count ? Math.abs(week.net / week.count) : null, unit: unitLabel('kcal') }
+      ]} note={week.provisional
+        ? t('Alimentation et dépense renseignées. Certaines dépenses sont estimées.')
+        : t('Seuls les jours avec alimentation et dépense sont comptés.')} />
 
       <div className="binge-card">
         {bingePicking ? (
@@ -441,25 +454,26 @@ export function History() {
           {days.map(day => {
             const net = getNetBalance(day);
             return (
-              <div
+              <button
+                type="button"
                 key={day.date}
                 className={`day-card ${isToday(day.date) ? 'today' : ''}`}
                 onClick={() => setSelectedDate(day.date)}
               >
-                <div className="day-badge">
+                <span className="day-badge">
                   <span className="day-badge-weekday">{shortWeekday(day.date)}</span>
                   <span className="day-badge-number">{dayNumber(day.date)}</span>
-                </div>
-                <div className="day-main">
+                </span>
+                <span className="day-main">
                   <span className="day-kcal">
-                    {!day.imported || day.imported.hasCalories ? `${day.totals.caloriesEaten} ${unitLabel('kcal')}` : t('Poids seul')}
+                    {hasIntake(day) ? `${day.totals.caloriesEaten} ${unitLabel('kcal')}` : t('Repas non renseignés')}
                   </span>
                   <span className="day-sub">
-                    {(!day.imported || day.imported.hasCalories) &&
+                    {hasIntake(day) &&
                       `${macroLetter('P')} ${Math.round(day.totals.protein)} · ${macroLetter('G')} ${Math.round(day.totals.carbs)} · ${macroLetter('L')} ${Math.round(day.totals.fat)}`}
                     {day.summary?.weight && (
                       <>
-                        {(!day.imported || day.imported.hasCalories) && ' · '}
+                        {hasIntake(day) && ' · '}
                         <span className="day-weight"><Icon name="scale" />{day.summary.weight} {unitLabel('kg')}</span>
                       </>
                     )}
@@ -468,18 +482,19 @@ export function History() {
                     {isToday(day.date) && `${t("Aujourd'hui")} · `}
                     {day.imported ? t('importé') : tn('{n} aliment', '{n} aliments', day.entries.length, { n: day.entries.length })}
                   </span>
-                </div>
+                </span>
                 {net !== null && (
                   <span className={`day-net ${net < 0 ? 'negative' : 'positive'}`}>
                     {ltr(`${net > 0 ? '+' : ''}${net}`)}
                     <small>{t('kcal net')}</small>
                   </span>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
       )}
+      <CutCard />
     </div>
   );
 }

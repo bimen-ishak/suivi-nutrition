@@ -9,12 +9,14 @@ describe('messages drôles', () => {
 
   it('couvre les mêmes événements en français et en arabe égyptien', () => {
     expect(Object.keys(MESSAGES['ar-EG']).sort()).toEqual([...EVENTS].sort());
+    expect(Object.keys(MESSAGES.en).sort()).toEqual([...EVENTS].sort());
   });
 
   it('propose au moins 3 variantes par événement dans chaque langue', () => {
     for (const event of EVENTS) {
       expect(MESSAGES.fr[event].length, `fr ${event}`).toBeGreaterThanOrEqual(3);
       expect(MESSAGES['ar-EG'][event].length, `ar ${event}`).toBeGreaterThanOrEqual(3);
+      expect(MESSAGES.en[event].length, `en ${event}`).toBeGreaterThanOrEqual(3);
     }
   });
 
@@ -25,7 +27,7 @@ describe('messages drôles', () => {
   });
 
   it('n\'a pas deux fois la même phrase pour un événement', () => {
-    for (const language of ['fr', 'ar-EG'] as const) {
+    for (const language of ['fr', 'ar-EG', 'en'] as const) {
       for (const event of EVENTS) {
         const list = MESSAGES[language][event];
         expect(new Set(list).size, `${language} ${event}`).toBe(list.length);
@@ -43,6 +45,7 @@ describe('messages drôles', () => {
   });
 
   it('renvoie toujours une phrase de la bonne langue', () => {
+    expect(MESSAGES.en.newFood).toContain(pickMessage('newFood', 'en'));
     expect(MESSAGES.fr.newFood).toContain(pickMessage('newFood', 'fr'));
     expect(MESSAGES['ar-EG'].newFood).toContain(pickMessage('newFood', 'ar-EG'));
   });
