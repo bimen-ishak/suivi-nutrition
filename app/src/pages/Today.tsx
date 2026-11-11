@@ -15,9 +15,11 @@ import { t, unitLabel, macroLetter, locale, displayUnit } from '../i18n';
 import { ti, Icon } from '../components/Icon';
 import { localDateKeys } from '../utils/photo';
 import { getPinnedCutMetrics } from '../utils/cutDashboard';
+import { estimatedExpenditure, getProfile, macroTargets, onProfileChange } from '../utils/profile';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
+const DEFAULT_FAT_GOAL = 70;
 const DISMISSED_KEY = 'dismissedMissingBurned';
 
 interface TodayProps {
@@ -38,8 +40,9 @@ export function Today({ onAddFood }: TodayProps) {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [objective, setObjective] = useState<number>(getObjective());
-  const [proteinGoal, setProteinGoal] = useState(DEFAULT_PROTEIN_GOAL);
-  const [carbMax, setCarbMax] = useState(DEFAULT_CARB_LIMIT);
+  // Tendance du poids des 14 derniers jours : les objectifs suivent le poids qui baisse
+  const [trendWeight, setTrendWeight] = useState<number | undefined>(undefined);
+  const [profile, setProfile] = useState(getProfile);
   // Hier : des repas notés mais pas de dépense, donc le raccourci Santé a sans doute été oublié
   const [yesterdaySummary, setYesterdaySummary] = useState<DailySummary | null>(null);
   const [yesterdayMissing, setYesterdayMissing] = useState(false);
@@ -74,6 +77,11 @@ export function Today({ onAddFood }: TodayProps) {
     return onObjectiveChange(setObjective);
   }, []);
 
+  useEffect(() => onProfileChange(() => {
+    setProfile(getProfile());
+    setObjective(getObjective());
+  }), []);
+
   const loadTodayData = async () => {
     try {
       const twoWeeksAgo = new Date(Date.now() - 14 * 86_400_000).toISOString().split('T')[0];
@@ -93,8 +101,7 @@ export function Today({ onAddFood }: TodayProps) {
       setYesterdayMissing(ateYesterday && !knowsBurned);
 
       const latestTrend = getWeightTrend(weights).at(-1)?.trend;
-      setProteinGoal(latestTrend ? proteinTarget(latestTrend) : DEFAULT_PROTEIN_GOAL);
-      setCarbMax(latestTrend ? carbLimit(latestTrend) : DEFAULT_CARB_LIMIT);
+      setTrendWeight(latestTrend);
       setJournalEntries(entries);
       setDailySummary(summary || null);
       setTotals(calculatedTotals);
@@ -191,7 +198,15 @@ export function Today({ onAddFood }: TodayProps) {
 
   const burned = dailySummary?.caloriesBurned;
   // On peut manger ce qu'on a brûlé, moins le déficit visé (objectif négatif)
-  const budget = burned ? Math.max(burned + objective, 0) : null;
+  const weight = trendWeight ?? profile?.weight;
+  // Sans dépense réelle (Santé ou saisie), on part de la dépense estimée par le questionnaire
+  const estimated = !burned && profile ? estimatedExpenditure(profile, weight) : null;
+  const expenditure = burned || estimated;
+  const budget = expenditure ? Math.max(expenditure + objective, 0) : null;
+  const targets = profile && weight ? macroTargets(weight, budget) : null;
+  const proteinGoal = targets?.protein ?? (weight ? proteinTarget(weight) : DEFAULT_PROTEIN_GOAL);
+  const carbMax = targets?.carbs ?? (weight ? carbLimit(weight) : DEFAULT_CARB_LIMIT);
+  const fatGoal = targets?.fat ?? DEFAULT_FAT_GOAL;
   const remaining = budget !== null ? budget - totals.caloriesEaten : null;
   const completion = budget ? Math.min(100, (totals.caloriesEaten / budget) * 100) : 0;
 
@@ -231,7 +246,7 @@ export function Today({ onAddFood }: TodayProps) {
   const showMissingBanner = yesterdayMissing && dismissed !== yesterday;
   const details = [
     { id: 'carbs', card: <MacroCard key="carbs" label={t('Glucides')} kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit /> },
-    { id: 'fat', card: <MacroCard key="fat" label={t('Lipides')} kind="fat" value={totals.fat} goal={70} unit="g" /> },
+    { id: 'fat', card: <MacroCard key="fat" label={t('Lipides')} kind="fat" value={totals.fat} goal={fatGoal} unit="g" /> },
     { id: 'sodium', card: <MacroCard key="sodium" label={t('Sodium')} kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit /> },
     { id: 'potassium', card: <MacroCard key="potassium" label={t('Potassium')} kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" /> }
   ] as const;
@@ -301,6 +316,8 @@ export function Today({ onAddFood }: TodayProps) {
                 {t('Dépense : {n} kcal', { n: burned })}
                 {dailySummary?.caloriesBurnedProvisional && <span className="provisional-badge">{t('provisoire')}</span>}
               </p>
+            ) : estimated ? (
+              <p className="hero-burned">{t('Dépense estimée : {n} kcal', { n: estimated })}</p>
             ) : null}
           </div>
           <div

@@ -12,6 +12,8 @@ import './sport.css';
 import { BulkPage } from './bulk/BulkPage';
 import { t } from './i18n';
 import { SettingsGroup } from './components/SettingsGroup';
+import { CutSetup } from './components/CutSetup';
+import { getProfile } from './utils/profile';
 
 import { modePicture, saveNutritionMode, type NutritionMode } from './utils/nutritionMode';
 
@@ -19,6 +21,7 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   const [mode, setMode] = useState(initialMode);
   const [activeTab, setActiveTab] = useState<NavigationTab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
+  const [needsProfile, setNeedsProfile] = useState(() => !getProfile());
 
   const modes = [
     { id: 'bulk', label: t('Prise de masse') },
@@ -53,7 +56,9 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
       </header>
       {mode === 'bulk' ? <BulkPage renderModeSettings={canLeave => modeSettings(next => {
         if (next !== mode && canLeave()) changeMode(next);
-      })} /> : showAddFood ? (
+      })} /> : needsProfile ? (
+        <CutSetup onComplete={() => { setNeedsProfile(false); window.scrollTo(0, 0); }} />
+      ) : showAddFood ? (
         <AddFood onComplete={() => setShowAddFood(false)} />
       ) : (
         <div className="app">
