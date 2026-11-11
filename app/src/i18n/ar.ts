@@ -393,6 +393,7 @@ export const AR: Record<string, ArabicEntry> = {
   "Tu manges moins que ton métabolisme de base ({n} kcal). Ce n’est pas conseillé.": "بتاكل أقل من معدل الحرق الأساسي ({n} سعرة). ده مش منصوح بيه.",
   "{sex}, {age} ans, {height} cm, {weight} kg. Métabolisme de base : {bmr} kcal. Plan : manger {eat} kcal, brûler {burn} kcal par jour.": "{sex}، {age} سنة، {height} سم، {weight} كجم. الحرق الأساسي: {bmr} سعرة. الخطة: تاكل {eat} سعرة وتحرق {burn} سعرة في اليوم.",
   "À brûler : {n} kcal": "للحرق: {n} سعرة",
+  "Retour à l’accueil": "رجوع للرئيسية",
   'Ajustement manuel': 'تعديل يدوي',
   'Journée de craquage': 'يوم فلتان',
   'Journée de craquage ({n} kcal min.)': 'يوم فلتان ({n} سعرة على الأقل)',

@@ -360,6 +360,7 @@ export const EN: Readonly<Record<string, string>> = {
   "Tu manges moins que ton métabolisme de base ({n} kcal). Ce n’est pas conseillé.": "You eat less than your basal metabolic rate ({n} kcal). That's not recommended.",
   "{sex}, {age} ans, {height} cm, {weight} kg. Métabolisme de base : {bmr} kcal. Plan : manger {eat} kcal, brûler {burn} kcal par jour.": "{sex}, {age} years, {height} cm, {weight} kg. Basal metabolic rate: {bmr} kcal. Plan: eat {eat} kcal, burn {burn} kcal a day.",
   "À brûler : {n} kcal": "To burn: {n} kcal",
+  "Retour à l’accueil": "Back to home",
   "Ajustement manuel": "Manual adjustment",
   "Journée de craquage": "Binge day",
   "Journée de craquage ({n} kcal min.)": "Binge day ({n} kcal min.)",

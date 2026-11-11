@@ -22,6 +22,18 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   const [activeTab, setActiveTab] = useState<NavigationTab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
   const [needsProfile, setNeedsProfile] = useState(() => !getProfile());
+  // Chaque appui sur la photo du haut ramène la prise de masse à son accueil
+  const [bulkHome, setBulkHome] = useState(0);
+
+  const goHome = () => {
+    if (mode === 'bulk') {
+      setBulkHome(count => count + 1);
+    } else {
+      setShowAddFood(false);
+      setActiveTab('today');
+    }
+    window.scrollTo(0, 0);
+  };
 
   const modes = [
     { id: 'bulk', label: t('Prise de masse') },
@@ -51,10 +63,12 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   return (
     <div className="nutrition-shell" data-mode={mode}>
       <header className="nutrition-header">
-        <div className="nutrition-brand"><img className="nutrition-mark" src={modePicture(mode)} alt="" /><span>KOUL</span></div>
+        <button type="button" className="nutrition-brand" onClick={goHome} aria-label={t('Retour à l’accueil')}>
+          <img className="nutrition-mark" src={modePicture(mode)} alt="" /><span>KOUL</span>
+        </button>
         <span className="nutrition-mode">{mode === 'bulk' ? modes[0].label : modes[1].label}</span>
       </header>
-      {mode === 'bulk' ? <BulkPage renderModeSettings={canLeave => modeSettings(next => {
+      {mode === 'bulk' ? <BulkPage homeSignal={bulkHome} renderModeSettings={canLeave => modeSettings(next => {
         if (next !== mode && canLeave()) changeMode(next);
       })} /> : needsProfile ? (
         <CutSetup onComplete={() => { setNeedsProfile(false); window.scrollTo(0, 0); }} />

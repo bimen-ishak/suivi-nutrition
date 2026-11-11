@@ -14,7 +14,7 @@ import { getHistorySheet, googleConnected, writeDay } from './googleSheets';
 
 type View = 'today' | 'history' | 'settings' | 'day';
 const newMeal = (date: string): BulkMeal => ({ id: newId(), date, time: new Date().toTimeString().slice(0, 5), name: '', quantity: 0, unit: 'g', values: { kcal: 0, protein: 0, carbs: 0, fat: 0 }, estimated: true, notes: '' });
-export function BulkPage({ renderModeSettings }: { renderModeSettings?: (canLeave: () => boolean) => ReactNode }) {
+export function BulkPage({ renderModeSettings, homeSignal = 0 }: { renderModeSettings?: (canLeave: () => boolean) => ReactNode; homeSignal?: number }) {
   const [setupComplete, setSetupComplete] = useState(() => { try { return localStorage.getItem('bulkSetupComplete') === '1'; } catch { return false; } });
   const [marks, setMarks] = useState<SyncMark[]>([]);
   const [sheet, setSheet] = useState(getHistorySheet);
@@ -104,6 +104,16 @@ export function BulkPage({ renderModeSettings }: { renderModeSettings?: (canLeav
     setView(next);
     setNotice('');
   };
+  const goToday = () => {
+    setSettingsGroup(null);
+    const currentDate = localDateKey();
+    setToday(currentDate);
+    openDay(currentDate, 'today');
+  };
+  // Appui sur la photo du haut : retour à l'accueil, comme l'onglet Aujourd'hui
+  useEffect(() => {
+    if (homeSignal > 0) goToday();
+  }, [homeSignal]);
   const mark = marks.find(m => m.date === date && m.spreadsheetId === sheet?.id);
   const synced = !!mark && mark.signature === daySignature(dayMeals, weightKg);
   const sync = async () => {
@@ -132,13 +142,8 @@ export function BulkPage({ renderModeSettings }: { renderModeSettings?: (canLeav
     <nav className="bulk-main-tabs" aria-label={t('Navigation prise de masse')}>
       {pages.filter(page => setupComplete || page.id !== 'history').map(page => (
         <button key={page.id} aria-pressed={view === page.id || (view === 'day' && page.id === 'history')} onClick={() => {
-          setSettingsGroup(null);
-          if (page.id === 'today') {
-            const currentDate = localDateKey();
-            setToday(currentDate);
-            openDay(currentDate, 'today');
-          }
-          else { setNotice(''); setView(page.id); }
+          if (page.id === 'today') goToday();
+          else { setSettingsGroup(null); setNotice(''); setView(page.id); }
         }}>
           <Icon name={page.icon} />{page.label}
         </button>
