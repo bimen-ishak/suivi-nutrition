@@ -330,3 +330,25 @@
   font-size: 0.9rem;
   color: var(--text-2);
 }
+
+.binge-card {
+  margin-bottom: 16px;
+}
+
+.binge-card input[type='date'] {
+  width: 100%;
+}
+
+.binge-open {
+  width: 100%;
+}
+
+.binge-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.binge-actions .btn {
+  flex: 1;
+}

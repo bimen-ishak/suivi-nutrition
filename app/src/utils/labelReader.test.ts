@@ -144,6 +144,19 @@ describe('parseLabelResponse : poids et estimation', () => {
     expect(result).toMatchObject({ sodium: 500, sodiumEstimated: true });
   });
 
+  it("garde le JSON même quand l'IA ajoute une phrase autour", () => {
+    const result = parseLabelResponse('Voici les valeurs : {"mode":"label","unit":"g","kcal":480,"protein":6,"carbs":62,"fat":23} Bonne journée.');
+    expect(result).toMatchObject({ kcal: 480, fat: 23 });
+  });
+
+  it("prend les valeurs typiques pour 100 g quand une estimation n'a pas de poids", () => {
+    const result = parseLabelResponse(
+      JSON.stringify({ mode: 'estimate', name: 'Cookies', kcal: 490, protein: 6, carbs: 63, fat: 24, sodium_mg: 300, potassium_mg: 200 })
+    );
+    expect(result).toMatchObject({ estimated: true, kcal: 490, protein: 6, sodium: 300, potassium: 200 });
+    expect(result?.weight).toBeUndefined();
+  });
+
   it('refuse une estimation sans poids', () => {
     const result = parseLabelResponse(JSON.stringify({ mode: 'estimate', total_kcal: 600, total_protein: 30, total_carbs: 60, total_fat: 25 }));
     expect(result).toBeNull();
