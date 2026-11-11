@@ -5,14 +5,18 @@
     <link rel="icon" type="image/png" href="/koul-bulk-192.png" />
     <link rel="apple-touch-icon" href="/koul-bulk-192.png" />
     <link rel="manifest" href="%BASE_URL%bulk.webmanifest" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#EEF1F5" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#161B17" />
+    <!-- App installée sur iPhone : l'en-tête sombre passe sous l'heure et la batterie -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
       // Applique le thème avant l'affichage, pour éviter un flash de l'autre couleur
       try {
         if (localStorage.getItem('theme') === 'dark') {
           document.documentElement.dataset.theme = 'dark';
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0F1319');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000000');
         }
       } catch (e) {}
       // Langue et sens d'écriture avant l'affichage, pour éviter un flash de gauche à droite

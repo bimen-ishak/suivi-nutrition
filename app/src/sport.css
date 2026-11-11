@@ -75,7 +75,7 @@
   justify-content: space-between;
   gap: 16px;
   min-height: 72px;
-  padding: 12px max(24px, calc((100% - 1160px) / 2));
+  padding: calc(12px + env(safe-area-inset-top)) max(24px, calc((100% - 1160px) / 2)) 12px;
   background: var(--header-bg, #161b17);
   color: #f5f7ef;
   border-bottom: 2px solid var(--signal);
@@ -290,7 +290,7 @@
 }
 
 @media (max-width: 740px) {
-  .nutrition-header { padding: 10px 14px; min-height: 60px; gap: 9px; }
+  .nutrition-header { padding: calc(10px + env(safe-area-inset-top)) 14px 10px; min-height: 60px; gap: 9px; }
   .nutrition-brand { font-size: .89rem; gap: 7px; }
   .nutrition-mark { width: 28px; height: 28px; }
   .nutrition-shell .bulk-page { padding: 14px 14px calc(76px + env(safe-area-inset-bottom)); }

@@ -5,7 +5,7 @@ describe('thème', () => {
   beforeEach(() => {
     localStorage.clear();
     delete document.documentElement.dataset.theme;
-    document.head.innerHTML = '<meta name="theme-color" content="#EEF1F5" />';
+    document.head.innerHTML = '<meta name="theme-color" content="#161B17" />';
   });
 
   it('démarre sur le thème clair', () => {
@@ -26,6 +26,6 @@ describe('thème', () => {
   it('adapte la couleur de la barre du téléphone', () => {
     applyTheme('dark');
     const bar = document.querySelector('meta[name="theme-color"]');
-    expect(bar?.getAttribute('content')).toBe('#0F1319');
+    expect(bar?.getAttribute('content')).toBe('#000000');
   });
 });
