@@ -5,7 +5,7 @@ describe('thème', () => {
   beforeEach(() => {
     localStorage.clear();
     delete document.documentElement.dataset.theme;
-    document.head.innerHTML = '<meta name="theme-color" content="#161B17" />';
+    document.head.innerHTML = '<meta name="theme-color" content="#EEF0EB" />';
   });
 
   it('démarre sur le thème clair', () => {

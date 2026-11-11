@@ -4,7 +4,6 @@ import { getJournalEntriesByDate, getDailySummary, getWeightsSince, getCutHistor
 import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
-import { MacroCard } from '../components/MacroCard';
 import { getObjective, onObjectiveChange } from '../utils/objective';
 import { getWeightTrend, proteinTarget, carbLimit, SODIUM_LIMIT_MG, POTASSIUM_TARGET_MG } from '../utils/cut';
 import { parseHealthText, applyHealthToSummary } from '../utils/health';
@@ -244,9 +243,16 @@ export function Today({ onAddFood }: TodayProps) {
       : null;
   const quip = quipEvent ? pickMessage(quipEvent, language, today) : null;
   const showMissingBanner = yesterdayMissing && dismissed !== yesterday;
+  const metric = (key: string, label: string, value: number, goal: number, isLimit: boolean) => (
+    <article key={key} data-over={(isLimit && value > goal) || undefined}>
+      <span>{label}</span>
+      <strong>{Math.round(value)} <small>/ {isLimit ? `${t('max')} ` : ''}{goal} {unitLabel('mg')}</small></strong>
+      <progress value={Math.min(value, goal)} max={goal || 1} aria-label={label} />
+    </article>
+  );
   const details = [
-    { id: 'sodium', card: <MacroCard key="sodium" label={t('Sodium')} kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit /> },
-    { id: 'potassium', card: <MacroCard key="potassium" label={t('Potassium')} kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" /> }
+    { id: 'sodium', card: metric('sodium', t('Sodium'), totals.sodium, SODIUM_LIMIT_MG, true) },
+    { id: 'potassium', card: metric('potassium', t('Potassium'), totals.potassium, POTASSIUM_TARGET_MG, false) }
   ] as const;
   const pinned = details.filter(metric => pinnedMetrics.includes(metric.id));
   const unpinned = details.filter(metric => !pinnedMetrics.includes(metric.id));
@@ -360,13 +366,13 @@ export function Today({ onAddFood }: TodayProps) {
             <progress value={Math.min(totals.fat, fatGoal)} max={fatGoal || 1} aria-label={t('Lipides')} />
           </article>
         </div>
-        {pinned.length > 0 && <div className="cut-macros">{pinned.map(metric => metric.card)}</div>}
+        {pinned.length > 0 && <div className="bulk-macros cut-minerals">{pinned.map(item => item.card)}</div>}
         {hasMinerals(pinned) && <p className="macro-note">{mineralsNote}</p>}
         {(unpinned.length > 0 || quip) && (
           <details className="settings-group nutrition-details">
             <summary>{t('Détails nutritionnels')}</summary>
             <div className="settings-group-content">
-              <div className="cut-macros">{unpinned.map(metric => metric.card)}</div>
+              <div className="bulk-macros cut-minerals">{unpinned.map(item => item.card)}</div>
               {hasMinerals(unpinned) && <p className="macro-note">{mineralsNote}</p>}
               {quip && <p className="hero-quip" dir={isRtl(language) ? 'rtl' : 'ltr'}>{quip}</p>}
             </div>

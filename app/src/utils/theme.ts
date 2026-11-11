@@ -2,9 +2,9 @@ export type ThemeName = 'light' | 'dark';
 
 const STORAGE_KEY = 'theme';
 
-// Couleur de la barre d'état du téléphone, alignée sur l'en-tête KOUL de chaque thème
+// Couleur de la barre d'état du téléphone, alignée sur le fond de la page de chaque thème
 const BAR_COLORS: Record<ThemeName, string> = {
-  light: '#161B17',
+  light: '#EEF0EB',
   dark: '#000000'
 };
 
