@@ -340,6 +340,8 @@ export const AR: Record<string, ArabicEntry> = {
   'Corriger les calories mangées': 'صحّح السعرات المأكولة',
   '✏️ Corriger les calories mangées': '✏️ صحّح السعرات المأكولة',
   'Entre le total de la journée. Le reste (bilan, Ma sèche) se recalcule tout seul.': 'اكتب إجمالي اليوم. الباقي (الحصيلة، رحلة التنشيف) بيتحسب لوحده.',
+  'Saisis ta dépense pour voir ton objectif.': 'سجّل حرقك علشان تشوف هدفك.',
+  'Dépense : {n} kcal': 'الحرق: {n} سعرة',
   'Ajustement manuel': 'تعديل يدوي',
   'Journée de craquage': 'يوم فلتان',
   'Journée de craquage ({n} kcal min.)': 'يوم فلتان ({n} سعرة على الأقل)',

@@ -307,6 +307,8 @@ export const EN: Readonly<Record<string, string>> = {
   "Corriger les calories mangées": "Correct calories eaten",
   "✏️ Corriger les calories mangées": "✏️ Correct calories eaten",
   "Entre le total de la journée. Le reste (bilan, Ma sèche) se recalcule tout seul.": "Enter the day’s total. Your balance and cutting summary update automatically.",
+  "Saisis ta dépense pour voir ton objectif.": "Log your expenditure to see your target.",
+  "Dépense : {n} kcal": "Burned: {n} kcal",
   "Ajustement manuel": "Manual adjustment",
   "Journée de craquage": "Binge day",
   "Journée de craquage ({n} kcal min.)": "Binge day ({n} kcal min.)",

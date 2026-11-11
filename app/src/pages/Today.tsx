@@ -1,10 +1,9 @@
 import { foodDisplayName } from '../data/genericFoods';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import { getJournalEntriesByDate, getDailySummary, getWeightsSince, getCutHistoryDay, recalculateDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
 import { EditJournalModal } from '../components/EditJournalModal';
-import { CalorieRing } from '../components/CalorieRing';
 import { MacroCard } from '../components/MacroCard';
 import { getObjective, onObjectiveChange } from '../utils/objective';
 import { getWeightTrend, proteinTarget, carbLimit, SODIUM_LIMIT_MG, POTASSIUM_TARGET_MG } from '../utils/cut';
@@ -194,6 +193,7 @@ export function Today({ onAddFood }: TodayProps) {
   // On peut manger ce qu'on a brûlé, moins le déficit visé (objectif négatif)
   const budget = burned ? Math.max(burned + objective, 0) : null;
   const remaining = budget !== null ? budget - totals.caloriesEaten : null;
+  const completion = budget ? Math.min(100, (totals.caloriesEaten / budget) * 100) : 0;
 
   if (editingEntry) {
     return (
@@ -265,7 +265,7 @@ export function Today({ onAddFood }: TodayProps) {
       )}
 
       {/* Carte Bilan du jour */}
-      <section className="hero-card">
+      <section className="hero-card" data-over-budget={(remaining !== null && remaining < 0) || undefined}>
         <div className="hero-top">
           <h2>{t('Bilan du jour')}</h2>
           {(dailySummary?.weight || dailySummary?.sleepDuration) && (
@@ -280,25 +280,40 @@ export function Today({ onAddFood }: TodayProps) {
           )}
         </div>
 
-        {budget !== null && (
-          <CalorieRing eaten={totals.caloriesEaten} budget={budget} provisional={dailySummary?.caloriesBurnedProvisional} />
-        )}
-
-        <div className="stat-tiles">
-          <div className="stat-tile">
-            <span className="stat-tile-value">{totals.caloriesEaten}</span>
-            <span className="stat-tile-label">{t('kcal mangées')}</span>
-          </div>
-          {budget !== null && (
-            <div className="stat-tile">
-              <span className="stat-tile-value">{burned}</span>
-              <span className="stat-tile-label">
-                {t('kcal brûlées')}
-                {dailySummary?.caloriesBurnedProvisional && <span className="provisional-badge">{t('provisoire')}</span>}
-              </span>
+        {/* Même présentation que la prise de masse : grand chiffre et cercle de progression */}
+        <div className="bulk-hero-body">
+          <div>
+            <div className="bulk-calories">
+              <strong>{totals.caloriesEaten}</strong>
+              {budget !== null && <span>/ {budget} {unitLabel('kcal')}</span>}
             </div>
-          )}
+            <p className={remaining !== null && remaining < 0 ? 'bulk-over-budget' : undefined}>
+              {remaining === null
+                ? t('Saisis ta dépense pour voir ton objectif.')
+                : remaining > 0
+                  ? t('Encore {n} kcal pour ton objectif.', { n: remaining })
+                  : remaining === 0
+                    ? t('Objectif du jour atteint.')
+                    : t('{n} kcal au-dessus de ton objectif.', { n: -remaining })}
+            </p>
+            {burned ? (
+              <p className="hero-burned">
+                {t('Dépense : {n} kcal', { n: burned })}
+                {dailySummary?.caloriesBurnedProvisional && <span className="provisional-badge">{t('provisoire')}</span>}
+              </p>
+            ) : null}
+          </div>
+          <div
+            className="bulk-energy-ring"
+            aria-hidden="true"
+            style={{ '--completion': `${completion}%` } as CSSProperties}
+          >
+            {budget !== null ? `${Math.floor(completion)}%` : '–'}
+          </div>
         </div>
+        {budget !== null && (
+          <progress className="bulk-sr-only" value={Math.min(totals.caloriesEaten, budget)} max={budget || 1} aria-label={t('Progression des calories')} />
+        )}
 
         <div className="action-row">
           <button className="btn btn-primary" onClick={() => openSummary(today)}>
