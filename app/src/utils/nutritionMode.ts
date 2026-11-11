@@ -22,10 +22,11 @@ export function modePicture(mode: NutritionMode): string {
 export function getNutritionMode(): NutritionMode {
   const requested = new URLSearchParams(location.search).get('mode');
   if (requested === 'bulk' || requested === 'cut') return requested;
+  // La sèche reste l'espace par défaut : la prise de masse s'ouvre seulement si on l'a choisie
   try {
-    return localStorage.getItem(MODE_KEY) === 'cut' ? 'cut' : 'bulk';
+    return localStorage.getItem(MODE_KEY) === 'bulk' ? 'bulk' : 'cut';
   } catch {
-    return 'bulk';
+    return 'cut';
   }
 }
 

@@ -20,6 +20,10 @@ it('opens a shortcut in its own mode and lets the user switch without losing oth
   expect(getNutritionMode()).toBe('bulk');
 });
 
+it('opens the cutting space when no mode has been chosen yet', () => {
+  expect(getNutritionMode()).toBe('cut');
+});
+
 it('uses the original cutting photo and a separate bulking icon and manifest', () => {
   const addLink = (rel: string) => {
     const link = document.createElement('link');

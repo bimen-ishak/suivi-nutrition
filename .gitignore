@@ -1,0 +1,5 @@
+# Fichiers d'outils et du Mac, a garder hors du projet
+graphify-out/
+.codex/
+.DS_Store
+
