@@ -245,8 +245,6 @@ export function Today({ onAddFood }: TodayProps) {
   const quip = quipEvent ? pickMessage(quipEvent, language, today) : null;
   const showMissingBanner = yesterdayMissing && dismissed !== yesterday;
   const details = [
-    { id: 'carbs', card: <MacroCard key="carbs" label={t('Glucides')} kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit /> },
-    { id: 'fat', card: <MacroCard key="fat" label={t('Lipides')} kind="fat" value={totals.fat} goal={fatGoal} unit="g" /> },
     { id: 'sodium', card: <MacroCard key="sodium" label={t('Sodium')} kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit /> },
     { id: 'potassium', card: <MacroCard key="potassium" label={t('Potassium')} kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" /> }
   ] as const;
@@ -281,8 +279,8 @@ export function Today({ onAddFood }: TodayProps) {
 
       {/* Carte Bilan du jour */}
       <section className="hero-card" data-over-budget={(remaining !== null && remaining < 0) || undefined}>
-        <div className="hero-top">
-          <h2>{t('Bilan du jour')}</h2>
+        <div className="hero-top bulk-hero-top">
+          <span><Icon name="flame" />{t('Calories mangées')}</span>
           {(dailySummary?.weight || dailySummary?.sleepDuration) && (
             <div className="secondary-data">
               {dailySummary.weight && (
@@ -344,10 +342,25 @@ export function Today({ onAddFood }: TodayProps) {
       </section>
 
       <section className="cut-nutrition">
-        <div className="cut-macros">
-          <MacroCard label={t('Protéines')} kind="protein" value={totals.protein} goal={proteinGoal} unit="g" wide />
-          {pinned.map(metric => metric.card)}
+        {/* Même présentation que la prise de masse : trois cartes côte à côte */}
+        <div className="bulk-macros">
+          <article>
+            <span>{t('Protéines')}</span>
+            <strong>{Math.round(totals.protein)} <small>/ {proteinGoal} {unitLabel('g')}</small></strong>
+            <progress value={Math.min(totals.protein, proteinGoal)} max={proteinGoal || 1} aria-label={t('Progression des protéines')} />
+          </article>
+          <article data-over={totals.carbs > carbMax || undefined}>
+            <span>{t('Glucides')}</span>
+            <strong>{Math.round(totals.carbs)} <small>/ {t('max')} {carbMax} {unitLabel('g')}</small></strong>
+            <progress value={Math.min(totals.carbs, carbMax)} max={carbMax || 1} aria-label={t('Glucides')} />
+          </article>
+          <article data-over={totals.fat > fatGoal || undefined}>
+            <span>{t('Lipides')}</span>
+            <strong>{Math.round(totals.fat)} <small>/ {fatGoal} {unitLabel('g')}</small></strong>
+            <progress value={Math.min(totals.fat, fatGoal)} max={fatGoal || 1} aria-label={t('Lipides')} />
+          </article>
         </div>
+        {pinned.length > 0 && <div className="cut-macros">{pinned.map(metric => metric.card)}</div>}
         {hasMinerals(pinned) && <p className="macro-note">{mineralsNote}</p>}
         {(unpinned.length > 0 || quip) && (
           <details className="settings-group nutrition-details">

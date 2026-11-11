@@ -1,6 +1,4 @@
 export const CUT_DETAIL_METRICS = [
-  { id: 'carbs', label: 'Glucides' },
-  { id: 'fat', label: 'Lipides' },
   { id: 'sodium', label: 'Sodium' },
   { id: 'potassium', label: 'Potassium' }
 ] as const;

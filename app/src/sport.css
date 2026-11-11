@@ -266,6 +266,7 @@
 .nutrition-shell .hero-card .bulk-calories { display: flex; flex-wrap: wrap; align-items: baseline; }
 .nutrition-shell .hero-card .bulk-hero-body p { margin: 6px 0 0; color: var(--text-2); }
 .nutrition-shell .hero-card .bulk-calories span { color: var(--text-2); font-weight: 650; }
+.nutrition-shell .hero-card .bulk-hero-top > span { color: var(--text); font-weight: 650; }
 .nutrition-shell .hero-card .hero-burned { display: flex; align-items: center; gap: 6px; font-size: .85rem; }
 .hero-card[data-over-budget] .bulk-energy-ring { --signal: #b78eff; }
 .nutrition-shell .hero-card .ring-track { stroke: var(--hero-track); }
@@ -353,6 +354,11 @@
 .nutrition-shell .missing-banner { background: var(--primary-soft); border: 1px solid var(--primary-border); }
 .nutrition-shell .missing-banner p { color: var(--primary-strong); }
 .cut-nutrition { margin-bottom: 16px; }
+.cut-nutrition .bulk-macros { margin: 0 0 8px; }
+.cut-nutrition .cut-macros { margin-bottom: 8px; }
+.cut-nutrition .bulk-macros article[data-over] strong { color: var(--danger); }
+.cut-nutrition .bulk-macros article[data-over] progress::-webkit-progress-value { background: var(--danger); }
+.cut-nutrition .bulk-macros article[data-over] progress::-moz-progress-bar { background: var(--danger); }
 .cut-macros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .cut-nutrition > .macro-note, .nutrition-details .macro-note { margin-top: 8px; }
 .nutrition-details { margin: 8px 0 0; }
