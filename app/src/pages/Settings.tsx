@@ -11,7 +11,7 @@ import { ti } from '../components/Icon';
 import { SettingsGroup } from '../components/SettingsGroup';
 import { CUT_DETAIL_METRICS, getPinnedCutMetrics, savePinnedCutMetrics } from '../utils/cutDashboard';
 import { CutSetup } from '../components/CutSetup';
-import { estimatedExpenditure, getProfile } from '../utils/profile';
+import { basalMetabolism, getProfile } from '../utils/profile';
 
 const THEMES: { name: ThemeName; label: ReactNode }[] = [
   { name: 'light', label: ti('☀️ Clair') },
@@ -198,12 +198,14 @@ export function Settings({ modeSettings }: { modeSettings?: ReactNode }) {
       <SettingsGroup title={t('Objectifs de sèche')}>
         {profile && (
           <p className="section-desc">
-            {t('{sex}, {age} ans, {height} cm, {weight} kg. Dépense estimée : {n} kcal par jour.', {
+            {t('{sex}, {age} ans, {height} cm, {weight} kg. Métabolisme de base : {bmr} kcal. Plan : manger {eat} kcal, brûler {burn} kcal par jour.', {
               sex: profile.sex === 'male' ? t('Homme') : t('Femme'),
               age: profile.age,
               height: profile.height,
               weight: profile.weight,
-              n: estimatedExpenditure(profile)
+              bmr: basalMetabolism(profile),
+              eat: profile.eat,
+              burn: profile.burn
             })}
           </p>
         )}

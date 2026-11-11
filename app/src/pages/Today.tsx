@@ -15,7 +15,7 @@ import { t, unitLabel, macroLetter, locale, displayUnit } from '../i18n';
 import { ti, Icon } from '../components/Icon';
 import { localDateKeys } from '../utils/photo';
 import { getPinnedCutMetrics } from '../utils/cutDashboard';
-import { dayExpenditure, estimatedExpenditure, getProfile, macroTargets, onProfileChange } from '../utils/profile';
+import { dayExpenditure, getProfile, macroTargets, onProfileChange } from '../utils/profile';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
@@ -199,9 +199,8 @@ export function Today({ onAddFood }: TodayProps) {
   const burned = dailySummary?.caloriesBurned;
   // On peut manger ce qu'on a brûlé, moins le déficit visé (objectif négatif)
   const weight = trendWeight ?? profile?.weight;
-  // Sans dépense réelle, ou avec une dépense Santé encore partielle, on part de l'estimation du questionnaire
-  const estimate = profile ? estimatedExpenditure(profile, weight) : null;
-  const day = dayExpenditure(burned, !!dailySummary?.caloriesBurnedProvisional, estimate);
+  // Sans dépense réelle, ou avec une dépense Santé encore partielle, on part de la dépense prévue dans le plan
+  const day = dayExpenditure(burned, !!dailySummary?.caloriesBurnedProvisional, profile?.burn ?? null);
   const estimated = day.estimated ? day.value : null;
   const budget = day.value ? Math.max(day.value + objective, 0) : null;
   const targets = profile && weight ? macroTargets(weight, budget) : null;
@@ -313,7 +312,7 @@ export function Today({ onAddFood }: TodayProps) {
                     : t('{n} kcal au-dessus de ton objectif.', { n: -remaining })}
             </p>
             {estimated ? (
-              <p className="hero-burned">{t('Dépense estimée : {n} kcal', { n: estimated })}</p>
+              <p className="hero-burned">{t('À brûler : {n} kcal', { n: estimated })}</p>
             ) : null}
             {burned ? (
               <p className="hero-burned">
