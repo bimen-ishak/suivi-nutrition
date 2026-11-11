@@ -1,3 +1,4 @@
+import { foodDisplayName } from '../data/genericFoods';
 import { useState, useEffect } from 'react';
 import { getJournalEntriesByDate, getDailySummary, getWeightsSince, getCutHistoryDay, recalculateDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
@@ -11,14 +12,14 @@ import { parseHealthText, applyHealthToSummary } from '../utils/health';
 import { showToast } from '../utils/toast';
 import { pickMessage, getLanguage, isRtl, type MessageEvent } from '../utils/messages';
 import './Today.css';
-import { t, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n';
+import { t, unitLabel, macroLetter, locale, displayUnit } from '../i18n';
 import { ti, Icon } from '../components/Icon';
+import { localDateKeys } from '../utils/photo';
+import { getPinnedCutMetrics } from '../utils/cutDashboard';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
 const DISMISSED_KEY = 'dismissedMissingBurned';
-
-const dateKey = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString().split('T')[0];
 
 interface TodayProps {
   onAddFood: () => void;
@@ -53,8 +54,8 @@ export function Today({ onAddFood }: TodayProps) {
   // Jour dont on saisit le bilan à la main : aujourd'hui, ou hier quand la dépense manque
   const [summaryDate, setSummaryDate] = useState<string | null>(null);
 
-  const today = dateKey(0);
-  const yesterday = dateKey(1);
+  const [today, yesterday] = localDateKeys(2);
+  const [pinnedMetrics] = useState(getPinnedCutMetrics);
 
   useEffect(() => {
     loadTodayData();
@@ -104,43 +105,13 @@ export function Today({ onAddFood }: TodayProps) {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const date = new Date(`${dateStr}T12:00:00`);
     return new Intl.DateTimeFormat(locale(), {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     }).format(date);
-  };
-
-  const getBalanceMessage = () => {
-    if (!dailySummary?.caloriesBurned) {
-      return {
-        message: t('Saisis ta dépense pour voir le bilan'),
-        type: 'neutral'
-      };
-    }
-
-    const net = totals.caloriesEaten - dailySummary.caloriesBurned;
-    const remainingToObjective = net - objective;
-    const objLabel = ltr(objective > 0 ? `+${objective}` : `${objective}`);
-
-    if (remainingToObjective > 0) {
-      return {
-        message: t('Il faut brûler {n} kcal de plus pour atteindre {objectif}', { n: remainingToObjective, objectif: objLabel }),
-        type: 'warning'
-      };
-    } else if (remainingToObjective < 0) {
-      return {
-        message: t('Il te reste {n} kcal à manger pour atteindre {objectif}', { n: Math.abs(remainingToObjective), objectif: objLabel }),
-        type: 'success'
-      };
-    } else {
-      return {
-        message: t('Objectif atteint exactement !'),
-        type: 'success'
-      };
-    }
   };
 
   const handleSaveSummary = async (summary: DailySummary) => {
@@ -219,12 +190,10 @@ export function Today({ onAddFood }: TodayProps) {
     }
   };
 
-  const balance = getBalanceMessage();
   const burned = dailySummary?.caloriesBurned;
   // On peut manger ce qu'on a brûlé, moins le déficit visé (objectif négatif)
   const budget = burned ? Math.max(burned + objective, 0) : null;
   const remaining = budget !== null ? budget - totals.caloriesEaten : null;
-  const net = burned ? totals.caloriesEaten - burned : null;
 
   if (editingEntry) {
     return (
@@ -252,21 +221,24 @@ export function Today({ onAddFood }: TodayProps) {
   // Une phrase drôle selon la journée, la même toute la journée pour ne pas changer à chaque affichage
   const language = getLanguage();
   const quipEvent: MessageEvent | null =
-    journalEntries.length === 0
-      ? 'emptyDay'
-      : budget !== null && totals.caloriesEaten > budget
-        ? 'overBudget'
-        : totals.carbs > carbMax
-          ? 'carbsOver'
-          : totals.sodium > SODIUM_LIMIT_MG
-            ? 'sodiumOver'
-            : totals.protein >= proteinGoal
-              ? 'proteinGoal'
-              : remaining !== null && remaining > 0
-                ? 'underBudget'
-                : null;
+    remaining !== null && remaining < 0 ? 'overBudget'
+      : totals.carbs > carbMax ? 'carbsOver'
+      : totals.sodium > SODIUM_LIMIT_MG ? 'sodiumOver'
+      : totals.protein >= proteinGoal ? 'proteinGoal'
+      : remaining !== null && remaining > 0 && journalEntries.length > 0 ? 'underBudget'
+      : null;
   const quip = quipEvent ? pickMessage(quipEvent, language, today) : null;
   const showMissingBanner = yesterdayMissing && dismissed !== yesterday;
+  const details = [
+    { id: 'carbs', card: <MacroCard key="carbs" label={t('Glucides')} kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit /> },
+    { id: 'fat', card: <MacroCard key="fat" label={t('Lipides')} kind="fat" value={totals.fat} goal={70} unit="g" /> },
+    { id: 'sodium', card: <MacroCard key="sodium" label={t('Sodium')} kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit /> },
+    { id: 'potassium', card: <MacroCard key="potassium" label={t('Potassium')} kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" /> }
+  ] as const;
+  const pinned = details.filter(metric => pinnedMetrics.includes(metric.id));
+  const unpinned = details.filter(metric => !pinnedMetrics.includes(metric.id));
+  const hasMinerals = (metrics: readonly { id: string }[]) => metrics.some(metric => metric.id === 'sodium' || metric.id === 'potassium');
+  const mineralsNote = t('Sodium et potassium ne comptent que les aliments où ils sont renseignés.');
 
   return (
     <div className="today-page">
@@ -308,42 +280,29 @@ export function Today({ onAddFood }: TodayProps) {
           )}
         </div>
 
-        <CalorieRing eaten={totals.caloriesEaten} budget={budget} />
-
-        <p className={`hero-message ${balance.type}`}>{balance.message}</p>
-        {quip && (
-          <p className="hero-quip" dir={isRtl(language) ? 'rtl' : 'ltr'}>
-            {quip}
-          </p>
+        {budget !== null && (
+          <CalorieRing eaten={totals.caloriesEaten} budget={budget} provisional={dailySummary?.caloriesBurnedProvisional} />
         )}
 
         <div className="stat-tiles">
           <div className="stat-tile">
-            <span className="stat-tile-value">{dailySummary?.caloriesBurned ?? '?'}</span>
-            <span className="stat-tile-label">
-              {t('brûlées')}
-              {dailySummary?.caloriesBurnedProvisional && (
-                <span className="provisional-badge">{t('provisoire')}</span>
-              )}
-            </span>
+            <span className="stat-tile-value">{totals.caloriesEaten}</span>
+            <span className="stat-tile-label">{t('kcal mangées')}</span>
           </div>
-          <div className="stat-tile">
-            <span className={`stat-tile-value ${remaining !== null && remaining < 0 ? 'negative' : ''}`}>
-              {remaining !== null ? Math.abs(remaining) : '?'}
-            </span>
-            <span className="stat-tile-label">{remaining !== null && remaining < 0 ? t('en trop') : t('restant')}</span>
-          </div>
-          <div className="stat-tile">
-            <span className="stat-tile-value">
-              {net !== null ? ltr(`${net > 0 ? '+' : ''}${net}`) : '?'}
-            </span>
-            <span className="stat-tile-label">{t('bilan net')}</span>
-          </div>
+          {budget !== null && (
+            <div className="stat-tile">
+              <span className="stat-tile-value">{burned}</span>
+              <span className="stat-tile-label">
+                {t('kcal brûlées')}
+                {dailySummary?.caloriesBurnedProvisional && <span className="provisional-badge">{t('provisoire')}</span>}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="action-row">
           <button className="btn btn-primary" onClick={() => openSummary(today)}>
-            {dailySummary?.caloriesBurned ? ti('✏️ Modifier le bilan') : ti('📊 Saisir ma dépense')}
+            {burned ? ti('✏️ Modifier le bilan') : t('Saisir ma dépense pour voir le restant')}
           </button>
           <button className="btn btn-secondary" onClick={handleImportHealth}>
             {ti('❤️ Importer depuis Santé')}
@@ -351,16 +310,22 @@ export function Today({ onAddFood }: TodayProps) {
         </div>
       </section>
 
-      {/* Macros et minéraux */}
-      <section className="macro-grid">
-        <MacroCard label={t('Protéines')} kind="protein" value={totals.protein} goal={proteinGoal} unit="g" />
-        <MacroCard label={t('Glucides')} kind="carbs" value={totals.carbs} goal={carbMax} unit="g" isLimit />
-        <MacroCard label={t('Lipides')} kind="fat" value={totals.fat} goal={70} unit="g" />
-        <MacroCard label={t('Sodium')} kind="sodium" value={totals.sodium} goal={SODIUM_LIMIT_MG} unit="mg" isLimit />
-        <MacroCard label={t('Potassium')} kind="potassium" value={totals.potassium} goal={POTASSIUM_TARGET_MG} unit="mg" wide />
-        <p className="macro-note">
-          {t('Sodium et potassium ne comptent que les aliments où ils sont renseignés.')}
-        </p>
+      <section className="cut-nutrition">
+        <div className="cut-macros">
+          <MacroCard label={t('Protéines')} kind="protein" value={totals.protein} goal={proteinGoal} unit="g" wide />
+          {pinned.map(metric => metric.card)}
+        </div>
+        {hasMinerals(pinned) && <p className="macro-note">{mineralsNote}</p>}
+        {(unpinned.length > 0 || quip) && (
+          <details className="settings-group nutrition-details">
+            <summary>{t('Détails nutritionnels')}</summary>
+            <div className="settings-group-content">
+              <div className="cut-macros">{unpinned.map(metric => metric.card)}</div>
+              {hasMinerals(unpinned) && <p className="macro-note">{mineralsNote}</p>}
+              {quip && <p className="hero-quip" dir={isRtl(language) ? 'rtl' : 'ltr'}>{quip}</p>}
+            </div>
+          </details>
+        )}
       </section>
 
       {/* Carte Aliments du jour */}
@@ -396,7 +361,7 @@ export function Today({ onAddFood }: TodayProps) {
                           </div>
                           <div className="entry-main">
                             <div className="entry-food">
-                              <strong>{entry.foodName}</strong>
+                              <strong>{foodDisplayName(entry.foodName, entry.foodSource)}</strong>
                               <span className="entry-quantity">
                                 {entry.quantity}{displayUnit(entry.unit)}
                                 {entry.calculation && (

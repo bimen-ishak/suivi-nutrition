@@ -8,6 +8,14 @@ export function localDateKey(date = new Date()): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
+export function localDateKeys(count: number, end = new Date()): string[] {
+  return Array.from({ length: count }, (_, offset) => {
+    const date = new Date(end);
+    date.setDate(date.getDate() - offset);
+    return localDateKey(date);
+  });
+}
+
 /** Réduit une photo pour limiter la place prise sur le téléphone et dans les sauvegardes */
 export async function compressPhoto(file: File, maxSize = MAX_SIZE, quality = JPEG_QUALITY): Promise<string> {
   const url = URL.createObjectURL(file);

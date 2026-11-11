@@ -12,6 +12,7 @@ import { showToast } from '../utils/toast';
 import { pickMessage } from '../utils/messages';
 import './AddFood.css';
 import { t } from '../i18n';
+import { localDateKey } from '../utils/photo';
 
 interface AddFoodProps {
   onComplete?: () => void;
@@ -136,7 +137,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
 
       // Créer l'entrée dans le journal
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = localDateKey(now);
       const time = now.toTimeString().slice(0, 5);
       const nowISO = now.toISOString();
 
@@ -145,6 +146,15 @@ export function AddFood({ onComplete }: AddFoodProps) {
         foodId: selectedFood.id,
         foodName: selectedFood.name,
         foodSource: selectedFood.source,
+        nutritionSnapshot: {
+          kcal_per_100g: selectedFood.kcal_per_100g,
+          protein: selectedFood.protein,
+          carbs: selectedFood.carbs,
+          fat: selectedFood.fat,
+          sodium: selectedFood.sodium,
+          potassium: selectedFood.potassium,
+          portions: selectedFood.portions.map(portion => ({ ...portion }))
+        },
         date: today,
         time,
         meal: entryData.meal,
@@ -193,7 +203,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
         foodId: ONE_OFF_FOOD_ID,
         foodName: data.name,
         foodSource: 'estimation',
-        date: nowISO.split('T')[0],
+        date: localDateKey(now),
         time: now.toTimeString().slice(0, 5),
         meal: data.meal,
         quantity: data.quantity,

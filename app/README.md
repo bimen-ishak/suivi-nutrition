@@ -1,11 +1,12 @@
 # 🥗 Suivi Nutrition
 
-Application personnelle de **suivi nutritionnel 100 % hors ligne** (PWA), conçue pour un
+Application personnelle de **suivi nutritionnel local avec suivi manuel hors ligne** (PWA), conçue pour un
 iPhone (17 Pro Max) mais utilisable sur n'importe quel navigateur moderne.
 
-- **0 € de coût** : aucun serveur, aucune API externe, aucune inscription.
-- **100 % privé** : toutes les données restent sur l'appareil (IndexedDB + localStorage).
-- **Fonctionne sans connexion** : une fois installée, l'app marche en mode avion.
+- **Suivi manuel sans compte** : aucun serveur applicatif requis.
+- **Stockage local** : journal, aliments et photos de suivi restent sur l'appareil (IndexedDB + localStorage).
+- **Suivi hors ligne** : une fois installée et mise en cache, la saisie manuelle et la consultation fonctionnent en mode avion.
+- **Analyse IA facultative en ligne** : les photos sélectionnées pour lire une étiquette ou estimer un repas sont envoyées à Google Gemini ou à OpenRouter (qui les transmet au modèle choisi), uniquement en appuyant sur « Envoyer pour analyse ». Cette fonction nécessite Internet, un compte fournisseur et une clé personnelle. Les tarifs et limites dépendent du fournisseur. Les clés restent en local et sont exclues des sauvegardes.
 - **Export Excel** compatible avec un tableau de suivi existant (3 feuilles : Bilan, Journal, Photos).
 
 ---

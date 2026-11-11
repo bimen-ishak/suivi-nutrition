@@ -69,6 +69,7 @@ export interface JournalEntry {
   quantity: number;
   unit: 'g' | 'ml' | string;     // ou nom de portion personnalisée
   calculation?: CalculationInfo;
+  nutritionSnapshot?: OneOffValues & { portions: Portion[] }; // recette et portions au moment de la saisie
   oneOff?: OneOffValues;         // présent si l'aliment n'est pas dans la bibliothèque
   // Valeurs calculées (dénormalisées)
   kcal: number;

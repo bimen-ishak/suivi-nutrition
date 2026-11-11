@@ -1,29 +1,32 @@
 import './CalorieRing.css';
-import { t } from '../i18n';
+import type { CSSProperties } from 'react';
+import { locale, t } from '../i18n';
 
 interface CalorieRingProps {
   eaten: number;
-  /** Calories à ne pas dépasser aujourd'hui, ou null tant que la dépense est inconnue */
-  budget: number | null;
+  budget: number;
+  provisional?: boolean;
 }
 
 const RADIUS = 66;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function CalorieRing({ eaten, budget }: CalorieRingProps) {
-  const progress = budget && budget > 0 ? Math.min(eaten / budget, 1) : 0;
-  const over = budget !== null && eaten > budget;
+export function CalorieRing({ eaten, budget, provisional }: CalorieRingProps) {
+  const remaining = Math.round((budget - eaten) * 10) / 10;
+  const over = remaining < 0;
+  const progress = budget > 0 ? Math.max(0, Math.min(eaten / budget, 1)) : 1;
+  const excess = Math.min(1, Math.max(0, -remaining) / (budget > 0 ? budget / 2 : 500));
+  const label = over ? t('kcal au-dessus de la limite') : remaining === 0 ? t('Limite du jour atteinte') : t('kcal restantes');
 
   return (
-    <div
-      className="calorie-ring"
-      role="img"
-      aria-label={budget !== null ? t('{eaten} kcal mangées sur {budget}', { eaten, budget }) : t('{eaten} kcal mangées', { eaten })}
-    >
+    <div className={`calorie-ring${over ? ' over' : ''}`} style={{
+      '--budget-use': `${progress * 100}%`,
+      '--budget-over': `${excess * 100}%`
+    } as CSSProperties}>
       <svg viewBox="0 0 160 160" aria-hidden="true">
         <circle className="ring-track" cx="80" cy="80" r={RADIUS} />
         <circle
-          className={`ring-progress ${over ? 'over' : ''}`}
+          className="ring-progress"
           cx="80"
           cy="80"
           r={RADIUS}
@@ -31,10 +34,10 @@ export function CalorieRing({ eaten, budget }: CalorieRingProps) {
           strokeDashoffset={CIRCUMFERENCE * (1 - progress)}
         />
       </svg>
-      <div className="ring-center">
-        <span className="ring-value">{eaten}</span>
-        <span className="ring-label">{t('kcal mangées')}</span>
-        {budget !== null && <span className="ring-goal">{t('sur {budget}', { budget })}</span>}
+      <div className="ring-center" role="status">
+        <strong className="ring-value">{Math.abs(remaining).toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
+        <span className="ring-label">{label}</span>
+        {provisional && <span className="ring-goal">{t('Estimation')}</span>}
       </div>
     </div>
   );

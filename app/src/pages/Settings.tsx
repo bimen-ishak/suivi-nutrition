@@ -5,25 +5,23 @@ import { getObjective, setObjective } from '../utils/objective';
 import { getTheme, setTheme, type ThemeName } from '../utils/theme';
 import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
 import { getOpenRouterKey, setOpenRouterKey, clearOpenRouterKey, getProvider, setProvider, type Provider } from '../utils/aiReader';
-import { t, locale, getLanguage, setLanguage, type Language } from '../i18n';
+import { t, locale, getLanguage, setLanguage, LANGUAGES } from '../i18n';
 import './Settings.css';
 import { ti } from '../components/Icon';
-
-const LANGUAGES: { name: Language; label: ReactNode }[] = [
-  { name: 'fr', label: '🇫🇷 Français' },
-  { name: 'ar-EG', label: '🇪🇬 عربي مصري' }
-];
+import { SettingsGroup } from '../components/SettingsGroup';
+import { CUT_DETAIL_METRICS, getPinnedCutMetrics, savePinnedCutMetrics } from '../utils/cutDashboard';
 
 const THEMES: { name: ThemeName; label: ReactNode }[] = [
   { name: 'light', label: ti('☀️ Clair') },
   { name: 'dark', label: ti('🌙 Sombre') }
 ];
 
-export function Settings() {
+export function Settings({ modeSettings }: { modeSettings?: ReactNode }) {
   const [lastBackup, setLastBackup] = useState<string | null>(
     localStorage.getItem('lastBackupDate')
   );
   const [objective, setObjectiveState] = useState<number>(getObjective());
+  const [pinnedMetrics, setPinnedMetrics] = useState(getPinnedCutMetrics);
   const [theme, setThemeState] = useState<ThemeName>(getTheme());
   const language = getLanguage();
   const [provider, setProviderState] = useState<Provider>(getProvider());
@@ -152,6 +150,7 @@ export function Settings() {
   };
 
   const handleSaveObjective = () => {
+    savePinnedCutMetrics(pinnedMetrics);
     setObjective(objective);
     alert(t('Objectif enregistré !'));
   };
@@ -178,73 +177,7 @@ export function Settings() {
         <h1>{ti('⚙️ Paramètres')}</h1>
       </div>
 
-      {/* Section Sauvegarde */}
-      <div className="settings-section">
-        <h2>{ti('💾 Sauvegarde et restauration')}</h2>
-        <p className="section-desc">
-          {t('Sauvegarde tes données en JSON pour les protéger contre la perte (effacement Safari après 7 jours d\'inactivité).')}
-        </p>
-
-        {lastBackup && (
-          <p className="last-backup">{t('Dernière sauvegarde :')} {lastBackup}</p>
-        )}
-
-        <div className="settings-buttons">
-          <button
-            className="btn btn-primary btn-block"
-            onClick={handleBackup}
-            disabled={exporting}
-          >
-            {exporting ? ti('⏳ Export en cours...') : ti('📥 Sauvegarder toutes mes données (JSON)')}
-          </button>
-          <button
-            className="btn btn-secondary btn-block"
-            onClick={handleRestore}
-            disabled={importing}
-          >
-            {importing ? ti('⏳ Import en cours...') : ti('📤 Restaurer mes données (JSON)')}
-          </button>
-        </div>
-      </div>
-
-      {/* Section Export Excel */}
-      <div className="settings-section">
-        <h2>{ti('📊 Export Excel')}</h2>
-        <p className="section-desc">
-          {t('Exporte tes données au format .xlsx compatible avec ton tableau existant (3 feuilles : Bilan quotidien, Journal, Photos).')}
-        </p>
-        <div className="period-selector">
-          <button
-            className={`period-btn ${exportPeriod === '7d' ? 'active' : ''}`}
-            onClick={() => setExportPeriod('7d')}
-          >
-            {t('7 derniers jours')}
-          </button>
-          <button
-            className={`period-btn ${exportPeriod === '30d' ? 'active' : ''}`}
-            onClick={() => setExportPeriod('30d')}
-          >
-            {t('30 derniers jours')}
-          </button>
-          <button
-            className={`period-btn ${exportPeriod === 'all' ? 'active' : ''}`}
-            onClick={() => setExportPeriod('all')}
-          >
-            {t('Tout')}
-          </button>
-        </div>
-        <button
-          className="btn btn-primary btn-block"
-          onClick={handleExportExcel}
-          disabled={exporting}
-        >
-          {exporting ? ti('⏳ Export en cours...') : ti('📥 Exporter en Excel (.xlsx)')}
-        </button>
-      </div>
-
-      {/* Section Objectif */}
-      <div className="settings-section">
-        <h2>{ti('🎯 Objectif calorique')}</h2>
+      <SettingsGroup title={t('Objectifs de sèche')}>
         <p className="section-desc">
           {t('Déficit calorique quotidien souhaité (en kcal, négatif = déficit).')}
         </p>
@@ -254,11 +187,9 @@ export function Settings() {
             value={objective}
             onChange={(e) => setObjectiveState(parseInt(e.target.value) || 0)}
             step={50}
+            aria-label={t('Objectif calorique')}
           />
           <span className="unit">{t('kcal/jour')}</span>
-          <button className="btn btn-primary" onClick={handleSaveObjective}>
-            {t('Enregistrer')}
-          </button>
         </div>
         <div className="objective-presets">
           {[-1000, -750, -500, -250, 0].map(preset => (
@@ -271,58 +202,27 @@ export function Settings() {
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Section Thème */}
-      <div className="settings-section">
-        <h2>{ti('🎨 Thème')}</h2>
-        <p className="section-desc">{t('Choisis l\'ambiance de l\'application.')}</p>
-        <div className="objective-presets">
-          {THEMES.map(({ name, label }) => (
-            <button
-              key={name}
-              className={`preset-btn ${theme === name ? 'active' : ''}`}
-              aria-pressed={theme === name}
-              onClick={() => {
-                setTheme(name);
-                setThemeState(name);
-              }}
-            >
-              {label}
-            </button>
+        <fieldset className="settings-metrics">
+          <legend>{t('À afficher sur l’accueil')}</legend>
+          {CUT_DETAIL_METRICS.map(({ id, label }) => (
+            <label key={id}>
+              <input type="checkbox" checked={pinnedMetrics.includes(id)} onChange={event => {
+                const checked = event.target.checked;
+                setPinnedMetrics(current => checked ? [...current, id] : current.filter(metric => metric !== id));
+              }} />
+              {t(label)}
+            </label>
           ))}
-        </div>
-      </div>
+        </fieldset>
+        <button className="btn btn-primary" onClick={handleSaveObjective}>{t('Enregistrer')}</button>
+      </SettingsGroup>
 
-      {/* Section Langue des messages drôles */}
-      <div className="settings-section">
-        <h2>{ti('😏 Messages drôles')}</h2>
-        <p className="section-desc">
-          {t('L\'app te charrie gentiment quand tu ajoutes un aliment ou dépasses ton budget. Choisis la langue de ses phrases.')}
-        </p>
-        <div className="objective-presets">
-          {LANGUAGES.map(({ name, label }) => (
-            <button
-              key={name}
-              className={`preset-btn ${language === name ? 'active' : ''}`}
-              aria-pressed={language === name}
-              onClick={() => {
-                setLanguage(name);
-                // Recharge la page : tous les textes et le sens d'écriture changent d'un coup
-                window.location.reload();
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {modeSettings}
 
-      {/* Section Lecture d'étiquette */}
-      <div className="settings-section">
-        <h2>{ti('🤖 Lecture d\'étiquette')}</h2>
+      <SettingsGroup title={t('Assistant photo')}>
         <p className="section-desc">
           {t("Prends en photo un produit ou ton assiette : l'IA remplit les valeurs pour toi. Choisis laquelle utiliser.")}
+          {' '}{t('L’analyse IA est facultative : elle envoie les photos au fournisseur choisi et nécessite Internet. Le suivi manuel reste hors ligne.')}
         </p>
         <div className="objective-presets">
           <button
@@ -423,22 +323,126 @@ export function Settings() {
             )}
           </>
         )}
-      </div>
 
-      {/* Section Import */}
-      <div className="settings-section">
-        <h2>{ti('📥 Importer mon historique')}</h2>
-        <p className="section-desc">
-          {t('Ajoute tes anciennes journées à Ma sèche et tes anciennes photos. Ton journal et tes données actuelles ne changent pas.')}
-        </p>
-        <button className="btn btn-secondary btn-block" onClick={handleImportHistory} disabled={importing}>
-          {importing ? ti('⏳ Import en cours...') : ti('📥 Choisir le fichier')}
-        </button>
-      </div>
+      </SettingsGroup>
 
-      {/* Section Infos */}
-      <div className="settings-section">
-        <h2>{t('ℹ️ Informations')}</h2>
+      <SettingsGroup title={t('Historique et sauvegardes')}>
+        <section className="settings-subsection">
+          <h3>{ti('💾 Sauvegarde et restauration')}</h3>
+          <p className="section-desc">
+            {t('Sauvegarde tes données en JSON pour les protéger contre la perte (effacement Safari après 7 jours d\'inactivité).')}
+          </p>
+
+          {lastBackup && (
+            <p className="last-backup">{t('Dernière sauvegarde :')} {lastBackup}</p>
+          )}
+
+          <div className="settings-buttons">
+            <button
+              className="btn btn-primary btn-block"
+              onClick={handleBackup}
+              disabled={exporting}
+            >
+              {exporting ? ti('⏳ Export en cours...') : ti('📥 Sauvegarder toutes mes données (JSON)')}
+            </button>
+            <button
+              className="btn btn-secondary btn-block"
+              onClick={handleRestore}
+              disabled={importing}
+            >
+              {importing ? ti('⏳ Import en cours...') : ti('📤 Restaurer mes données (JSON)')}
+            </button>
+          </div>
+        </section>
+        <section className="settings-subsection">
+          <h3>{ti('📊 Export Excel')}</h3>
+          <p className="section-desc">
+            {t('Exporte tes données au format .xlsx compatible avec ton tableau existant (3 feuilles : Bilan quotidien, Journal, Photos).')}
+          </p>
+          <div className="period-selector">
+            <button
+              className={`period-btn ${exportPeriod === '7d' ? 'active' : ''}`}
+              onClick={() => setExportPeriod('7d')}
+            >
+              {t('7 derniers jours')}
+            </button>
+            <button
+              className={`period-btn ${exportPeriod === '30d' ? 'active' : ''}`}
+              onClick={() => setExportPeriod('30d')}
+            >
+              {t('30 derniers jours')}
+            </button>
+            <button
+              className={`period-btn ${exportPeriod === 'all' ? 'active' : ''}`}
+              onClick={() => setExportPeriod('all')}
+            >
+              {t('Tout')}
+            </button>
+          </div>
+          <button
+            className="btn btn-primary btn-block"
+            onClick={handleExportExcel}
+            disabled={exporting}
+          >
+            {exporting ? ti('⏳ Export en cours...') : ti('📥 Exporter en Excel (.xlsx)')}
+          </button>
+        </section>
+        <section className="settings-subsection">
+          <h3>{ti('📥 Importer mon historique')}</h3>
+          <p className="section-desc">
+            {t('Ajoute tes anciennes journées à Ma sèche et tes anciennes photos. Ton journal et tes données actuelles ne changent pas.')}
+          </p>
+          <button className="btn btn-secondary btn-block" onClick={handleImportHistory} disabled={importing}>
+            {importing ? ti('⏳ Import en cours...') : ti('📥 Choisir le fichier')}
+          </button>
+        </section>
+      </SettingsGroup>
+
+      <SettingsGroup title={t('Langue et apparence')}>
+        <section className="settings-subsection">
+          <h3>{ti('🎨 Thème')}</h3>
+          <p className="section-desc">{t('Choisis l\'ambiance de l\'application.')}</p>
+          <div className="objective-presets">
+            {THEMES.map(({ name, label }) => (
+              <button
+                key={name}
+                className={`preset-btn ${theme === name ? 'active' : ''}`}
+                aria-pressed={theme === name}
+                onClick={() => {
+                  setTheme(name);
+                  setThemeState(name);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="settings-subsection">
+          <h3>{t('Langue')}</h3>
+          <p className="section-desc">
+            {t('Langue de l’application et des messages.')}
+          </p>
+          <div className="objective-presets">
+            {LANGUAGES.map(({ id, label }) => (
+              <button
+                key={id}
+                className={`preset-btn ${language === id ? 'active' : ''}`}
+                aria-pressed={language === id}
+                onClick={() => {
+                  setLanguage(id);
+                  // Recharge la page : tous les textes et le sens d'écriture changent d'un coup
+                  window.location.reload();
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </section>
+      </SettingsGroup>
+
+      <SettingsGroup title={t('Informations')}>
         <div className="info-list">
           <div className="info-item">
             <span className="info-label">{t('Version')}</span>
@@ -450,14 +454,15 @@ export function Settings() {
           </div>
           <div className="info-item">
             <span className="info-label">{t('Stockage')}</span>
-            <span className="info-value">{t('100% local (IndexedDB)')}</span>
+            <span className="info-value">{t('Suivi local ; analyse IA en ligne (facultative)')}</span>
           </div>
           <div className="info-item">
             <span className="info-label">{t('Coût')}</span>
             <span className="info-value">{t('0 € — aucun serveur')}</span>
           </div>
         </div>
-      </div>
+
+      </SettingsGroup>
     </div>
   );
 }

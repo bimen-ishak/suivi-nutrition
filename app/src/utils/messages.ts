@@ -1,4 +1,4 @@
-// Messages drôles de l'application, en français et en arabe égyptien
+// Messages drôles de l'application.
 // Le ton : direct, franc, taquin sur les choix d'aliments, jamais sur le corps ni la valeur de la personne.
 
 import { getLanguage, setLanguage, isRtl, type Language } from '../i18n';
@@ -200,6 +200,19 @@ export const MESSAGES: Record<Language, Record<MessageEvent, string[]>> = {
       'امبارح لغز. حرقت كام؟ محدش عارف.',
       'الصحة ملقتش حاجة. ساعتك مضربة.'
     ]
+  },
+  en: {
+    newFood: ['New food added. Your fridge is getting interesting.', 'One more thing on the menu.', 'Your food library has a new regular.'],
+    entryAdded: ['Logged. Your future self has the receipt.', 'On the record.', 'Another meal in the books.'],
+    oneOff: ['Logged for today. A guest appearance.', 'One-off food, officially on the record.', 'Today’s special is logged.'],
+    healthImported: ['Health data imported. Your watch did its homework.', 'Your activity data is in.', 'Your watch and your journal are caught up.'],
+    overBudget: ['Over today’s budget. It happens.', 'That’s over the limit for today.', 'Today’s log is over budget.'],
+    underBudget: ['Still room in today’s budget.', 'You’ve got calories left today.', 'Some of today’s budget is still available.'],
+    emptyDay: ['Your journal is waiting for its first meal.', 'Nothing logged yet.', 'An empty page, for now.'],
+    proteinGoal: ['Protein goal reached.', 'Protein is covered for today.', 'That’s today’s protein goal checked off.'],
+    carbsOver: ['Carbs are over today’s limit.', 'The carbs showed up in force today.', 'Carbs went past the daily target.'],
+    sodiumOver: ['Sodium is above today’s limit.', 'The salt shaker had a busy day.', 'Today’s sodium total is over the limit.'],
+    missingBurned: ['Yesterday’s calories burned are still missing.', 'Your watch may have yesterday’s burn data.', 'Log yesterday’s burn to complete the day.']
   }
 };
 

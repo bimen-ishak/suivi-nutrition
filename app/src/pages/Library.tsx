@@ -1,3 +1,4 @@
+import { foodDisplayName } from '../data/genericFoods';
 import { useState, useEffect } from 'react';
 import type { Food } from '../types';
 import { getAllFoods, createFood, updateFood, deleteFood } from '../db';
@@ -97,6 +98,7 @@ export function Library() {
   const filteredFoods = foods.filter(food => {
     const query = searchQuery.toLowerCase();
     const matchesSearch = food.name.toLowerCase().includes(query) ||
+      foodDisplayName(food.name, food.source).toLowerCase().includes(query) ||
                          (food.brand?.toLowerCase().includes(query) ?? false);
 
     if (activeTab === 'mine') {
@@ -190,7 +192,7 @@ export function Library() {
           <div className="confirm-modal">
             <h3>{t('Supprimer cet aliment ?')}</h3>
             <p>
-              <strong>{showDeleteConfirm.name}</strong>
+              <strong>{foodDisplayName(showDeleteConfirm.name, showDeleteConfirm.source)}</strong>
               {showDeleteConfirm.brand && ` (${showDeleteConfirm.brand})`}
             </p>
             <p className="warning">

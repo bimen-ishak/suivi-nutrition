@@ -3,7 +3,7 @@ import type { Food } from '../types';
 import { FoodCard } from './FoodCard';
 import { BarcodeScanner } from './BarcodeScanner';
 import { QuickEntry, type QuickEntryData } from './QuickEntry';
-import { GENERIC_FOODS, GENERIC_CATEGORIES, searchGenericFoods, type GenericFood } from '../data/genericFoods';
+import { foodDisplayName, GENERIC_FOODS, GENERIC_CATEGORIES, searchGenericFoods, type GenericFood } from '../data/genericFoods';
 import './FoodSelector.css';
 import { t, unitLabel } from '../i18n';
 import { ti, Icon } from './Icon';
@@ -29,8 +29,15 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
   // Filtrer les aliments fréquents (triés par fréquence)
   const frequentFoods = foods
     .filter(f => f.frequency > 0)
-    .sort((a, b) => b.frequency - a.frequency)
+    .sort((a, b) => b.frequency - a.frequency || (b.lastUsed ?? '').localeCompare(a.lastUsed ?? ''))
     .slice(0, 20);
+
+  const frequentButton = (food: Food) => (
+    <button key={food.id} type="button" className="frequent-food" onClick={() => onSelectFood(food)}>
+      <span><strong>{foodDisplayName(food.name, food.source)}</strong>{food.brand && <small>{food.brand}</small>}</span>
+      <span aria-hidden="true">+</span>
+    </button>
+  );
 
   // Résultats de recherche dans les aliments personnels
   const personalResults = useMemo(() => {
@@ -38,6 +45,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
     const query = searchQuery.toLowerCase();
     return foods.filter(food =>
       food.name.toLowerCase().includes(query) ||
+      foodDisplayName(food.name, food.source).toLowerCase().includes(query) ||
       (food.brand?.toLowerCase().includes(query) ?? false)
     );
   }, [searchQuery, foods]);
@@ -126,13 +134,15 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
                 </button>
               </div>
             ) : (
-              <div className="foods-list">
-                {frequentFoods.map(food => (
-                  <div key={food.id} onClick={() => onSelectFood(food)}>
-                    <FoodCard food={food} compact />
-                  </div>
-                ))}
-              </div>
+              <>
+                <div className="frequent-foods">{frequentFoods.slice(0, 6).map(frequentButton)}</div>
+                {frequentFoods.length > 6 && (
+                  <details className="settings-group frequent-more">
+                    <summary>{t('Plus d’aliments fréquents')}</summary>
+                    <div className="settings-group-content frequent-foods">{frequentFoods.slice(6).map(frequentButton)}</div>
+                  </details>
+                )}
+              </>
             )}
           </div>
         )}

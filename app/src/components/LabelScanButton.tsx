@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { compressPhoto } from '../utils/photo';
 import { LabelReadError, type LabelResult } from '../utils/labelReader';
-import { getActiveKey, analysePhotos } from '../utils/aiReader';
+import { getActiveKey, getProvider, analysePhotos } from '../utils/aiReader';
 import './LabelScanButton.css';
 import { t, unitLabel } from '../i18n';
 import { ti } from './Icon';
@@ -37,6 +37,7 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<File[]>([]);
   const [message, setMessage] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
+  const providerName = getProvider() === 'openrouter' ? t('OpenRouter et le fournisseur du modèle') : 'Google Gemini';
   const hasKey = getActiveKey() !== null;
 
   const previews = useMemo(() => pending.map(file => URL.createObjectURL(file)), [pending]);
@@ -139,6 +140,9 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
           </button>
         </div>
       )}
+      <p className="label-scan-tip">
+        {t('Les photos sélectionnées sont envoyées à {provider} pour analyse uniquement quand tu appuies sur « Envoyer pour analyse ». Une connexion Internet est nécessaire.', { provider: providerName })}
+      </p>
       {message && <p className={`label-scan-message ${message.kind}`}>{message.text}</p>}
     </div>
   );

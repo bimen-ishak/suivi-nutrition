@@ -1,6 +1,7 @@
 // Vérifie que chaque texte de l'application a sa traduction en arabe égyptien
 import { describe, it, expect } from 'vitest';
 import { AR } from './ar';
+import { EN } from './en';
 import { GENERIC_FOODS, GENERIC_CATEGORIES } from '../data/genericFoods';
 import { MEAL_TYPES } from '../types';
 
@@ -80,5 +81,19 @@ describe('traductions arabes', () => {
       .map(([key]) => key);
     // Quelques textes restent identiques dans les deux langues (noms propres, symboles)
     expect(latinOnly.sort()).toEqual(['Google AI Studio']);
+  });
+});
+
+describe('English translations', () => {
+  it('covers the interface, generic food database, and meal types', () => {
+    const keys = new Set([...usedKeys().map(({ key }) => key), ...Object.keys(AR), ...MEAL_TYPES, '{n} aliment']);
+    expect([...keys].filter(key => !EN[key]?.trim())).toEqual([]);
+  });
+
+  it('preserves interpolation parameters', () => {
+    const mismatches = Object.entries(EN).filter(([key, value]) =>
+      JSON.stringify(placeholders(key)) !== JSON.stringify(placeholders(value))
+    );
+    expect(mismatches).toEqual([]);
   });
 });

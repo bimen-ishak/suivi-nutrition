@@ -1,3 +1,4 @@
+import { foodDisplayName } from '../data/genericFoods';
 import { useState, useEffect } from 'react';
 import type { Food, CalculationType, MealType } from '../types';
 import { MEAL_TYPES } from '../types';
@@ -87,6 +88,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
     description: string;
   }) => {
     setQuantity(result.finalQuantity.toString());
+    setSelectedUnit('g');
     setCalculation({
       type: result.type,
       values: result.values,
@@ -134,7 +136,7 @@ export function QuantityEntry({ food, onSave, onCancel }: QuantityEntryProps) {
       <div className="quantity-content">
         {/* Nom de l'aliment */}
         <div className="food-name-display">
-          <h3>{food.name}</h3>
+          <h3>{foodDisplayName(food.name, food.source)}</h3>
           {food.brand && <p className="food-brand">{food.brand}</p>}
         </div>
 

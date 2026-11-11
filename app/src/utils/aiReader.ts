@@ -44,8 +44,8 @@ export function getActiveKey(): string | null {
 }
 
 /** Lit ou estime ce qu'il y a sur les photos avec l'IA choisie */
-export function analysePhotos(images: string[]): Promise<LabelResult> {
+export function analysePhotos(images: string[], context = ''): Promise<LabelResult> {
   const key = getActiveKey();
   if (!key) return Promise.reject(new Error('Aucune clé enregistrée'));
-  return getProvider() === 'openrouter' ? readPhotosWithOpenRouter(images, key) : readFoodPhotos(images, key);
+  return getProvider() === 'openrouter' ? readPhotosWithOpenRouter(images, key, undefined, context) : readFoodPhotos(images, key, undefined, context);
 }
