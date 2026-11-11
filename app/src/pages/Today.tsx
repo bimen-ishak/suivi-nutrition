@@ -15,7 +15,7 @@ import { t, unitLabel, macroLetter, locale, displayUnit } from '../i18n';
 import { ti, Icon } from '../components/Icon';
 import { localDateKeys } from '../utils/photo';
 import { getPinnedCutMetrics } from '../utils/cutDashboard';
-import { estimatedExpenditure, getProfile, macroTargets, onProfileChange } from '../utils/profile';
+import { dayExpenditure, estimatedExpenditure, getProfile, macroTargets, onProfileChange } from '../utils/profile';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
@@ -199,10 +199,11 @@ export function Today({ onAddFood }: TodayProps) {
   const burned = dailySummary?.caloriesBurned;
   // On peut manger ce qu'on a brûlé, moins le déficit visé (objectif négatif)
   const weight = trendWeight ?? profile?.weight;
-  // Sans dépense réelle (Santé ou saisie), on part de la dépense estimée par le questionnaire
-  const estimated = !burned && profile ? estimatedExpenditure(profile, weight) : null;
-  const expenditure = burned || estimated;
-  const budget = expenditure ? Math.max(expenditure + objective, 0) : null;
+  // Sans dépense réelle, ou avec une dépense Santé encore partielle, on part de l'estimation du questionnaire
+  const estimate = profile ? estimatedExpenditure(profile, weight) : null;
+  const day = dayExpenditure(burned, !!dailySummary?.caloriesBurnedProvisional, estimate);
+  const estimated = day.estimated ? day.value : null;
+  const budget = day.value ? Math.max(day.value + objective, 0) : null;
   const targets = profile && weight ? macroTargets(weight, budget) : null;
   const proteinGoal = targets?.protein ?? (weight ? proteinTarget(weight) : DEFAULT_PROTEIN_GOAL);
   const carbMax = targets?.carbs ?? (weight ? carbLimit(weight) : DEFAULT_CARB_LIMIT);
@@ -311,13 +312,14 @@ export function Today({ onAddFood }: TodayProps) {
                     ? t('Objectif du jour atteint.')
                     : t('{n} kcal au-dessus de ton objectif.', { n: -remaining })}
             </p>
+            {estimated ? (
+              <p className="hero-burned">{t('Dépense estimée : {n} kcal', { n: estimated })}</p>
+            ) : null}
             {burned ? (
               <p className="hero-burned">
-                {t('Dépense : {n} kcal', { n: burned })}
+                {estimated ? t('Santé pour l’instant : {n} kcal', { n: burned }) : t('Dépense : {n} kcal', { n: burned })}
                 {dailySummary?.caloriesBurnedProvisional && <span className="provisional-badge">{t('provisoire')}</span>}
               </p>
-            ) : estimated ? (
-              <p className="hero-burned">{t('Dépense estimée : {n} kcal', { n: estimated })}</p>
             ) : null}
           </div>
           <div

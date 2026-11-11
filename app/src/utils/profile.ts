@@ -91,6 +91,20 @@ export function estimatedExpenditure(profile: CutProfile, weight = profile.weigh
 }
 
 /**
+ * Dépense retenue pour la journée. Une dépense Santé de la journée en cours ne compte que
+ * jusqu'à l'heure de l'import : tant qu'elle reste sous l'estimation, on garde l'estimation.
+ */
+export function dayExpenditure(
+  burned: number | undefined,
+  provisional: boolean,
+  estimate: number | null
+): { value: number | null; estimated: boolean } {
+  if (burned && !(provisional && estimate !== null && estimate > burned)) return { value: burned, estimated: false };
+  if (estimate !== null) return { value: estimate, estimated: true };
+  return { value: burned || null, estimated: false };
+}
+
+/**
  * Objectifs de macros : protéines selon le poids, lipides 0,8 g/kg (au moins 40 g),
  * glucides = le reste des calories quand on les connaît, sinon le plafond habituel.
  */

@@ -377,6 +377,7 @@ export const AR: Record<string, ArabicEntry> = {
   "Environ 500 kcal de déficit par jour. Le repère courant.": "عجز حوالي 500 سعرة في اليوم. الرقم المعتاد.",
   "Rapide": "سريع",
   "Environ 750 kcal de déficit par jour. Plus dur, à surveiller.": "عجز حوالي 750 سعرة في اليوم. أصعب، خلي بالك.",
+  "Santé pour l’instant : {n} kcal": "Santé لحد دلوقتي: {n} سعرة",
   'Ajustement manuel': 'تعديل يدوي',
   'Journée de craquage': 'يوم فلتان',
   'Journée de craquage ({n} kcal min.)': 'يوم فلتان ({n} سعرة على الأقل)',

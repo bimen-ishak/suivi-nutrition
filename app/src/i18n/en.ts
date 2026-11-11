@@ -344,6 +344,7 @@ export const EN: Readonly<Record<string, string>> = {
   "Environ 500 kcal de déficit par jour. Le repère courant.": "About 500 kcal deficit a day. The usual benchmark.",
   "Rapide": "Fast",
   "Environ 750 kcal de déficit par jour. Plus dur, à surveiller.": "About 750 kcal deficit a day. Harder, keep an eye on it.",
+  "Santé pour l’instant : {n} kcal": "Health so far: {n} kcal",
   "Ajustement manuel": "Manual adjustment",
   "Journée de craquage": "Binge day",
   "Journée de craquage ({n} kcal min.)": "Binge day ({n} kcal min.)",
