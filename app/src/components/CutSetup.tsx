@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { t, unitLabel } from '../i18n';
 import { getWeightsSince } from '../db';
 import { setObjective } from '../utils/objective';
+import { SetupProgress } from './SetupProgress';
 import {
   DEFICIT_PRESETS, basalMetabolism, macroTargets, proposePlan, saveProfile, validBody, validPlan,
   type Sex
@@ -96,48 +97,41 @@ export function CutSetup({ onComplete, onCancel }: { onComplete: () => void; onC
 
   return (
     <div className="bulk-page bulk-setup cut-setup">
-      <p className="bulk-eyebrow">{t('TA SÈCHE, À TA MESURE')}</p>
-      <h1>{t('Quelques questions pour calculer tes objectifs.')}</h1>
-      <p className="bulk-muted">{t('Tes réponses restent sur ce téléphone. Tu pourras les changer dans les réglages.')}</p>
-      <ol className="bulk-steps">
-        <li aria-current={step === 1 ? 'step' : undefined}>{t('Toi')}</li>
-        <li aria-current={step === 2 ? 'step' : undefined}>{t('Ta sèche')}</li>
-        <li aria-current={step === 3 ? 'step' : undefined}>{t('Ton plan')}</li>
-      </ol>
+      <h1>{t('Calculons tes objectifs')}</h1>
+      <SetupProgress step={step} labels={[t('Toi'), t('Ta sèche'), t('Ton plan')]} />
 
       {step === 1 && (
-        <section className="bulk-panel">
-          <h2>{t('Toi')}</h2>
-          <div className="bulk-tabs" role="group" aria-label={t('Sexe')}>
+        <section className="bulk-panel setup-card">
+          <div className="setup-toggle" role="group" aria-label={t('Sexe')}>
             <button aria-pressed={sex === 'male'} onClick={() => setSex('male')}>{t('Homme')}</button>
             <button aria-pressed={sex === 'female'} onClick={() => setSex('female')}>{t('Femme')}</button>
           </div>
-          <div className="bulk-number-grid cut-setup-grid">
-            <label>{t('Âge')}<input type="number" inputMode="numeric" min="15" max="100" value={age} onChange={e => setAge(e.target.value)} /></label>
-            <label>{t('Taille (cm)')}<input type="number" inputMode="numeric" min="120" max="230" value={height} onChange={e => setHeight(e.target.value)} /></label>
-            <label>{t('Poids (kg)')}<input type="number" inputMode="decimal" step="0.1" min="35" max="300" value={weight} onChange={e => setWeight(e.target.value)} /></label>
+          <div className="setup-fields">
+            <label><span>{t('Âge')}</span><input type="number" inputMode="numeric" min="15" max="100" placeholder="25" value={age} onChange={e => setAge(e.target.value)} /><small>{t('ans')}</small></label>
+            <label><span>{t('Taille')}</span><input type="number" inputMode="numeric" min="120" max="230" placeholder="175" value={height} onChange={e => setHeight(e.target.value)} /><small>{t('cm')}</small></label>
+            <label><span>{t('Poids')}</span><input type="number" inputMode="decimal" step="0.1" min="35" max="300" placeholder="75" value={weight} onChange={e => setWeight(e.target.value)} /><small>{unitLabel('kg')}</small></label>
           </div>
-          <button className="btn btn-primary" disabled={!sex || !age || !height || !weight} onClick={checkBody}>{t('Continuer')}</button>
+          <button className="btn btn-primary setup-next" disabled={!sex || !age || !height || !weight} onClick={checkBody}>{t('Continuer')}</button>
         </section>
       )}
 
       {step === 2 && bmr !== null && (
-        <section className="bulk-panel">
-          <h2>{t('Ta sèche')}</h2>
-          <div className="cut-setup-result">
-            <p>{t('Ton métabolisme de base : {n} kcal par jour.', { n: bmr })}</p>
-            <p className="bulk-muted">{t('C’est ce que ton corps brûle au repos, sans bouger.')}</p>
+        <section className="bulk-panel setup-card">
+          <div className="setup-figure">
+            <span>{t('Métabolisme de base')}</span>
+            <strong>{bmr} <small>{unitLabel('kcal')}</small></strong>
+            <em>{t('brûlées au repos, chaque jour')}</em>
           </div>
-          <label className="cut-setup-field">
-            {t('Tu veux être en sèche de combien de kcal par jour ?')}
+          <label className="setup-question">
+            <span>{t('Ton déficit par jour')}</span>
             <input type="number" inputMode="numeric" min="0" max="1500" step="50" value={deficit} onChange={e => setDeficit(e.target.value)} />
           </label>
-          <div className="bulk-tabs">
+          <div className="setup-chips">
             {DEFICIT_PRESETS.map(preset => (
-              <button key={preset} aria-pressed={Number(deficit) === preset} onClick={() => setDeficit(String(preset))}>{preset} {unitLabel('kcal')}</button>
+              <button key={preset} aria-pressed={Number(deficit) === preset} onClick={() => setDeficit(String(preset))}>{preset}</button>
             ))}
           </div>
-          <div className="bulk-inline">
+          <div className="setup-actions">
             <button className="back-btn" onClick={() => setStep(1)}>{t('Retour')}</button>
             <button className="btn btn-primary" onClick={checkDeficit}>{t('Continuer')}</button>
           </div>
@@ -145,44 +139,35 @@ export function CutSetup({ onComplete, onCancel }: { onComplete: () => void; onC
       )}
 
       {step === 3 && bmr !== null && (
-        <section className="bulk-panel">
-          <h2>{t('Ton plan')}</h2>
-          <p className="bulk-muted">{t('Voici ce qu’on te propose. Tu peux changer les deux chiffres.')}</p>
-          <div className="bulk-number-grid">
-            <label>{t('À manger (kcal/jour)')}<input type="number" inputMode="numeric" step="50" value={eat} onChange={e => setEat(e.target.value)} /></label>
-            <label>{t('À brûler (kcal/jour)')}<input type="number" inputMode="numeric" step="50" value={burn} onChange={e => setBurn(e.target.value)} /></label>
+        <section className="bulk-panel setup-card">
+          <div className="setup-plan">
+            <label><span>{t('Manger')}</span><input type="number" inputMode="numeric" step="50" value={eat} onChange={e => setEat(e.target.value)} /><small>{t('kcal / jour')}</small></label>
+            <label><span>{t('Brûler')}</span><input type="number" inputMode="numeric" step="50" value={burn} onChange={e => setBurn(e.target.value)} /><small>{t('kcal / jour')}</small></label>
           </div>
           {planReady && (
-            <div className="cut-setup-result">
-              <p>
-                {planDeficit > 0
-                  ? t('Déficit : {n} kcal par jour.', { n: planDeficit })
-                  : t('Pas de déficit : tu manges autant ou plus que ce que tu brûles.')}
+            <>
+              <p className={`setup-badge${planDeficit > 0 ? '' : ' is-off'}`}>
+                {planDeficit > 0 ? t('Déficit de {n} kcal', { n: planDeficit }) : t('Pas de déficit')}
               </p>
-              {eatValue < bmr && (
-                <p className="cut-setup-warning">{t('Tu manges moins que ton métabolisme de base ({n} kcal). Ce n’est pas conseillé.', { n: bmr })}</p>
-              )}
+              {eatValue < bmr && <p className="setup-warning">{t('Sous ton métabolisme de base : déconseillé.')}</p>}
               {targets && (
-                <dl>
-                  <div><dt>{t('Protéines')}</dt><dd>{targets.protein} <small>{unitLabel('g')}</small></dd></div>
-                  <div><dt>{t('Lipides')}</dt><dd>{targets.fat} <small>{unitLabel('g')}</small></dd></div>
-                  <div><dt>{t('Glucides')}</dt><dd>{targets.carbs} <small>{unitLabel('g')}</small></dd></div>
-                </dl>
+                <div className="setup-macros">
+                  <div><strong>{targets.protein}{unitLabel('g')}</strong><span>{t('Protéines')}</span></div>
+                  <div><strong>{targets.carbs}{unitLabel('g')}</strong><span>{t('Glucides')}</span></div>
+                  <div><strong>{targets.fat}{unitLabel('g')}</strong><span>{t('Lipides')}</span></div>
+                </div>
               )}
-              <p className="bulk-muted">
-                {t('Si tu importes ta dépense depuis Santé ou la saisis à la main, ce chiffre réel remplace l’estimation.')}
-                {' '}{t('Ce sont des repères généraux, pas un avis médical.')}
-              </p>
-            </div>
+            </>
           )}
-          <div className="bulk-inline">
+          <div className="setup-actions">
             <button className="back-btn" onClick={() => setStep(2)}>{t('Retour')}</button>
             <button className="btn btn-primary" disabled={!planReady} onClick={finish}>{t('C’est parti')}</button>
           </div>
+          <p className="setup-footnote">{t('Repères généraux, pas un avis médical.')}</p>
         </section>
       )}
 
-      {onCancel && <button className="back-btn" onClick={onCancel}>{t('Annuler')}</button>}
+      {onCancel && <button className="back-btn setup-cancel" onClick={onCancel}>{t('Annuler')}</button>}
       {error && <p className="bulk-error" role="alert">{error}</p>}
     </div>
   );
