@@ -416,6 +416,8 @@ export const AR: Record<string, ArabicEntry> = {
   "Sous ton métabolisme de base : déconseillé.": "أقل من الحرق الأساسي: مش منصوح بيه.",
   "Taille": "الطول",
   "Ton déficit par jour": "العجز بتاعك في اليوم",
+  "Bonjour": "صباح الخير",
+  "Bonsoir": "مساء الخير",
   'Ajustement manuel': 'تعديل يدوي',
   'Journée de craquage': 'يوم فلتان',
   'Journée de craquage ({n} kcal min.)': 'يوم فلتان ({n} سعرة على الأقل)',

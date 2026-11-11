@@ -14,6 +14,7 @@ import { t } from './i18n';
 import { SettingsGroup } from './components/SettingsGroup';
 import { CutSetup } from './components/CutSetup';
 import { getProfile } from './utils/profile';
+import { Icon } from './components/Icon';
 
 import { modePicture, saveNutritionMode, type NutritionMode } from './utils/nutritionMode';
 
@@ -64,9 +65,16 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
     <div className="nutrition-shell" data-mode={mode}>
       <header className="nutrition-header">
         <button type="button" className="nutrition-brand" onClick={goHome} aria-label={t('Retour à l’accueil')}>
-          <img className="nutrition-mark" src={modePicture(mode)} alt="" /><span>KOUL</span>
+          <img className="nutrition-mark" src={modePicture(mode)} alt="" />
+          <span className="nutrition-brand-text">
+            <strong>KOUL</strong>
+            <small>{new Date().getHours() < 18 ? t('Bonjour') : t('Bonsoir')}</small>
+          </span>
         </button>
-        <span className="nutrition-mode">{mode === 'bulk' ? modes[0].label : modes[1].label}</span>
+        <span className="nutrition-mode">
+          <Icon name={mode === 'bulk' ? 'scale' : 'flame'} />
+          {mode === 'bulk' ? modes[0].label : modes[1].label}
+        </span>
       </header>
       {mode === 'bulk' ? <BulkPage homeSignal={bulkHome} renderModeSettings={canLeave => modeSettings(next => {
         if (next !== mode && canLeave()) changeMode(next);

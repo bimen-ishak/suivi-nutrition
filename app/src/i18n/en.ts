@@ -383,6 +383,8 @@ export const EN: Readonly<Record<string, string>> = {
   "Sous ton métabolisme de base : déconseillé.": "Below your basal metabolic rate: not recommended.",
   "Taille": "Height",
   "Ton déficit par jour": "Your daily deficit",
+  "Bonjour": "Hello",
+  "Bonsoir": "Good evening",
   "Ajustement manuel": "Manual adjustment",
   "Journée de craquage": "Binge day",
   "Journée de craquage ({n} kcal min.)": "Binge day ({n} kcal min.)",
