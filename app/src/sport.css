@@ -1,4 +1,4 @@
-/* The two modes share layout and typography, with distinct accent colors. */
+/* Sèche et prise de masse partagent le même style : vert pomme en clair, violet sur noir en sombre. */
 .nutrition-shell {
   --bg: #eef0eb;
   --surface: #fafbf7;
@@ -24,19 +24,6 @@
   color: var(--text);
 }
 
-.nutrition-shell[data-mode='cut'] {
-  --primary: #9a3619;
-  --primary-strong: #792710;
-  --primary-soft: #ffeadc;
-  --primary-border: #e6b098;
-  --signal: #ff9461;
-  --signal-hover: #ff8248;
-  --signal-ink: #30180e;
-  --hero-bg: #261d19;
-  --hero-track: #58463c;
-  --ring: #ca633966;
-}
-
 :root[data-theme='dark'] .nutrition-shell {
   --bg: #121612;
   --surface: #1c231d;
@@ -54,19 +41,11 @@
   --shadow: 0 1px 2px #0003;
 }
 
-:root[data-theme='dark'] .nutrition-shell[data-mode='cut'] {
-  --primary: #ffab82;
-  --primary-strong: #ffc7ab;
-  --primary-soft: #3b2b24;
-  --primary-border: #745040;
-  --hero-bg: #30241f;
-}
-
-:root[data-theme='dark']:has(.nutrition-shell[data-mode='bulk']) {
+:root[data-theme='dark']:has(.nutrition-shell) {
   --bg: #000;
 }
 
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] {
+:root[data-theme='dark'] .nutrition-shell {
   --bg: #000;
   --surface: #0b0b0b;
   --surface-soft: #171717;
@@ -220,30 +199,39 @@
 .nutrition-shell .bulk-recent { margin: 16px 0; }
 .nutrition-shell .bulk-steps li { border-radius: 8px; }
 
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .nutrition-header {
+:root[data-theme='dark'] .nutrition-shell .nutrition-header {
   border-bottom: 1px solid var(--border);
 }
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-hero {
+:root[data-theme='dark'] .nutrition-shell .bulk-hero {
   border: 1px solid var(--border);
   color: var(--text);
 }
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-calories strong {
+:root[data-theme='dark'] .nutrition-shell .hero-card {
+  --text: #f5f4f7;
+  --text-2: #cbc7d0;
+  --surface-soft: #171717;
+  --primary-soft: #1d142c;
+  --info: #d2baff;
+  --info-soft: #171717;
+  border-color: var(--border);
+}
+:root[data-theme='dark'] .nutrition-shell .bulk-calories strong {
   color: var(--text);
 }
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-macros article {
+:root[data-theme='dark'] .nutrition-shell .bulk-macros article {
   border-block-start: 1px solid var(--border);
 }
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-energy-ring {
+:root[data-theme='dark'] .nutrition-shell .bulk-energy-ring {
   --progress-start: #70a5ff;
   --progress-end: #8851e9;
   color: var(--progress-end);
 }
 @supports (color: color-mix(in oklab, #000, #fff)) {
-  :root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-energy-ring {
+  :root[data-theme='dark'] .nutrition-shell .bulk-energy-ring {
     --progress-end: color-mix(in oklab, var(--progress-start), #8851e9 var(--completion));
   }
 }
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-energy-ring::before {
+:root[data-theme='dark'] .nutrition-shell .bulk-energy-ring::before {
   background: conic-gradient(
     var(--progress-start),
     var(--progress-end) var(--completion),
@@ -254,14 +242,15 @@
 .nutrition-shell .today-page { max-width: 1200px; padding: 24px 24px 118px; }
 .nutrition-shell .today-header { margin-bottom: 18px; }
 .nutrition-shell .hero-card {
-  --text: #fff4eb;
-  --text-2: #e7d7cc;
-  --surface-soft: #43352c;
-  --primary: #ffab82;
-  --primary-soft: #443025;
-  --info: #f6d2b7;
-  --info-soft: #45382e;
+  --text: #f5f7ed;
+  --text-2: #cfd8c8;
+  --surface-soft: #2c362b;
+  --primary: var(--signal);
+  --primary-soft: #2b3b20;
+  --info: #dfe8d3;
+  --info-soft: #2c362b;
   background: var(--hero-bg);
+  background-image: var(--hero-pattern, repeating-linear-gradient(120deg, transparent 0 22px, #ffffff09 23px, transparent 24px));
   border: 1px solid #ffffff1a;
   border-radius: 16px;
   padding: 22px;
@@ -400,7 +389,7 @@
 .frequent-more { margin-top: 10px; }
 
 .bulk-hero[data-over-budget] .bulk-energy-ring { --signal: #b78eff; }
-:root[data-theme='dark'] .nutrition-shell[data-mode='bulk'] .bulk-hero[data-over-budget] .bulk-energy-ring {
+:root[data-theme='dark'] .nutrition-shell .bulk-hero[data-over-budget] .bulk-energy-ring {
   --progress-start: #a178f6;
   --progress-end: #a178f6;
 }
