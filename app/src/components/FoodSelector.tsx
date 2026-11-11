@@ -8,7 +8,7 @@ import './FoodSelector.css';
 import { t, unitLabel } from '../i18n';
 import { ti, Icon } from './Icon';
 
-export type SelectorTab = 'frequent' | 'oneoff' | 'scan' | 'search';
+export type SelectorTab = 'oneoff' | 'scan' | 'search';
 
 interface FoodSelectorProps {
   foods: Food[];
@@ -21,23 +21,10 @@ interface FoodSelectorProps {
 }
 
 export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric, onScanNotFound, onSaveOneOff, onClose }: FoodSelectorProps) {
-  const [activeTab, setActiveTab] = useState<SelectorTab>('frequent');
+  const [activeTab, setActiveTab] = useState<SelectorTab>('oneoff');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
-
-  // Filtrer les aliments fréquents (triés par fréquence)
-  const frequentFoods = foods
-    .filter(f => f.frequency > 0)
-    .sort((a, b) => b.frequency - a.frequency || (b.lastUsed ?? '').localeCompare(a.lastUsed ?? ''))
-    .slice(0, 20);
-
-  const frequentButton = (food: Food) => (
-    <button key={food.id} type="button" className="frequent-food" onClick={() => onSelectFood(food)}>
-      <span><strong>{foodDisplayName(food.name, food.source)}</strong>{food.brand && <small>{food.brand}</small>}</span>
-      <span aria-hidden="true">+</span>
-    </button>
-  );
 
   // Résultats de recherche dans les aliments personnels
   const personalResults = useMemo(() => {
@@ -93,12 +80,6 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
 
       <div className="selector-tabs">
         <button
-          className={`tab ${activeTab === 'frequent' ? 'active' : ''}`}
-          onClick={() => setActiveTab('frequent')}
-        >
-          {ti('⭐ Fréquents')}
-        </button>
-        <button
           className={`tab ${activeTab === 'oneoff' ? 'active' : ''}`}
           onClick={() => setActiveTab('oneoff')}
         >
@@ -119,34 +100,6 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
       </div>
 
       <div className="selector-content">
-        {/* Onglet Fréquents */}
-        {activeTab === 'frequent' && (
-          <div className="frequent-tab">
-            <div className="tab-header">
-              <h3>{t('Aliments les plus utilisés')}</h3>
-            </div>
-            {frequentFoods.length === 0 ? (
-              <div className="empty-state">
-                <p>{t('Aucun aliment utilisé pour le moment')}</p>
-                <p className="hint">{t('Utilise l\'onglet Rechercher pour trouver un aliment dans la base générique')}</p>
-                <button className="btn btn-primary" onClick={() => setActiveTab('search')}>
-                  {ti('🔍 Rechercher un aliment')}
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="frequent-foods">{frequentFoods.slice(0, 6).map(frequentButton)}</div>
-                {frequentFoods.length > 6 && (
-                  <details className="settings-group frequent-more">
-                    <summary>{t('Plus d’aliments fréquents')}</summary>
-                    <div className="settings-group-content frequent-foods">{frequentFoods.slice(6).map(frequentButton)}</div>
-                  </details>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
         {/* Onglet Ponctuel */}
         {activeTab === 'oneoff' && <QuickEntry onSave={onSaveOneOff} />}
 
