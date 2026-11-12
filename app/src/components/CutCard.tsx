@@ -16,7 +16,8 @@ import {
 } from '../utils/cut';
 import './CutCard.css';
 import { t, unitLabel, locale, ltr } from '../i18n';
-import { ti } from './Icon';
+import { ti, Icon } from './Icon';
+import { addBingePeriod, getBingePeriods, removeBingePeriod, withoutBinges, WATER_DAYS_AFTER, type BingePeriod } from '../utils/bingePeriods';
 
 const HISTORY_DAYS = 60;
 const MAINTENANCE_DAYS_NEEDED = 14;
@@ -39,9 +40,13 @@ const signed = (value: number, digits: number) =>
   ltr(`${value > 0 ? '+' : ''}${number(value, digits)}`);
 
 export function CutCard() {
-  const [weights, setWeights] = useState<WeightPoint[]>([]);
-  const [intakes, setIntakes] = useState<IntakeDay[]>([]);
+  const [allWeights, setWeights] = useState<WeightPoint[]>([]);
+  const [allIntakes, setIntakes] = useState<IntakeDay[]>([]);
   const [range, setRange] = useState(30);
+  const [periods, setPeriods] = useState<BingePeriod[]>(getBingePeriods);
+  const [declaring, setDeclaring] = useState(false);
+  const [periodStart, setPeriodStart] = useState('');
+  const [periodEnd, setPeriodEnd] = useState('');
 
   useEffect(() => {
     const since = dateDaysAgo(HISTORY_DAYS);
@@ -51,8 +56,18 @@ export function CutCard() {
     });
   }, []);
 
+  // Les jours de craquage, mal comptés, ne faussent pas les calculs
+  const { weights, intakes } = withoutBinges(allWeights, allIntakes, periods);
+
   // La journée en cours n'est pas finie : elle fausserait les moyennes
   const today = dateDaysAgo(0);
+  const shortDate = (date: string) =>
+    new Date(`${date}T12:00:00`).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
+  const saveDeclaredPeriod = () => {
+    if (!periodStart || !periodEnd) return;
+    setPeriods(addBingePeriod(periodStart, periodEnd));
+    setDeclaring(false);
+  };
   const pastIntakes = intakes.filter(day => day.date < today);
 
   const trend = getWeightTrend(weights);
@@ -186,6 +201,56 @@ export function CutCard() {
           )}
         </>
       )}
+
+      {/* Période de craquage : ces jours sortent des calculs, sans rien effacer */}
+      <div className="cut-binge">
+        {periods.length > 0 && (
+          <ul className="binge-periods">
+            {periods.map(period => (
+              <li key={`${period.start}-${period.end}`}>
+                <span>
+                  {period.start === period.end
+                    ? t('Craquage le {date}', { date: shortDate(period.start) })
+                    : t('Craquage du {start} au {end}', { start: shortDate(period.start), end: shortDate(period.end) })}
+                </span>
+                <button
+                  className="entry-action"
+                  aria-label={t('Supprimer')}
+                  onClick={() => {
+                    if (window.confirm(t('Remettre ces jours dans les calculs de Ma sèche ?'))) setPeriods(removeBingePeriod(period));
+                  }}
+                ><Icon name="trash" /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {declaring ? (
+          <div className="binge-form">
+            <div className="binge-dates">
+              <label><span>{t('Du')}</span><input type="date" value={periodStart} max={today} onChange={e => setPeriodStart(e.target.value)} /></label>
+              <label><span>{t('Au')}</span><input type="date" value={periodEnd} max={today} onChange={e => setPeriodEnd(e.target.value)} /></label>
+            </div>
+            <p className="cut-hint">
+              {t('Ces jours ne comptent plus dans Ma sèche, ni les pesées des {n} jours suivants, le temps que l’eau parte. Rien n’est effacé.', { n: WATER_DAYS_AFTER })}
+            </p>
+            <div className="binge-buttons">
+              <button className="btn btn-secondary" onClick={() => setDeclaring(false)}>{t('Annuler')}</button>
+              <button className="btn btn-primary" disabled={!periodStart || !periodEnd} onClick={saveDeclaredPeriod}>{t('Valider')}</button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="btn btn-secondary binge-declare"
+            onClick={() => {
+              setPeriodStart(dateDaysAgo(1));
+              setPeriodEnd(dateDaysAgo(1));
+              setDeclaring(true);
+            }}
+          >
+            {t('Déclarer une période de craquage')}
+          </button>
+        )}
+      </div>
     </section>
   );
 }

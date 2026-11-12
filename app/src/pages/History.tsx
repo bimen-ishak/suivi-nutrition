@@ -13,9 +13,6 @@ import { ti, Icon } from '../components/Icon';
 import { WeeklySummary } from '../components/WeeklySummary';
 import { localDateKey, localDateKeys } from '../utils/photo';
 
-// Une journée de craquage non comptée vaut au moins ce total
-const BINGE_MIN_KCAL = 4500;
-
 interface DayData {
   date: string;
   entries: JournalEntry[];
@@ -38,8 +35,6 @@ export function History() {
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [editingTotal, setEditingTotal] = useState(false);
   const [totalInput, setTotalInput] = useState('');
-  const [bingePicking, setBingePicking] = useState(false);
-  const [bingeDate, setBingeDate] = useState('');
 
   useEffect(() => {
     loadHistory();
@@ -163,24 +158,6 @@ export function History() {
     await applyDayTotal(day.date, target, 'Ajustement manuel');
     await loadHistory();
     setEditingTotal(false);
-  };
-
-  // Craquage non compté : le jour passe à 4 500 kcal, ou garde son total s'il est déjà plus haut
-  const markBinge = async (date: string) => {
-    const [entries, history] = await Promise.all([getJournalEntriesByDate(date), getCutHistoryDay(date)]);
-    const current = entries.length === 0 && history
-      ? history.kcal ?? 0
-      : entries.reduce((sum, e) => sum + e.kcal, 0);
-    if (current < BINGE_MIN_KCAL) await applyDayTotal(date, BINGE_MIN_KCAL, 'Journée de craquage');
-    await loadHistory();
-    setBingePicking(false);
-    setSelectedDate(date);
-  };
-
-  const localDate = (offset: number) => {
-    const d = new Date();
-    d.setDate(d.getDate() - offset);
-    return d.toISOString().split('T')[0];
   };
 
   const handleSaveEntry = async (updated: JournalEntry) => {
@@ -328,11 +305,6 @@ export function History() {
           >
             {ti('✏️ Corriger les calories mangées')}
           </button>
-          {day.totals.caloriesEaten < BINGE_MIN_KCAL && (
-            <button className="btn btn-secondary day-edit-btn" onClick={() => markBinge(day.date)}>
-              {t('Journée de craquage ({n} kcal min.)', { n: BINGE_MIN_KCAL })}
-            </button>
-          )}
           <button className="btn btn-primary day-edit-btn" onClick={() => setEditingSummary(true)}>
             {day.summary?.caloriesBurned ? ti('✏️ Modifier le bilan') : ti('📊 Saisir ma dépense')}
           </button>
@@ -412,37 +384,6 @@ export function History() {
       ]} note={week.provisional
         ? t('Alimentation et dépense renseignées. Certaines dépenses sont estimées.')
         : t('Seuls les jours avec alimentation et dépense sont comptés.')} />
-
-      <div className="binge-card">
-        {bingePicking ? (
-          <>
-            <p className="total-edit-hint">
-              {t("Choisis le jour du craquage. Il comptera au moins {n} kcal, même si tu n'as rien noté.", { n: BINGE_MIN_KCAL })}
-            </p>
-            <input
-              type="date"
-              value={bingeDate}
-              min={localDate(29)}
-              max={localDate(0)}
-              onChange={(e) => setBingeDate(e.target.value)}
-            />
-            <div className="binge-actions">
-              <button className="btn btn-secondary" onClick={() => setBingePicking(false)}>{t('Annuler')}</button>
-              <button className="btn btn-primary" disabled={!bingeDate} onClick={() => markBinge(bingeDate)}>{t('Valider')}</button>
-            </div>
-          </>
-        ) : (
-          <button
-            className="btn btn-secondary binge-open"
-            onClick={() => {
-              setBingeDate(localDate(1));
-              setBingePicking(true);
-            }}
-          >
-            {t('Noter une journée de craquage')}
-          </button>
-        )}
-      </div>
 
       {days.length === 0 ? (
         <div className="empty-history">
