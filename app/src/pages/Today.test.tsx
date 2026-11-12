@@ -20,5 +20,6 @@ it('makes the calorie excess the main number and keeps intake and limit visible'
   expect(within(alert).getByText('+250')).toBeTruthy();
   expect(within(alert).getByText('kcal au-dessus de la limite')).toBeTruthy();
   expect(alert.closest('.hero-card')?.getAttribute('data-over-budget')).toBe('true');
-  expect(screen.getByText('2250 / 2000 kcal')).toBeTruthy();
+  expect(screen.getByText('2250')).toBeTruthy();
+  expect(screen.getByText('/ 2000 kcal')).toBeTruthy();
 });

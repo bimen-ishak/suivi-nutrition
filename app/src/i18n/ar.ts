@@ -439,6 +439,8 @@ export const AR: Record<string, ArabicEntry> = {
   "Ces jours ne comptent plus dans Ma sèche, ni les pesées des {n} jours suivants, le temps que l’eau parte. Rien n’est effacé.": "الأيام دي مش هتتحسب في التنشيف، ولا الوزن في الـ {n} أيام اللي بعدها لحد ما المية تنزل. مفيش حاجة هتتمسح.",
   "Déclarer une période de craquage": "سجّل فترة فلتان",
   "Dépense": "الحرق",
+  "restantes aujourd’hui": "فاضلين النهارده",
+  "restantes": "فاضلين",
   "Objectif": "الهدف",
   "prévue": "متوقعة",
   'Ajustement manuel': 'تعديل يدوي',

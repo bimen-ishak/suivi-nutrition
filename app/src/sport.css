@@ -692,21 +692,6 @@
 .welcome-setup .setup-actions .btn { max-width: none; min-height: 52px; }
 
 /* Bilan du jour en anneaux : fond bleu nuit, un anneau épais par chiffre */
-.nutrition-shell .hero-card.ring-dash {
-  --hero-bg: #1c1b4a;
-  --hero-track: #0e0d2c;
-  --text: #ffffff;
-  --text-2: #b4b3d6;
-  --surface-soft: #2a2960;
-  --primary-soft: #2a2960;
-  --ring-kcal: #ebf68f;
-  --ring-protein: #ec736b;
-  --ring-carbs: #f3d877;
-  --ring-fat: #94dcf6;
-  --ring-over: #fa637e;
-  border-color: #ffffff14;
-}
-:root[data-theme='dark'] .nutrition-shell .hero-card.ring-dash { --hero-bg: #16153a; --hero-track: #0a0a22; }
 .ring { position: relative; display: grid; place-items: center; aspect-ratio: 1; }
 .ring svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ring-bg { fill: none; stroke: var(--hero-track); stroke-width: 16; }
@@ -739,7 +724,7 @@
   gap: var(--space-3);
   margin: var(--space-5) 0;
   padding-top: var(--space-5);
-  border-top: 1px solid #ffffff22;
+  border-top: 1px solid var(--border);
 }
 .ring-dash-macros figure { display: grid; justify-items: center; gap: 10px; margin: 0; }
 .ring-dash-macros figcaption { color: var(--text); font-size: .9rem; font-weight: 500; }
@@ -759,17 +744,202 @@
   padding: 10px 12px;
   list-style: none;
   border-radius: 999px;
-  background: #1c1b4a;
+  background: var(--surface);
   max-width: 460px;
 }
-:root[data-theme='dark'] .week-strip { background: #16153a; }
 .week-strip li { position: relative; display: grid; place-items: center; aspect-ratio: 1; max-width: 46px; width: 100%; justify-self: center; }
 .week-strip svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.week-bg { fill: #0e0d2c; stroke: #0e0d2c; stroke-width: 6; }
-.week-arc { fill: none; stroke: #ebf68f; stroke-width: 6; stroke-linecap: round; }
-.week-strip li[data-over] .week-arc { stroke: #fa637e; }
-.week-strip span { position: relative; color: #b4b3d6; font-size: .78rem; font-weight: 600; }
-.week-strip li[data-future] span { color: #6f6e98; }
-.week-strip li[data-today] .week-bg { fill: #ebf68f; stroke: #ebf68f; }
-.week-strip li[data-today] span { color: #1c1b4a; font-weight: 800; }
-.week-strip li[data-today][data-over] .week-bg { fill: #fa637e; stroke: #fa637e; }
+.week-bg { fill: var(--hero-track); stroke: var(--hero-track); stroke-width: 6; }
+.week-arc { fill: none; stroke: var(--signal); stroke-width: 6; stroke-linecap: round; }
+.week-strip li[data-over] .week-arc { stroke: var(--danger); }
+.week-strip span { position: relative; color: var(--text-2); font-size: .78rem; font-weight: 600; }
+.week-strip li[data-future] span { color: var(--text-3); opacity: .7; }
+.week-strip li[data-today] .week-bg { fill: var(--signal); stroke: var(--signal); }
+.week-strip li[data-today] span { color: var(--signal-ink); font-weight: 800; }
+.week-strip li[data-today][data-over] .week-bg { fill: var(--danger); stroke: var(--danger); }
+
+/* Espacements : serré dans un groupe (4–8 px), large entre les groupes (16–24 px) */
+.nutrition-shell[data-mode='cut'] .hero-card.ring-dash { padding: var(--space-6) var(--space-5); }
+.ring-dash-top { gap: var(--space-4); }
+.ring-dash-text { gap: 0; }
+.ring-dash-label { margin-bottom: var(--space-3); font-size: 1.2rem; line-height: 1.2; }
+.ring-dash-left,
+.nutrition-shell[data-mode='cut'] .hero-card .cut-calorie-alert { flex-direction: column; align-items: flex-start; gap: 4px; }
+.ring-dash-left span,
+.nutrition-shell[data-mode='cut'] .hero-card .cut-calorie-alert > span { font-size: .8rem; line-height: 1.25; }
+.ring-dash-sub { margin-top: var(--space-2); line-height: 1.4; }
+.ring-dash-stats { margin: var(--space-4) 0 0; gap: var(--space-2); }
+.ring-dash-stats dt, .ring-dash-stats dd { font-size: 1rem; line-height: 1.3; }
+.ring-dash-center-gap .ring-center { gap: 2px; }
+.ring .ring-center { gap: 3px; }
+.ring-dash-macros { margin: var(--space-6) 0; padding-top: var(--space-6); }
+.ring-dash-macros figure { gap: var(--space-3); }
+.nutrition-shell[data-mode='cut'] .hero-card .action-row { margin: 0; }
+
+.nutrition-shell[data-mode='cut'] .foods-card { padding: var(--space-5); }
+.nutrition-shell[data-mode='cut'] .foods-card h2 { margin: 0 0 var(--space-4); line-height: 1.2; }
+.nutrition-shell[data-mode='cut'] .journal-by-meal { gap: var(--space-5); }
+.nutrition-shell[data-mode='cut'] .meal-section { padding-bottom: var(--space-5); }
+.nutrition-shell[data-mode='cut'] .meal-header { margin-bottom: var(--space-3); }
+.nutrition-shell[data-mode='cut'] .journal-list { gap: var(--space-2); }
+.nutrition-shell[data-mode='cut'] .journal-entry { padding: var(--space-3) var(--space-4); }
+.nutrition-shell[data-mode='cut'] .entry-time { margin-bottom: var(--space-2); }
+.nutrition-shell[data-mode='cut'] .entry-main { margin-bottom: 4px; }
+.nutrition-shell[data-mode='cut'] .entry-food strong { margin-bottom: 4px; line-height: 1.3; }
+.nutrition-shell[data-mode='cut'] .entry-macros { margin: 0; }
+.nutrition-shell[data-mode='cut'] .entry-actions { margin-top: var(--space-2); }
+.nutrition-shell[data-mode='cut'] .nutrition-details summary { padding-block: var(--space-4); }
+.nutrition-shell[data-mode='cut'] .cut-tiles { gap: var(--space-3); }
+.nutrition-shell[data-mode='cut'] .cut-tile { justify-content: space-between; gap: var(--space-2); padding: var(--space-4); line-height: 1.3; }
+.nutrition-shell[data-mode='cut'] .cut-tile strong { font-size: 1.15rem; }
+.nutrition-shell[data-mode='cut'] .cut-learning { gap: var(--space-3); padding: var(--space-5); line-height: 1.45; }
+.nutrition-shell[data-mode='cut'] .learning-head { align-items: flex-start; line-height: 1.3; }
+.nutrition-shell[data-mode='cut'] .learning-track { background: var(--hero-track); }
+.nutrition-shell[data-mode='cut'] .day-main { gap: 4px; }
+.nutrition-shell[data-mode='cut'] .day-sub, .nutrition-shell[data-mode='cut'] .day-count { line-height: 1.35; }
+.nutrition-shell[data-mode='cut'] .cut-hint { line-height: 1.45; }
+.nutrition-shell[data-mode='cut'] .learning-head strong { white-space: nowrap; }
+
+/* Cercles de la semaine : un appui ouvre le jour dans l'Historique */
+.week-strip button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .15s cubic-bezier(.16, 1, .3, 1);
+}
+.week-strip button:active:not(:disabled) { transform: scale(.9); }
+.week-strip button:disabled { cursor: default; }
+.week-strip button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Bloc de gauche du bilan : le restant en grand, puis objectif et dépense en deux lignes nettes */
+.ring-dash-left { display: grid; gap: 2px; margin: 0; }
+.ring-dash-caption { color: var(--text-2); font-size: .85rem; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.ring-dash-left strong {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--signal-text);
+  font-size: clamp(2.4rem, 11vw, 3rem);
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ring-dash-left strong small { color: var(--text-2); font-size: .9rem; font-weight: 600; letter-spacing: 0; }
+.ring-dash-stats { display: grid; gap: 6px; margin: var(--space-4) 0 0; }
+.ring-dash-stats div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.ring-dash-stats .icon { width: 16px; height: 16px; color: var(--text-2); }
+.ring-dash-stats dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  min-width: 0;
+  color: var(--text-2);
+  font-size: .82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.ring-dash-stats dt small { color: var(--text-3); font-size: .7rem; font-weight: 500; }
+.ring-dash-stats dd {
+  margin: 0;
+  color: var(--text);
+  font-size: .98rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Objectif et dépense : deux tuiles côte à côte sous le grand anneau */
+.ring-dash-left .ring-dash-caption { text-transform: none; letter-spacing: 0; font-size: .9rem; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-5) 0 0; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats div {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "icon label" "value value";
+  row-gap: 6px;
+  column-gap: 6px;
+  padding: var(--space-3) var(--space-4);
+}
+.nutrition-shell[data-mode='cut'] .ring-dash-stats .icon { grid-area: icon; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats dt { grid-area: label; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats dd { grid-area: value; font-size: 1.35rem; font-weight: 750; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats dd small { margin-inline-start: 4px; color: var(--text-3); font-size: .78rem; font-weight: 600; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats div { grid-template-rows: auto 1fr; align-items: start; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats dd { align-self: end; }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats .icon { align-self: center; margin-top: 1px; }
+.ring-dash-top { align-items: center; }
+
+/* Sèche : mêmes couleurs que la prise de masse.
+   Clair : fond crème, bilan vert foncé, citron vert. Sombre : fond noir, violet. */
+.nutrition-shell[data-mode='cut'] {
+  --ring-kcal: #c6fb55;
+  --ring-protein: #dbe98f;
+  --ring-carbs: #9fd3ab;
+  --ring-fat: #ead08a;
+  --ring-over: #ff7b93;
+  --signal-text: #c6fb55;
+  --week-arc: #6f9a1f;
+}
+:root[data-theme='dark'] .nutrition-shell[data-mode='cut'] {
+  --ring-kcal: #b78eff;
+  --ring-protein: #f48dbb;
+  --ring-carbs: #70a5ff;
+  --ring-fat: #d2baff;
+  --ring-over: #fa637e;
+  --signal-text: #d2baff;
+  --week-arc: #b78eff;
+}
+.nutrition-shell[data-mode='cut'] .ring-dash-left strong { color: var(--signal-text); }
+.nutrition-shell[data-mode='cut'] .ring-dash-left strong small,
+.nutrition-shell[data-mode='cut'] .ring-dash-caption { color: var(--text-2); }
+.nutrition-shell[data-mode='cut'] .ring-dash-stats div { background: var(--surface-soft); }
+.nutrition-shell[data-mode='cut'] .ring-dash-macros { border-top-color: #ffffff1f; }
+.nutrition-shell[data-mode='cut'] .hero-card .cut-calorie-alert strong,
+.nutrition-shell[data-mode='cut'] .hero-card .cut-calorie-alert > span { color: var(--ring-over); }
+
+.nutrition-shell[data-mode='cut'] .week-strip { background: var(--surface); border: 1px solid var(--border); }
+.nutrition-shell[data-mode='cut'] .week-bg { fill: var(--surface-soft); stroke: var(--surface-soft); }
+.nutrition-shell[data-mode='cut'] .week-arc { stroke: var(--week-arc); }
+.nutrition-shell[data-mode='cut'] .week-strip li[data-over] .week-arc { stroke: var(--ring-over); }
+.nutrition-shell[data-mode='cut'] .week-strip li[data-today] .week-bg { fill: var(--signal); stroke: var(--signal); }
+.nutrition-shell[data-mode='cut'] .week-strip li[data-today] span { color: var(--signal-ink); }
+.nutrition-shell[data-mode='cut'] .week-strip li[data-today][data-over] .week-bg { fill: var(--ring-over); stroke: var(--ring-over); }
+.nutrition-shell[data-mode='cut'] .hero-card { --text-3: #b5c4b0; }
+:root[data-theme='dark'] .nutrition-shell[data-mode='cut'] .hero-card { --text-3: #aaa5b0; }
+.nutrition-shell[data-mode='cut'] .ring-dash-left { gap: 6px; }
+.nutrition-shell[data-mode='cut'] .ring-dash-left .ring-dash-caption { font-size: .88rem; line-height: 1.25; }
+
+/* Bilan de la sèche : grande barre */
+.kcal-bar { display: grid; gap: var(--space-2); }
+.kcal-bar-label { color: var(--text-2); font-size: .9rem; font-weight: 600; }
+.kcal-bar-eaten { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 0; }
+.kcal-bar-eaten strong { color: var(--text); font-size: clamp(2.6rem, 12vw, 3.2rem); font-weight: 750; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.kcal-bar-eaten span { color: var(--text-2); font-size: 1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.kcal-bar-track { height: 16px; margin-top: var(--space-2); border-radius: 999px; background: var(--hero-track); overflow: hidden; }
+.kcal-bar-track span { display: block; height: 100%; min-width: 16px; border-radius: inherit; background: var(--ring-kcal); transition: width .6s cubic-bezier(.16, 1, .3, 1); }
+.kcal-bar[data-over] .kcal-bar-track span { background: var(--ring-over); }
+.kcal-bar-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; margin-top: 4px; color: var(--text-2); font-size: .9rem; }
+.kcal-bar-foot strong { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.kcal-bar-left strong { color: var(--signal-text); font-size: 1.05rem; }
+.kcal-bar[data-over] .kcal-bar-left, .kcal-bar[data-over] .kcal-bar-left strong { color: var(--ring-over); }
+.kcal-bar-burn small { margin-inline-start: 6px; color: var(--text-3); font-size: .75rem; }
+.kcal-bar-note { margin: 0; color: var(--text-3); font-size: .8rem; }
+@media (prefers-reduced-motion: reduce) { .kcal-bar-track span { transition: none; } }

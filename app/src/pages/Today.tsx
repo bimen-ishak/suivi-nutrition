@@ -23,9 +23,10 @@ const DISMISSED_KEY = 'dismissedMissingBurned';
 
 interface TodayProps {
   onAddFood: () => void;
+  onOpenDay?: (date: string) => void;
 }
 
-export function Today({ onAddFood }: TodayProps) {
+export function Today({ onAddFood, onOpenDay }: TodayProps) {
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [dailySummary, setDailySummary] = useState<DailySummary | null>(null);
   const [totals, setTotals] = useState({
@@ -276,6 +277,7 @@ export function Today({ onAddFood }: TodayProps) {
           }}
           todayEaten={totals.caloriesEaten}
           todayBudget={budget}
+          onOpenDay={onOpenDay}
         />
       </div>
 
@@ -315,46 +317,42 @@ export function Today({ onAddFood }: TodayProps) {
         </div>
         )}
 
-        {/* Tableau à anneaux : calories à gauche, grand anneau à droite, puis les trois macros */}
-        <div className="ring-dash-top">
-          <div className="ring-dash-text">
-            <span className="ring-dash-label">{t('Calories')}</span>
+        {/* Bilan en grande barre : mangé en grand, une barre épaisse, puis restant et dépense */}
+        <div className="kcal-bar" data-over={excess > 0 || undefined}>
+          <span className="kcal-bar-label">{t('Aujourd’hui')}</span>
+          <p className="kcal-bar-eaten">
+            <strong>{totals.caloriesEaten}</strong>
+            {budget !== null && <span>/ {budget} {unitLabel('kcal')}</span>}
+            {budget === null && <span>{unitLabel('kcal')}</span>}
+          </p>
+          {budget !== null && (
+            <div className="kcal-bar-track" aria-hidden="true">
+              <span style={{ width: `${completion}%` }} />
+            </div>
+          )}
+          <div className="kcal-bar-foot">
             {excess > 0 ? (
-              <>
-                <div className="cut-calorie-alert" role="status">
-                  <strong dir="ltr">+{excess.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
-                  <span>{t('kcal au-dessus de la limite')}</span>
-                </div>
-                <p className="ring-dash-sub">{totals.caloriesEaten} / {budget} {unitLabel('kcal')}</p>
-              </>
+              <span className="kcal-bar-left" role="status">
+                <strong dir="ltr">+{excess.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>{' '}
+                <span>{t('kcal au-dessus de la limite')}</span>
+              </span>
             ) : remaining !== null ? (
-              <p className="ring-dash-left">
-                <strong>{remaining.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
-                <span>{t('kcal restantes')}</span>
-              </p>
+              <span className="kcal-bar-left">
+                <strong>{remaining.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong> {t('restantes')}
+              </span>
             ) : (
-              <p className="ring-dash-sub">{t('Saisis ta dépense pour voir ton objectif.')}</p>
+              <span>{t('Saisis ta dépense pour voir ton objectif.')}</span>
             )}
-            {budget !== null && (
-              <dl className="ring-dash-stats">
-                <div><dt>{t('Objectif')}</dt><dd>{budget}</dd></div>
-                <div>
-                  <dt>{t('Dépense')}</dt>
-                  <dd>
-                    {day.value}
-                    {estimated ? <small>{t('prévue')}</small> : dailySummary?.caloriesBurnedProvisional ? <small>{t('provisoire')}</small> : null}
-                  </dd>
-                </div>
-              </dl>
-            )}
-            {estimated && burned ? (
-              <p className="ring-dash-sub">{t('Santé pour l’instant : {n} kcal', { n: burned })}</p>
+            {day.value ? (
+              <span className="kcal-bar-burn">
+                {t('dépense')} <strong>{day.value}</strong>
+                {estimated ? <small>{t('prévue')}</small> : dailySummary?.caloriesBurnedProvisional ? <small>{t('provisoire')}</small> : null}
+              </span>
             ) : null}
           </div>
-          <Ring className="ring-dash-big" value={totals.caloriesEaten} max={budget ?? 0} color="var(--ring-kcal)">
-            <strong>{totals.caloriesEaten}</strong>
-            <small>{budget !== null ? `${budget} ${unitLabel('kcal')}` : unitLabel('kcal')}</small>
-          </Ring>
+          {estimated && burned ? (
+            <p className="kcal-bar-note">{t('Santé pour l’instant : {n} kcal', { n: burned })}</p>
+          ) : null}
         </div>
         {budget !== null && (
           <progress className="bulk-sr-only" value={Math.min(totals.caloriesEaten, budget)} max={budget || 1} aria-label={t('Progression des calories')} />
@@ -370,7 +368,7 @@ export function Today({ onAddFood }: TodayProps) {
               <figcaption>{label}</figcaption>
               <Ring value={value} max={goal} color={`var(--ring-${key})`}>
                 <strong>{Math.round(value)}{unitLabel('g')}</strong>
-                <small>{isLimit && key === 'carbs' ? `${t('max')} ` : ''}{goal}{unitLabel('g')}</small>
+                <small>/ {goal}{unitLabel('g')}</small>
               </Ring>
             </figure>
           ))}
@@ -549,12 +547,13 @@ async function loadWeek(dates: string[]): Promise<WeekDay[]> {
 }
 
 /** Bande de la semaine : un petit anneau par jour, aujourd'hui rempli */
-function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget }: {
+function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget, onOpenDay }: {
   days: WeekDay[];
   today: string;
   budgetFor: (burned?: number) => number | null;
   todayEaten: number;
   todayBudget: number | null;
+  onOpenDay?: (date: string) => void;
 }) {
   if (!days.length) return null;
   const letter = new Intl.DateTimeFormat(locale(), { weekday: 'narrow' });
@@ -575,9 +574,15 @@ function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget }: {
             data-today={isToday || undefined}
             data-future={day.date > today || undefined}
             data-over={over || undefined}
-            aria-label={`${full.format(date)}${eaten ? ` · ${Math.round(eaten)} ${unitLabel('kcal')}` : ''}`}
-            aria-current={isToday ? 'date' : undefined}
           >
+            <button
+              type="button"
+              aria-label={`${full.format(date)}${eaten ? ` · ${Math.round(eaten)} ${unitLabel('kcal')}` : ''}`}
+              aria-current={isToday ? 'date' : undefined}
+              // Un jour passé avec des données s'ouvre dans l'Historique ; aujourd'hui remonte en haut
+              disabled={!isToday && (day.date > today || (!day.eaten && !day.burned))}
+              onClick={() => (isToday ? window.scrollTo({ top: 0, behavior: 'smooth' }) : onOpenDay?.(day.date))}
+            >
             <svg viewBox="0 0 50 50" aria-hidden="true">
               <circle className="week-bg" cx="25" cy="25" r="21" />
               {ratio > 0 && !isToday && (
@@ -590,6 +595,7 @@ function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget }: {
               )}
             </svg>
             <span aria-hidden="true">{letter.format(date)}</span>
+            </button>
           </li>
         );
       })}

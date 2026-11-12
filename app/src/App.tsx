@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { applyTheme, getTheme } from './utils/theme';
 import { Navigation, type NavigationTab } from './components/Navigation';
 import { Today } from './pages/Today';
 import { Library } from './pages/Library';
@@ -22,10 +23,14 @@ import { hasCompletedWelcome, modePicture, saveNutritionMode, type NutritionMode
 function App({ initialMode }: { initialMode: NutritionMode }) {
   const [mode, setMode] = useState(initialMode);
   const [activeTab, setActiveTab] = useState<NavigationTab>('today');
+  // Jour ouvert depuis la bande de la semaine : l'Historique s'ouvre directement dessus
+  const [historyDay, setHistoryDay] = useState<string | null>(null);
   const [showAddFood, setShowAddFood] = useState(false);
   const [welcoming, setWelcoming] = useState(() => !hasCompletedWelcome());
   // En sèche, le questionnaire calcule calories et macros de chaque personne
   const [needsProfile, setNeedsProfile] = useState(() => !getProfile());
+  // La barre de l'iPhone suit le fond du mode affiché
+  useEffect(() => applyTheme(getTheme()), [mode]);
   // Chaque appui sur la photo du haut ramène la prise de masse à son accueil
   const [bulkHome, setBulkHome] = useState(0);
 
@@ -101,13 +106,13 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
       ) : (
         <div className="app">
           <main className="app-main">
-            {activeTab === 'today' && <Today onAddFood={() => setShowAddFood(true)} />}
+            {activeTab === 'today' && <Today onAddFood={() => setShowAddFood(true)} onOpenDay={date => { setHistoryDay(date); setActiveTab('history'); window.scrollTo(0, 0); }} />}
             {activeTab === 'library' && <Library />}
-            {activeTab === 'history' && <History />}
+            {activeTab === 'history' && <History key={historyDay ?? 'list'} initialDate={historyDay} onBack={historyDay ? () => { setHistoryDay(null); setActiveTab('today'); } : undefined} />}
             {activeTab === 'photos' && <Photos />}
             {activeTab === 'settings' && <Settings modeSettings={modeSettings(changeMode)} />}
           </main>
-          <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+          <Navigation activeTab={activeTab} onTabChange={tab => { setHistoryDay(null); setActiveTab(tab); }} />
         </div>
       )}
       {/* Toujours au même endroit de l'arbre : la bulle survit au passage d'un écran à l'autre */}

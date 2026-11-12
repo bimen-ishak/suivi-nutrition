@@ -27,10 +27,10 @@ interface DayData {
   imported?: { hasCalories: boolean };
 }
 
-export function History() {
+export function History({ initialDate = null, onBack }: { initialDate?: string | null; onBack?: () => void } = {}) {
   const [days, setDays] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(initialDate);
   const [editingSummary, setEditingSummary] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [editingTotal, setEditingTotal] = useState(false);
@@ -244,7 +244,7 @@ export function History() {
     return (
       <div className="history-page">
         <div className="history-header">
-          <button className="back-btn" onClick={() => setSelectedDate(null)}>
+          <button className="back-btn" onClick={() => (onBack && selectedDate === initialDate ? onBack() : setSelectedDate(null))}>
             {t('← Retour')}
           </button>
           <h1>{formatDateLong(day.date)}</h1>

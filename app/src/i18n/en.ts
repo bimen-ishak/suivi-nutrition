@@ -406,6 +406,8 @@ export const EN: Readonly<Record<string, string>> = {
   "Ces jours ne comptent plus dans Ma sèche, ni les pesées des {n} jours suivants, le temps que l’eau parte. Rien n’est effacé.": "These days no longer count in My cut, nor the weigh-ins of the next {n} days while the water goes. Nothing is deleted.",
   "Déclarer une période de craquage": "Declare a binge period",
   "Dépense": "Burn",
+  "restantes aujourd’hui": "left today",
+  "restantes": "left",
   "Objectif": "Goal",
   "prévue": "planned",
   "Ajustement manuel": "Manual adjustment",
