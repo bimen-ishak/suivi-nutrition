@@ -624,3 +624,6 @@
 .setup-key input { width: 100%; }
 .setup-key-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .setup-cancel { margin-top: 12px; }
+
+.welcome-setup .profile-switch { margin-bottom: 16px; }
+.welcome-setup .setup-actions { margin-top: 16px; }

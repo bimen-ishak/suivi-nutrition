@@ -40,6 +40,18 @@ export function applyModeIcons(mode: NutritionMode): void {
   }
 }
 
+export function hasCompletedWelcome(): boolean {
+  try {
+    const savedMode = localStorage.getItem(MODE_KEY);
+    return savedMode === 'bulk' || savedMode === 'cut'
+      || localStorage.getItem('bulkSetupComplete') === '1'
+      || localStorage.getItem('cutSetupSkipped') === '1'
+      || localStorage.getItem('cutProfile') !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function saveNutritionMode(mode: NutritionMode): void {
   try {
     localStorage.setItem(MODE_KEY, mode);

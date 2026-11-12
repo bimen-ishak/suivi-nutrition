@@ -12,17 +12,16 @@ import './sport.css';
 import { BulkPage } from './bulk/BulkPage';
 import { t } from './i18n';
 import { SettingsGroup } from './components/SettingsGroup';
-import { CutSetup } from './components/CutSetup';
-import { getProfile } from './utils/profile';
+import { WelcomeSetup } from './components/WelcomeSetup';
 import { Icon } from './components/Icon';
 
-import { modePicture, saveNutritionMode, type NutritionMode } from './utils/nutritionMode';
+import { hasCompletedWelcome, modePicture, saveNutritionMode, type NutritionMode } from './utils/nutritionMode';
 
 function App({ initialMode }: { initialMode: NutritionMode }) {
   const [mode, setMode] = useState(initialMode);
   const [activeTab, setActiveTab] = useState<NavigationTab>('today');
   const [showAddFood, setShowAddFood] = useState(false);
-  const [needsProfile, setNeedsProfile] = useState(() => !getProfile());
+  const [welcoming, setWelcoming] = useState(() => !hasCompletedWelcome());
   // Chaque appui sur la photo du haut ramène la prise de masse à son accueil
   const [bulkHome, setBulkHome] = useState(0);
 
@@ -42,7 +41,7 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   ] as const;
 
   const changeMode = (next: NutritionMode) => {
-    if (next === mode) return;
+    if (next === mode && !welcoming) return;
     saveNutritionMode(next);
     setActiveTab('today');
     setMode(next);
@@ -64,23 +63,35 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   return (
     <div className="nutrition-shell" data-mode={mode}>
       <header className="nutrition-header">
-        <button type="button" className="nutrition-brand" onClick={goHome} aria-label={t('Retour à l’accueil')}>
-          <img className="nutrition-mark" src={modePicture(mode)} alt="" />
-          <span className="nutrition-brand-text">
-            <strong>KOUL</strong>
-            <small>{new Date().getHours() < 18 ? t('Bonjour') : t('Bonsoir')}</small>
-          </span>
-        </button>
-        <span className="nutrition-mode">
-          <Icon name={mode === 'bulk' ? 'scale' : 'flame'} />
-          {mode === 'bulk' ? modes[0].label : modes[1].label}
-        </span>
+        {welcoming ? (
+          <div className="nutrition-brand">
+            <img className="nutrition-mark" src={modePicture('bulk')} alt="" />
+            <span className="nutrition-brand-text"><strong>KOUL</strong></span>
+          </div>
+        ) : (
+          <>
+            <button type="button" className="nutrition-brand" onClick={goHome} aria-label={t('Retour à l’accueil')}>
+              <img className="nutrition-mark" src={modePicture(mode)} alt="" />
+              <span className="nutrition-brand-text">
+                <strong>KOUL</strong>
+                <small>{new Date().getHours() < 18 ? t('Bonjour') : t('Bonsoir')}</small>
+              </span>
+            </button>
+            <span className="nutrition-mode">
+              <Icon name={mode === 'bulk' ? 'scale' : 'flame'} />
+              {mode === 'bulk' ? modes[0].label : modes[1].label}
+            </span>
+          </>
+        )}
       </header>
-      {mode === 'bulk' ? <BulkPage homeSignal={bulkHome} renderModeSettings={canLeave => modeSettings(next => {
+      {welcoming ? (
+        <WelcomeSetup initialMode={mode} onComplete={next => {
+          changeMode(next);
+          setWelcoming(false);
+        }} />
+      ) : mode === 'bulk' ? <BulkPage homeSignal={bulkHome} renderModeSettings={canLeave => modeSettings(next => {
         if (next !== mode && canLeave()) changeMode(next);
-      })} /> : needsProfile ? (
-        <CutSetup onComplete={() => { setNeedsProfile(false); window.scrollTo(0, 0); }} />
-      ) : showAddFood ? (
+      })} /> : showAddFood ? (
         <AddFood onComplete={() => setShowAddFood(false)} />
       ) : (
         <div className="app">
