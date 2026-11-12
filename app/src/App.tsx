@@ -74,11 +74,10 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
               <img className="nutrition-mark" src={modePicture(mode)} alt="" />
               <span className="nutrition-brand-text">
                 <strong>KOUL</strong>
-                <small>{new Date().getHours() < 18 ? t('Bonjour') : t('Bonsoir')}</small>
               </span>
             </button>
             <span className="nutrition-mode">
-              <Icon name={mode === 'bulk' ? 'scale' : 'flame'} />
+              <Icon name={mode === 'bulk' ? 'target' : 'flame'} />
               {mode === 'bulk' ? modes[0].label : modes[1].label}
             </span>
           </>

@@ -1,6 +1,6 @@
 import { newId } from './id';
 import { Icon } from '../components/Icon';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { t, unitLabel } from '../i18n';
 import { getActiveKey, getProvider } from './ai';
 import { understandMeal } from './understandMeal';
@@ -18,11 +18,30 @@ export function MealEditor({ initial, onSave, onCancel, onSettings, children }: 
   const [question, setQuestion] = useState('');
   const [assumptions, setAssumptions] = useState<string[]>([]);
   const [needsAnalysis, setNeedsAnalysis] = useState(false);
+  const [hasAnalysis, setHasAnalysis] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
+  const reviewHeading = useRef<HTMLHeadingElement>(null);
+  const analysisReady = hasAnalysis && !needsAnalysis && !manualOpen;
   useEffect(() => () => previews.forEach(url => URL.revokeObjectURL(url)), [previews]);
   const valid = items.length > 0 && items.every(validMeal) && !needsAnalysis;
   const total = items.length && items.every(validMeal) ? totalValues(items) : null;
   const patch = (index: number, changes: Partial<BulkMeal>) => setItems(current => current.map((item, i) => i === index ? { ...item, ...changes } : item));
+  const cancel = () => {
+    const hasDraft = text.trim() || files.length > 0 || items.some(item => item !== initial);
+    if (!hasDraft || window.confirm(t('Quitter la saisie sans enregistrer ?'))) onCancel();
+  };
+  const openManual = () => {
+    if (hasAnalysis && needsAnalysis) {
+      setItems([initial.quantity > 0 ? initial : { ...initial, quantity: 100 }]);
+      setAssumptions([]);
+      setHasAnalysis(false);
+    } else if (!items.length) {
+      setItems([{ ...initial, quantity: 100 }]);
+    }
+    setManualOpen(true);
+    setNeedsAnalysis(false);
+    setQuestion('');
+  };
   const analyze = async () => {
     setBusy(true); setError('');
     try {
@@ -30,24 +49,33 @@ export function MealEditor({ initial, onSave, onCancel, onSettings, children }: 
       const result = await understandMeal(text, images, question);
       if (result.question) { setQuestion(result.question); setNeedsAnalysis(true); return; }
       setItems(result.items.map((item, index) => ({ ...initial, ...item, id: index === 0 ? initial.id : newId(), notes: [text, ...result.assumptions].filter(Boolean).join('\n') })));
-      setAssumptions(result.assumptions); setQuestion(''); setNeedsAnalysis(false); setManualOpen(false);
+      setAssumptions(result.assumptions); setQuestion(''); setNeedsAnalysis(false); setManualOpen(false); setHasAnalysis(true);
     } catch (e) { setError(e instanceof Error ? e.message : t('Impossible de lire ces photos. Réessaie.')); }
     finally { setBusy(false); }
   };
   return <section className="bulk-editor bulk-panel">
-    <div className="bulk-section-head"><h2>{t('Qu’est-ce que tu as mangé ?')}</h2><button className="back-btn" onClick={onCancel} disabled={busy}>{t('Annuler')}</button></div>
+    <div className="bulk-section-head"><h2>{t('Qu’est-ce que tu as mangé ?')}</h2><button className="back-btn" onClick={cancel} disabled={busy}>{t('Annuler')}</button></div>
     <fieldset disabled={busy} className="bulk-fields">
       <label className="bulk-compose-label">{t('Écris à ta façon')}<textarea rows={3} maxLength={4000} value={text} onChange={e => { setText(e.target.value); setNeedsAnalysis(true); }} placeholder={t('Ex. 100 lait, 2 œufs et une banane… même avec des fautes.')} /></label>
-      <div className="bulk-compose-actions"><label className="bulk-attach"><Icon name="camera" />{t('+ Photo facultative')}<input type="file" accept="image/*" multiple onChange={e => { const picked = Array.from(e.target.files ?? []); if (picked.length > 3) { setError(t('Choisis au maximum trois photos.')); return; } setFiles(picked); setError(''); setNeedsAnalysis(true); }} /></label><button className="btn btn-primary" type="button" disabled={!getActiveKey() || (!text.trim() && !files.length)} onClick={analyze}>{busy ? t('Analyse en cours…') : t('Comprendre')}</button></div>
+      <div className="bulk-compose-actions">
+        <label className="bulk-attach"><Icon name="camera" />{t('+ Photo facultative')}<input type="file" accept="image/*" multiple onChange={e => { const picked = Array.from(e.target.files ?? []); if (picked.length > 3) { setError(t('Choisis au maximum trois photos.')); return; } setFiles(picked); setError(''); setNeedsAnalysis(true); }} /></label>
+        <button className="btn btn-primary" type="button" disabled={!analysisReady && (!getActiveKey() || (!text.trim() && !files.length))} onClick={analysisReady ? () => reviewHeading.current?.focus() : analyze}>
+          {busy ? t('Analyse en cours…') : analysisReady ? t('Voir le résultat') : t('Comprendre')}
+        </button>
+        {analysisReady && getActiveKey() && <button className="btn btn-secondary" type="button" onClick={analyze}>{t('Relancer l’analyse')}</button>}
+      </div>
+      {analysisReady && !busy && !error && <p className="bulk-analysis-ready" role="status">{t('Analyse terminée. Ton repas est prêt à vérifier.')}</p>}
       {previews.length > 0 && <div className="bulk-previews">{previews.map((url, i) => <div key={url}><img src={url} alt={t('Photo du repas')} /><button type="button" aria-label={t('Retirer')} onClick={() => { setFiles(files.filter((_, index) => index !== i)); setNeedsAnalysis(true); }}>×</button></div>)}</div>}
       <p className="bulk-muted">{t('Texte seul, photo seule ou les deux. En appuyant sur Comprendre, tu les envoies au service choisi.')} {getProvider() === 'gemini' ? 'Google Gemini.' : 'OpenRouter.'}</p>
       {!getActiveKey() && <button className="back-btn" type="button" onClick={onSettings}>{t('Configurer Gemini ou OpenRouter')}</button>}
       {question && <div className="bulk-question" role="status"><strong>{question}</strong><p>{t('Complète ton texte au-dessus et appuie à nouveau sur Comprendre.')}</p></div>}
       {error && <p role="alert" className="bulk-error">{error}</p>}
-      <button className="back-btn bulk-manual-link" type="button" onClick={() => { setManualOpen(true); setNeedsAnalysis(false); setQuestion(''); if (!items.length) setItems([{ ...initial, quantity: 100 }]); }}>{t('Ou saisir les valeurs moi-même')}</button>
+      <button className="back-btn bulk-manual-link" type="button" onClick={openManual}>{t('Ou saisir les valeurs moi-même')}</button>
       {!text && files.length === 0 && items.length === 0 && children}
-      {assumptions.length > 0 && <div className="bulk-assumptions"><strong>{t('Ce que j’ai supposé')}</strong>{assumptions.map((item, i) => <p key={i}>{item}</p>)}</div>}
-      {items.length > 0 && <div className="bulk-review-list"><h3>{t('Vérifie avant d’ajouter')}</h3><p className="bulk-muted">{needsAnalysis ? t('Ton message a changé. Relance Comprendre pour actualiser le résultat.') : t('Corrige la quantité ou les détails si besoin, puis confirme.')}</p>{items.map((item, index) => {
+      {items.length > 0 && <div className="bulk-review-list">
+        <h3 ref={reviewHeading} tabIndex={-1}>{t('Vérifie avant d’ajouter')}</h3>
+        {assumptions.length > 0 && <div className="bulk-assumptions"><strong>{t('Ce que j’ai supposé')}</strong>{assumptions.map((item, i) => <p key={i}>{item}</p>)}</div>}
+        <p className="bulk-muted">{needsAnalysis ? t('Ton message a changé. Relance Comprendre pour actualiser le résultat.') : t('Corrige la quantité ou les détails si besoin, puis confirme.')}</p>{items.map((item, index) => {
         const p = validMeal(item) ? portionValues(item) : null;
         return <article className="bulk-food-review" key={item.id} data-testid={`review-food-${index}`}>
           <div className="bulk-section-head"><input aria-label={t('Nom du repas')} value={item.name} placeholder={t('Nom du repas')} onChange={e => patch(index, { name: e.target.value })} /><span className="bulk-muted">{item.estimated ? t('Estimation') : t('Étiquette')}</span></div>

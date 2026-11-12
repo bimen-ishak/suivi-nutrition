@@ -356,3 +356,26 @@
 .weight-chart svg {
   direction: ltr;
 }
+
+/* Période de craquage, en bas de la carte */
+.cut-binge { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border); }
+.binge-periods { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.binge-periods li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.binge-declare { width: 100%; }
+.binge-form { display: flex; flex-direction: column; gap: 12px; }
+.binge-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.binge-dates label { display: grid; gap: 4px; font-size: .8rem; font-weight: 650; color: var(--text-3); }
+.binge-dates input { width: 100%; min-width: 0; }
+.binge-form .cut-hint { margin: 0; }
+.binge-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

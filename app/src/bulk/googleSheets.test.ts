@@ -81,7 +81,7 @@ it('changes the pending signature for edits/deletions but not for record orderin
   expect(daySignature([meal])).not.toBe(daySignature([]));
 });
 
-it('requests access only to app files, creates one new spreadsheet, and keeps Google tokens out of storage', async () => {
+it('creates or relinks an app spreadsheet with file-only access and keeps tokens out of storage', async () => {
   vi.resetModules(); vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-client'); vi.useFakeTimers(); localStorage.clear();
   const configs: { scope: string; client_id: string; callback: (value: { access_token: string; expires_in: number }) => void }[] = [];
   const revoke = vi.fn((_token: string, done: () => void) => done());
@@ -102,6 +102,27 @@ it('requests access only to app files, creates one new spreadsheet, and keeps Go
     expect(fetcher.mock.calls[0][0]).toBe('https://sheets.googleapis.com/v4/spreadsheets');
     expect(fetcher.mock.calls[0][1]?.method).toBe('POST');
     expect(localStorage.getItem('bulkHistorySheet')).not.toContain('memory-only-token');
+
+    fetcher.mockClear();
+    await expect(api.linkHistorySheet('https://docs.google.com.example/spreadsheets/d/old-file/edit')).rejects.toThrow(/lien/);
+    expect(fetcher).not.toHaveBeenCalled();
+
+    fetcher.mockResolvedValueOnce(new Response(JSON.stringify(gridInfo())));
+    fetcher.mockResolvedValueOnce(new Response(JSON.stringify({ values: [['Unrelated history']] })));
+    await expect(api.linkHistorySheet('https://docs.google.com/spreadsheets/d/unrelated/edit')).rejects.toThrow(/structure/);
+    expect(api.getHistorySheet()).toEqual(created);
+
+    fetcher.mockClear();
+    fetcher.mockResolvedValueOnce(new Response(JSON.stringify({ ...gridInfo(), properties: { title: 'My KOUL history' } })));
+    fetcher.mockResolvedValueOnce(new Response('{}'));
+    const linked = await api.linkHistorySheet('https://docs.google.com/spreadsheets/d/old-file/edit?gid=0#gid=0');
+    expect(linked).toEqual({ id: 'old-file', url: 'https://docs.google.com/spreadsheets/d/old-file/edit', title: 'My KOUL history' });
+    expect(api.getHistorySheet()).toEqual(linked);
+    expect(await api.createHistorySheet()).toEqual(linked);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls.every(([url, init]) => String(url).includes('/old-file') && !init?.method)).toBe(true);
+    expect(configs).toHaveLength(1);
+
     vi.advanceTimersByTime(3540_000);
     expect(api.googleConnected()).toBe(false);
   } finally {

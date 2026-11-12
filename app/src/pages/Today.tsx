@@ -206,8 +206,9 @@ export function Today({ onAddFood }: TodayProps) {
   const proteinGoal = targets?.protein ?? (weight ? proteinTarget(weight) : DEFAULT_PROTEIN_GOAL);
   const carbMax = targets?.carbs ?? (weight ? carbLimit(weight) : DEFAULT_CARB_LIMIT);
   const fatGoal = targets?.fat ?? DEFAULT_FAT_GOAL;
-  const remaining = budget !== null ? budget - totals.caloriesEaten : null;
-  const completion = budget ? Math.min(100, (totals.caloriesEaten / budget) * 100) : 0;
+  const remaining = budget !== null ? Math.round((budget - totals.caloriesEaten) * 10) / 10 : null;
+  const excess = Math.max(0, -(remaining ?? 0));
+  const completion = budget ? Math.min(100, (totals.caloriesEaten / budget) * 100) : excess ? 100 : 0;
 
   if (editingEntry) {
     return (
@@ -284,7 +285,10 @@ export function Today({ onAddFood }: TodayProps) {
       )}
 
       {/* Carte Bilan du jour */}
-      <section className="hero-card" data-over-budget={(remaining !== null && remaining < 0) || undefined}>
+      <section className="hero-card" data-over-budget={excess > 0 || undefined} style={{
+        '--completion': `${completion}%`,
+        '--cut-excess': `${Math.min(100, 100 * excess / (budget ? budget / 2 : 500))}%`,
+      } as CSSProperties}>
         <div className="hero-top bulk-hero-top">
           <span><Icon name="flame" />{t('Calories mangées')}</span>
           {(dailySummary?.weight || dailySummary?.sleepDuration) && (
@@ -300,21 +304,25 @@ export function Today({ onAddFood }: TodayProps) {
         </div>
 
         {/* Même présentation que la prise de masse : grand chiffre et cercle de progression */}
-        <div className="bulk-hero-body">
+        <div className="bulk-hero-body" data-has-budget={budget !== null || undefined}>
           <div>
-            <div className="bulk-calories">
-              <strong>{totals.caloriesEaten}</strong>
-              {budget !== null && <span>/ {budget} {unitLabel('kcal')}</span>}
-            </div>
-            <p className={remaining !== null && remaining < 0 ? 'bulk-over-budget' : undefined}>
-              {remaining === null
-                ? t('Saisis ta dépense pour voir ton objectif.')
-                : remaining > 0
-                  ? t('Encore {n} kcal pour ton objectif.', { n: remaining })
-                  : remaining === 0
-                    ? t('Objectif du jour atteint.')
-                    : t('{n} kcal au-dessus de ton objectif.', { n: -remaining })}
-            </p>
+            {excess > 0 ? (
+              <>
+                <div className="cut-calorie-alert" role="status">
+                  <div className="bulk-calories"><strong dir="ltr">+{excess.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong></div>
+                  <span>{t('kcal au-dessus de la limite')}</span>
+                </div>
+                <p>{totals.caloriesEaten} / {budget} {unitLabel('kcal')}</p>
+              </>
+            ) : (
+              <>
+                <div className="bulk-calories">
+                  <strong>{totals.caloriesEaten}</strong>
+                  <span>{unitLabel('kcal')}</span>
+                </div>
+                {remaining === null && <p>{t('Saisis ta dépense pour voir ton objectif.')}</p>}
+              </>
+            )}
             {estimated ? (
               <p className="hero-burned">{t('À brûler : {n} kcal', { n: estimated })}</p>
             ) : null}
@@ -325,20 +333,23 @@ export function Today({ onAddFood }: TodayProps) {
               </p>
             ) : null}
           </div>
-          <div
-            className="bulk-energy-ring"
-            aria-hidden="true"
-            style={{ '--completion': `${completion}%` } as CSSProperties}
-          >
-            {budget !== null ? `${Math.floor(completion)}%` : '–'}
-          </div>
+          {budget !== null && (
+            <div className="bulk-energy-ring" aria-hidden={excess > 0 || undefined}>
+              {excess > 0 ? <Icon name="warning" /> : (
+                <span className="energy-ring-reading">
+                  <strong>{remaining?.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
+                  <small>{t('kcal restantes')}</small>
+                </span>
+              )}
+            </div>
+          )}
         </div>
         {budget !== null && (
           <progress className="bulk-sr-only" value={Math.min(totals.caloriesEaten, budget)} max={budget || 1} aria-label={t('Progression des calories')} />
         )}
 
         <div className="action-row">
-          <button className="btn btn-primary" onClick={() => openSummary(today)}>
+          <button className="btn btn-secondary" onClick={() => openSummary(today)}>
             {burned ? ti('✏️ Modifier le bilan') : t('Saisir ma dépense pour voir le restant')}
           </button>
           <button className="btn btn-secondary" onClick={handleImportHealth}>
@@ -350,17 +361,17 @@ export function Today({ onAddFood }: TodayProps) {
       <section className="cut-nutrition">
         {/* Même présentation que la prise de masse : trois cartes côte à côte */}
         <div className="bulk-macros">
-          <article>
+          <article data-macro="protein">
             <span>{t('Protéines')}</span>
             <strong>{Math.round(totals.protein)} <small>/ {proteinGoal} {unitLabel('g')}</small></strong>
             <progress value={Math.min(totals.protein, proteinGoal)} max={proteinGoal || 1} aria-label={t('Progression des protéines')} />
           </article>
-          <article data-over={totals.carbs > carbMax || undefined}>
+          <article data-macro="carbs" data-over={totals.carbs > carbMax || undefined}>
             <span>{t('Glucides')}</span>
             <strong>{Math.round(totals.carbs)} <small>/ {t('max')} {carbMax} {unitLabel('g')}</small></strong>
             <progress value={Math.min(totals.carbs, carbMax)} max={carbMax || 1} aria-label={t('Glucides')} />
           </article>
-          <article data-over={totals.fat > fatGoal || undefined}>
+          <article data-macro="fat" data-over={totals.fat > fatGoal || undefined}>
             <span>{t('Lipides')}</span>
             <strong>{Math.round(totals.fat)} <small>/ {fatGoal} {unitLabel('g')}</small></strong>
             <progress value={Math.min(totals.fat, fatGoal)} max={fatGoal || 1} aria-label={t('Lipides')} />

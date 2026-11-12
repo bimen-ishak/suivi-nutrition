@@ -81,16 +81,53 @@ async function request(path: string, init: RequestInit = {}, fetcher: typeof fet
   }
   return response.json();
 }
+function saveHistorySheet(id: string, title: string): HistorySheet {
+  const sheet = { id, title, url: `https://docs.google.com/spreadsheets/d/${id}/edit` };
+  localStorage.setItem('bulkHistorySheet', JSON.stringify(sheet));
+  changed();
+  return sheet;
+}
+
 export async function createHistorySheet(): Promise<HistorySheet> {
   const existing = getHistorySheet();
   if (existing) return existing;
   const title = `Nutrition · ${new Date().toLocaleDateString()}`;
   const result = await request('', { method: 'POST', body: JSON.stringify({ properties: { title }, sheets: [{ properties: { title: 'Daily', gridProperties: { rowCount: 1000, columnCount: HEADERS.length, frozenRowCount: 1 } } }] }) }) as { spreadsheetId?: string };
   if (!result.spreadsheetId) throw new Error(t('Google n’a pas renvoyé le lien du nouveau fichier.'));
-  const sheet = { id: result.spreadsheetId, title, url: `https://docs.google.com/spreadsheets/d/${result.spreadsheetId}/edit` };
-  // Keep the created file even if header initialization fails: retry the same file.
-  localStorage.setItem('bulkHistorySheet', JSON.stringify(sheet)); changed();
-  return sheet;
+  return saveHistorySheet(result.spreadsheetId, title);
+}
+
+const badLayout = () => new Error(t('La structure du tableau a changé. Aucun contenu n’a été écrasé.'));
+
+async function readDailySheet(sheetPath: string, api: typeof request) {
+  const info = await api(`${sheetPath}?fields=properties(title),sheets(properties)`) as {
+    properties?: { title?: string };
+    sheets?: { properties?: { title: string; sheetId: number; gridProperties?: { rowCount: number; columnCount: number } } }[];
+  };
+  const daily = info.sheets?.find(item => item.properties?.title === 'Daily')?.properties;
+  const grid = daily?.gridProperties;
+  if (!daily || !grid || grid.columnCount < 12 || grid.rowCount < 1) throw badLayout();
+
+  const lastColumn = grid.columnCount < HEADERS.length ? 'L' : 'M';
+  const data = await api(`${sheetPath}/values/${encodeURIComponent(`Daily!A1:${lastColumn}`)}`) as { values?: unknown[][] };
+  const rows = data.values ?? [];
+  const header = rows[0];
+  const current = JSON.stringify(header) === JSON.stringify(HEADERS);
+  const legacy = header && JSON.stringify(header.slice(0, 12)) === JSON.stringify(HEADERS.slice(0, 12))
+    && rows.every(row => row[12] === undefined || row[12] === '');
+  if (header && !current && !legacy) throw badLayout();
+  return { daily, grid, rows, current, title: info.properties?.title ?? 'Nutrition' };
+}
+
+export async function linkHistorySheet(link: string): Promise<HistorySheet> {
+  const url = URL.canParse(link) ? new URL(link) : null;
+  const match = url?.origin === 'https://docs.google.com' && url.pathname.match(/^\/spreadsheets\/d\/([a-zA-Z0-9_-]+)(?:\/edit)?\/?$/);
+  if (!match) throw new Error(t('Colle le lien de ton fichier Google Sheets.'));
+
+  if (!googleConnected()) await connectGoogle();
+  const id = match[1];
+  const { title } = await readDailySheet(`/${id}`, request);
+  return saveHistorySheet(id, title);
 }
 
 export function dayRow(date: string, meals: BulkMeal[], updatedAt: string, weightKg?: number): (string | number)[] {
@@ -113,22 +150,7 @@ export async function writeDay(
   try {
     const sheetPath = `/${encodeURIComponent(sheet.id)}`;
     const prefix = `${sheetPath}/values/`;
-    const info = await api(`${sheetPath}?fields=sheets.properties`) as {
-      sheets?: { properties?: { title: string; sheetId: number; gridProperties?: { rowCount: number; columnCount: number } } }[];
-    };
-    const daily = info.sheets?.find(item => item.properties?.title === 'Daily')?.properties;
-    const grid = daily?.gridProperties;
-    const badLayout = () => new Error(t('La structure du tableau a changé. Aucun contenu n’a été écrasé.'));
-    if (!daily || !grid || grid.columnCount < 12 || grid.rowCount < 1) throw badLayout();
-
-    const lastColumn = grid.columnCount < HEADERS.length ? 'L' : 'M';
-    const data = await api(`${prefix}${encodeURIComponent(`Daily!A1:${lastColumn}`)}`) as { values?: unknown[][] };
-    const rows = data.values ?? [];
-    const header = rows[0];
-    const current = header && JSON.stringify(header) === JSON.stringify(HEADERS);
-    const legacy = header && JSON.stringify(header.slice(0, 12)) === JSON.stringify(HEADERS.slice(0, 12))
-      && rows.every(row => row[12] === undefined || row[12] === '');
-    if (header && !current && !legacy) throw badLayout();
+    const { daily, grid, rows, current } = await readDailySheet(sheetPath, api);
 
     const matches = rows.map((row, index) => row[0] === date ? index + 1 : -1).filter(row => row > 1);
     if (matches.length > 1) throw new Error(t('Cette date existe plusieurs fois dans le tableau. Corrige les doublons avant de réessayer.'));

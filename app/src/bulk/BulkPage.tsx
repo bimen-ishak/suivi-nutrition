@@ -153,13 +153,13 @@ export function BulkPage({ renderModeSettings, homeSignal = 0 }: { renderModeSet
       <h1>{view === 'day' ? formatDate(date) : view === 'history' ? t('Ton historique') : view === 'settings' ? t('Tes réglages') : t('Ton journal du jour')}</h1>
       {view === 'today' && <time className="bulk-muted" dateTime={date}>{formatDate(date)}</time>}
       {view === 'day' && <button className="back-btn" onClick={() => { setNotice(''); setView('history'); }}>{t('Retour à l’historique')}</button>}
+      {(view === 'today' || view === 'day') && !editor && !loading && !error && (
+        <BulkWeightEntry key={date} date={date} weightKg={weightKg} onChange={refresh} />
+      )}
     </header>
     {error && <div role="alert" className="bulk-notice">{error}<button className="back-btn" onClick={refresh}>{t('Réessayer')}</button></div>}
     {notice && <p role="status" className="bulk-notice">{notice}</p>}
     <div hidden={view !== 'today' && view !== 'day'}>
-      {(view === 'today' || view === 'day') && !editor && !loading && !error && (
-        <BulkWeightEntry key={date} date={date} weightKg={weightKg} onChange={refresh} />
-      )}
       <div className={`bulk-dashboard${editor ? ' is-editing' : ''}`}>
         <div className="bulk-summary">
           <section className="bulk-hero" data-over-budget={remaining < 0 || undefined}>
@@ -167,18 +167,20 @@ export function BulkPage({ renderModeSettings, homeSignal = 0 }: { renderModeSet
               <span><Icon name="flame" />{t('Calories mangées')}</span>
             </div>
             <div className="bulk-hero-body">
-              <div>
-                <div className="bulk-calories"><strong>{format(totals.kcal)}</strong><span>/ {format(goals.kcal)} {unitLabel('kcal')}</span></div>
-                <p className={remaining < 0 ? 'bulk-over-budget' : undefined}>{remaining > 0 ? t('Encore {n} kcal pour ton objectif.', { n: format(remaining) }) : remaining === 0 ? t('Objectif du jour atteint.') : t('{n} kcal au-dessus de ton objectif.', { n: format(-remaining) })}</p>
+              <div className="bulk-calories"><strong>{format(totals.kcal)}</strong><span>{unitLabel('kcal')}</span></div>
+              <div className="bulk-energy-ring" style={{ '--completion': `${completion}%` } as CSSProperties}>
+                <span className="energy-ring-reading">
+                  <strong dir="ltr">{remaining < 0 ? '+' : ''}{format(Math.abs(remaining))}</strong>
+                  <small>{remaining < 0 ? t('kcal en plus') : t('kcal restantes')}</small>
+                </span>
               </div>
-              <div className="bulk-energy-ring" aria-hidden="true" style={{ '--completion': `${completion}%` } as CSSProperties}>{Math.floor(completion)}%</div>
             </div>
             <progress className="bulk-sr-only" value={Math.min(totals.kcal, goals.kcal)} max={goals.kcal} aria-label={t('Progression des calories')} />
           </section>
           <div className="bulk-macros">
-            <article><span>{t('Protéines')}</span><strong>{format(totals.protein)} <small>/ {goals.protein} {unitLabel('g')}</small></strong><progress value={Math.min(totals.protein, goals.protein)} max={goals.protein} aria-label={t('Progression des protéines')} /></article>
-            <article><span>{t('Glucides')}</span><strong>{format(totals.carbs)} <small>{unitLabel('g')}</small></strong></article>
-            <article><span>{t('Lipides')}</span><strong>{format(totals.fat)} <small>{unitLabel('g')}</small></strong></article>
+            <article data-macro="protein"><span>{t('Protéines')}</span><strong>{format(totals.protein)} <small>/ {goals.protein} {unitLabel('g')}</small></strong><progress value={Math.min(totals.protein, goals.protein)} max={goals.protein} aria-label={t('Progression des protéines')} /></article>
+            <article data-macro="carbs"><span>{t('Glucides')}</span><strong>{format(totals.carbs)} <small>{unitLabel('g')}</small></strong></article>
+            <article data-macro="fat"><span>{t('Lipides')}</span><strong>{format(totals.fat)} <small>{unitLabel('g')}</small></strong></article>
             {goals.showSugars && <article><span>{t('Sucres')}</span><strong>{dayMeals.some(meal => meal.values.sugars !== undefined) ? format(totals.sugars ?? 0) : '—'} <small>{unitLabel('g')}</small></strong><small>{t('Seulement les valeurs renseignées.')}</small></article>}
           </div>
         </div>
@@ -200,7 +202,7 @@ export function BulkPage({ renderModeSettings, homeSignal = 0 }: { renderModeSet
             <section className="bulk-journal">
               <div className="bulk-section-head"><h2>{t('Tes repas')}</h2><span>{dayMeals.length}</span></div>
               {loading && <p className="bulk-muted">{t('Chargement…')}</p>}
-              {!loading && dayMeals.length === 0 && <div className="bulk-empty"><Icon name="book" /><p>{t('Écris par exemple : 100 lait et 2 œufs. Une photo est facultative.')}</p></div>}
+              {!loading && dayMeals.length === 0 && <div className="bulk-empty"><p>{t('Essaie : 100 ml de lait et deux œufs.')}</p></div>}
               {dayMeals.map(meal => {
                 const values = portionValues(meal);
                 return <article key={meal.id} className="bulk-meal">
