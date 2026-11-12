@@ -19,6 +19,19 @@ it('rejects partial foods, implausible values and null numeric data instead of s
 it('represents a clarification without manufacturing foods', () => {
   expect(parseMealUnderstanding('{"items":[],"question":"How much rice?"}')).toEqual({ items: [], assumptions: [], question: 'How much rice?' });
 });
+it('combines sandwich ingredients into one portion and keeps the drink separate', () => {
+  const bread = { name: 'Bread', quantity: 60, unit: 'g', values: { kcal: 250, protein: 10, carbs: 50, fat: 2, sugars: 4 }, source: 'label' };
+  const potatoes = { name: 'Potatoes', quantity: 90, unit: 'g', values: { kcal: 100, protein: 5, carbs: 20, fat: 1, sugars: null } };
+  const result = parseMealUnderstanding(JSON.stringify({
+    items: [{ name: 'Potato sandwich', ingredients: [bread, potatoes] }, response.items[0]],
+  }));
+  expect(result.items.map(item => item.name)).toEqual(['Potato sandwich', 'Milk']);
+  expect(result.items[0]).toMatchObject({ quantity: 150, unit: 'g', estimated: true });
+  expect(result.items[0].values.kcal * 1.5).toBeCloseTo(240);
+  expect(result.items[0].values.protein * 1.5).toBeCloseTo(10.5);
+  expect(result.items[0].values.sugars).toBeUndefined();
+  expect(result.assumptions[0]).toMatch(/Bread \(60 g\).*Potatoes \(90 g\)/);
+});
 it('sends casual text to Gemini without requiring an image', async () => {
   const fetcher = vi.fn(async (_url: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(response) }] } }] }), { status: 200 }));
   const result = await understandMeal('100 melk', [], '', fetcher);

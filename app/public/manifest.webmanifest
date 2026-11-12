@@ -1,7 +1,7 @@
 {
   "id": "/suivi-nutrition/",
-  "name": "KOUL â€” Cutting",
-  "short_name": "KOUL Cut",
+  "name": "KOUL",
+  "short_name": "KOUL",
   "start_url": "./?mode=cut",
   "scope": "./",
   "display": "standalone",

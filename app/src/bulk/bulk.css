@@ -31,6 +31,8 @@
 .bulk-number-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:16px 0; }
 .bulk-number-grid input { width:100%; }
 .bulk-inline>input { flex:1; min-width:0; }.bulk-inline { justify-content:flex-start; }
+.bulk-analysis-ready { margin:0; color:var(--primary-strong); font-weight:700; }
+.bulk-review-list h3 { scroll-margin-block-start:20px; }
 .bulk-photo-picker { background:var(--surface-soft); border:1px dashed var(--border-strong); border-radius:14px; padding:18px; display:grid; gap:8px; cursor:pointer; }
 .bulk-photo-picker input { border:0; background:transparent; padding:0; font-size:.85rem; }
 .bulk-previews { display:flex; gap:10px; }.bulk-previews>div { position:relative; }.bulk-previews img { width:90px; height:90px; object-fit:cover; border-radius:12px; }.bulk-previews button { position:absolute; top:0; right:0; border:0; border-radius:50%; width:26px; height:26px; background:var(--surface); color:var(--text); cursor:pointer; }

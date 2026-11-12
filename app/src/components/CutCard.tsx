@@ -17,7 +17,7 @@ import {
 import './CutCard.css';
 import { t, unitLabel, locale, ltr } from '../i18n';
 import { ti, Icon } from './Icon';
-import { addBingePeriod, getBingePeriods, removeBingePeriod, withoutBinges, WATER_DAYS_AFTER, type BingePeriod } from '../utils/bingePeriods';
+import { addBingePeriod, afterLastBinge, getBingePeriods, removeBingePeriod, withoutBinges, WATER_DAYS_AFTER, type BingePeriod } from '../utils/bingePeriods';
 
 const HISTORY_DAYS = 60;
 const MAINTENANCE_DAYS_NEEDED = 14;
@@ -74,7 +74,8 @@ export function CutCard() {
   const latest = trend[trend.length - 1];
   const rate = getWeeklyRate(weights);
   const verdict = rate ? getRateVerdict(rate.percentPerWeek) : null;
-  const maintenance = estimateMaintenance(weights, pastIntakes);
+  const maintenanceData = afterLastBinge(weights, pastIntakes, periods);
+  const maintenance = estimateMaintenance(maintenanceData.weights, maintenanceData.intakes);
   const week = averageIntake(pastIntakes.filter(day => day.date >= dateDaysAgo(7)));
   const chartStart = dateDaysAgo(range);
   const chartPoints = trend.filter(p => p.date >= chartStart);
@@ -204,6 +205,9 @@ export function CutCard() {
 
       {/* Période de craquage : ces jours sortent des calculs, sans rien effacer */}
       <div className="cut-binge">
+        {periods.length > 0 && <p className="cut-hint">
+          {t('Le résumé de l’historique inclut aussi les jours exclus de Ma sèche. La dépense est estimée à partir des données relevées après la dernière période et les {n} jours suivants.', { n: WATER_DAYS_AFTER })}
+        </p>}
         {periods.length > 0 && (
           <ul className="binge-periods">
             {periods.map(period => (

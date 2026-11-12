@@ -61,3 +61,18 @@ export function withoutBinges(
     intakes: intakes.filter(i => !inBingePeriod(i.date, periods))
   };
 }
+
+/** Keep the intake and weight windows aligned after the latest exclusion. */
+export function afterLastBinge(
+  weights: WeightPoint[],
+  intakes: IntakeDay[],
+  periods: BingePeriod[]
+): { weights: WeightPoint[]; intakes: IntakeDay[] } {
+  if (periods.length === 0) return { weights, intakes };
+  const lastEnd = periods.reduce((latest, period) => period.end > latest ? period.end : latest, periods[0].end);
+  const cutoff = addDays(lastEnd, WATER_DAYS_AFTER);
+  return {
+    weights: weights.filter(point => point.date > cutoff),
+    intakes: intakes.filter(day => day.date > cutoff),
+  };
+}

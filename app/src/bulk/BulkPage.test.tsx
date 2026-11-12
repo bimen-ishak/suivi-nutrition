@@ -85,6 +85,17 @@ describe('simple bulking workflow', () => {
     await screen.findByText('Lait entier, 100 ml.');
     expect(understandMeal).toHaveBeenCalledWith('100 melk and 2 eggs', [], '');
     expect(save).not.toHaveBeenCalled();
+    expect(screen.getByRole('status').textContent).toContain('Analyse terminée');
+    fireEvent.click(screen.getByRole('button', { name: 'Voir le résultat' }));
+    expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Vérifie avant d’ajouter' }));
+    expect(understandMeal).toHaveBeenCalledTimes(1);
+    const firstResult = await vi.mocked(understandMeal).mock.results[0].value;
+    vi.mocked(understandMeal).mockResolvedValueOnce({ ...firstResult, assumptions: ['Nouvelle estimation.'] });
+    fireEvent.click(screen.getByRole('button', { name: 'Relancer l’analyse' }));
+    await screen.findByText('Nouvelle estimation.');
+    expect(understandMeal).toHaveBeenCalledTimes(2);
+    expect(understandMeal).toHaveBeenLastCalledWith('100 melk and 2 eggs', [], '');
+    expect(save).not.toHaveBeenCalled();
     fireEvent.change(within(screen.getByTestId('review-food-0')).getByLabelText('Quantité mangée'), { target: { value: '200' } });
     fireEvent.click(screen.getByRole('button', { name: 'Confirmer et enregistrer' }));
     await waitFor(() => expect(save).toHaveBeenCalled());
@@ -115,7 +126,29 @@ describe('simple bulking workflow', () => {
     await screen.findByText('Vérifie avant d’ajouter');
     expect(understandMeal).toHaveBeenCalledWith('', ['data:image/jpeg;base64,test'], '');
     fireEvent.change(screen.getByRole('textbox', { name: 'Écris à ta façon' }), { target: { value: 'Only half of it' } });
+    expect(screen.getByRole('button', { name: 'Comprendre' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Confirmer et enregistrer' })).toHaveProperty('disabled', true);
+    fireEvent.click(screen.getByRole('button', { name: 'Ou saisir les valeurs moi-même' }));
+    expect(screen.getByLabelText('Nom du repas')).toHaveProperty('value', '');
+    expect(screen.getByRole('button', { name: 'Confirmer et enregistrer' })).toHaveProperty('disabled', true);
+  });
+
+  it('keeps the draft when cancellation is declined', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
+    const cancel = vi.fn();
+    try {
+      render(<MealEditor initial={initial} onSave={vi.fn()} onCancel={cancel} onSettings={vi.fn()} />);
+      const text = screen.getByRole('textbox', { name: 'Écris à ta façon' });
+      const cancelButton = screen.getByRole('button', { name: 'Annuler' });
+      fireEvent.change(text, { target: { value: 'Sandwich aux pommes de terre' } });
+      fireEvent.click(cancelButton);
+      expect(cancel).not.toHaveBeenCalled();
+      expect(text).toHaveProperty('value', 'Sandwich aux pommes de terre');
+      fireEvent.click(cancelButton);
+      expect(cancel).toHaveBeenCalledOnce();
+    } finally {
+      confirm.mockRestore();
+    }
   });
 
   it('keeps weigh-ins optional, supports decimal input, and rolls over without moving yesterday’s weight', async () => {

@@ -1,7 +1,7 @@
 {
   "id": "/suivi-nutrition/?mode=bulk",
-  "name": "KOUL — Bulking",
-  "short_name": "KOUL Bulk",
+  "name": "KOUL",
+  "short_name": "KOUL",
   "start_url": "./?mode=bulk",
   "scope": "./",
   "display": "standalone",
