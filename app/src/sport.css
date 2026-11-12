@@ -690,3 +690,62 @@
 .welcome-setup .setup-card > p { margin: 0 0 16px; color: var(--text-2); }
 .welcome-setup .bulk-number-grid { margin-bottom: 24px; }
 .welcome-setup .setup-actions .btn { max-width: none; min-height: 52px; }
+
+/* Bilan du jour en anneaux : fond bleu nuit, un anneau épais par chiffre */
+.nutrition-shell .hero-card.ring-dash {
+  --hero-bg: #1c1b4a;
+  --hero-track: #0e0d2c;
+  --text: #ffffff;
+  --text-2: #b4b3d6;
+  --surface-soft: #2a2960;
+  --primary-soft: #2a2960;
+  --ring-kcal: #ebf68f;
+  --ring-protein: #ec736b;
+  --ring-carbs: #f3d877;
+  --ring-fat: #94dcf6;
+  --ring-over: #fa637e;
+  border-color: #ffffff14;
+}
+:root[data-theme='dark'] .nutrition-shell .hero-card.ring-dash { --hero-bg: #16153a; --hero-track: #0a0a22; }
+.ring { position: relative; display: grid; place-items: center; aspect-ratio: 1; }
+.ring svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ring-bg { fill: none; stroke: var(--hero-track); stroke-width: 16; }
+.ring-arc { fill: none; stroke: var(--ring-over); stroke-width: 16; stroke-linecap: round; transition: stroke-dasharray .6s cubic-bezier(.16, 1, .3, 1); }
+.ring-center { position: relative; display: grid; justify-items: center; line-height: 1.1; text-align: center; color: var(--text); }
+.ring-center strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ring-center small { color: var(--text-2); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.ring-dash-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); align-items: center; gap: var(--space-4); }
+.ring-dash-text { display: grid; gap: 6px; min-width: 0; }
+.ring-dash-label { font-size: 1.35rem; font-weight: 500; color: var(--text); }
+.ring-dash-left { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin: 0; color: var(--ring-kcal); }
+.ring-dash-left strong { font-size: clamp(2rem, 9vw, 2.6rem); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.ring-dash-left span { font-size: .95rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.nutrition-shell .hero-card .cut-calorie-alert { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.nutrition-shell .hero-card .cut-calorie-alert strong { font-size: clamp(2rem, 9vw, 2.6rem); line-height: 1; font-weight: 600; }
+.ring-dash-sub { margin: 0; color: var(--text-2); font-size: .85rem; }
+.ring-dash-stats { display: grid; gap: 4px; margin: 6px 0 0; }
+.ring-dash-stats div { display: flex; align-items: baseline; gap: 10px; }
+.ring-dash-stats dt { min-width: 5.5em; color: var(--text); font-size: 1.05rem; }
+.ring-dash-stats dd { margin: 0; color: var(--text-2); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.ring-dash-stats dd small { margin-inline-start: 6px; font-size: .72rem; }
+.ring-dash-big { width: 100%; max-width: 220px; justify-self: end; }
+.ring-dash-big .ring-center strong { font-size: clamp(1.4rem, 6vw, 1.9rem); }
+.ring-dash-big .ring-center small { font-size: .75rem; }
+
+.ring-dash-macros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid #ffffff22;
+}
+.ring-dash-macros figure { display: grid; justify-items: center; gap: 10px; margin: 0; }
+.ring-dash-macros figcaption { color: var(--text); font-size: .9rem; font-weight: 500; }
+.ring-dash-macros .ring { width: 100%; max-width: 120px; }
+.ring-dash-macros .ring-center strong { font-size: clamp(.95rem, 4.2vw, 1.2rem); }
+.ring-dash-macros .ring-center small { font-size: .68rem; }
+.ring-dash-macros figure[data-over] figcaption { color: var(--ring-over); }
+.nutrition-shell .hero-card.ring-dash .bulk-hero-top { margin-bottom: var(--space-3); }
+@media (prefers-reduced-motion: reduce) { .ring-arc { transition: none; } }

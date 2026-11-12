@@ -1,5 +1,5 @@
 import { foodDisplayName } from '../data/genericFoods';
-import { useState, useEffect, type CSSProperties } from 'react';
+import { useState, useEffect, type CSSProperties, type ReactNode } from 'react';
 import { getJournalEntriesByDate, getDailySummary, getWeightsSince, getCutHistoryDay, recalculateDailySummary, updateDailySummary, updateJournalEntry, deleteJournalEntry } from '../db';
 import type { JournalEntry, DailySummary } from '../types';
 import { DailySummaryModal } from '../components/DailySummaryModal';
@@ -285,13 +285,12 @@ export function Today({ onAddFood }: TodayProps) {
       )}
 
       {/* Carte Bilan du jour */}
-      <section className="hero-card" data-over-budget={excess > 0 || undefined} style={{
+      <section className="hero-card ring-dash" data-over-budget={excess > 0 || undefined} style={{
         '--completion': `${completion}%`,
         '--cut-excess': `${Math.min(100, 100 * excess / (budget ? budget / 2 : 500))}%`,
       } as CSSProperties}>
+        {(dailySummary?.weight || dailySummary?.sleepDuration) && (
         <div className="hero-top bulk-hero-top">
-          <span><Icon name="flame" />{t('Calories mangées')}</span>
-          {(dailySummary?.weight || dailySummary?.sleepDuration) && (
             <div className="secondary-data">
               {dailySummary.weight && (
                 <span className="data-badge"><Icon name="scale" />{dailySummary.weight} {unitLabel('kg')}</span>
@@ -300,53 +299,69 @@ export function Today({ onAddFood }: TodayProps) {
                 <span className="data-badge"><Icon name="moon" />{dailySummary.sleepDuration}{unitLabel('h')}</span>
               )}
             </div>
-          )}
         </div>
+        )}
 
-        {/* Même présentation que la prise de masse : grand chiffre et cercle de progression */}
-        <div className="bulk-hero-body" data-has-budget={budget !== null || undefined}>
-          <div>
+        {/* Tableau à anneaux : calories à gauche, grand anneau à droite, puis les trois macros */}
+        <div className="ring-dash-top">
+          <div className="ring-dash-text">
+            <span className="ring-dash-label">{t('Calories')}</span>
             {excess > 0 ? (
               <>
                 <div className="cut-calorie-alert" role="status">
-                  <div className="bulk-calories"><strong dir="ltr">+{excess.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong></div>
+                  <strong dir="ltr">+{excess.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
                   <span>{t('kcal au-dessus de la limite')}</span>
                 </div>
-                <p>{totals.caloriesEaten} / {budget} {unitLabel('kcal')}</p>
+                <p className="ring-dash-sub">{totals.caloriesEaten} / {budget} {unitLabel('kcal')}</p>
               </>
-            ) : (
-              <>
-                <div className="bulk-calories">
-                  <strong>{totals.caloriesEaten}</strong>
-                  <span>{unitLabel('kcal')}</span>
-                </div>
-                {remaining === null && <p>{t('Saisis ta dépense pour voir ton objectif.')}</p>}
-              </>
-            )}
-            {estimated ? (
-              <p className="hero-burned">{t('À brûler : {n} kcal', { n: estimated })}</p>
-            ) : null}
-            {burned ? (
-              <p className="hero-burned">
-                {estimated ? t('Santé pour l’instant : {n} kcal', { n: burned }) : t('Dépense : {n} kcal', { n: burned })}
-                {dailySummary?.caloriesBurnedProvisional && <span className="provisional-badge">{t('provisoire')}</span>}
+            ) : remaining !== null ? (
+              <p className="ring-dash-left">
+                <strong>{remaining.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
+                <span>{t('kcal restantes')}</span>
               </p>
+            ) : (
+              <p className="ring-dash-sub">{t('Saisis ta dépense pour voir ton objectif.')}</p>
+            )}
+            {budget !== null && (
+              <dl className="ring-dash-stats">
+                <div><dt>{t('Objectif')}</dt><dd>{budget}</dd></div>
+                <div>
+                  <dt>{t('Dépense')}</dt>
+                  <dd>
+                    {day.value}
+                    {estimated ? <small>{t('prévue')}</small> : dailySummary?.caloriesBurnedProvisional ? <small>{t('provisoire')}</small> : null}
+                  </dd>
+                </div>
+              </dl>
+            )}
+            {estimated && burned ? (
+              <p className="ring-dash-sub">{t('Santé pour l’instant : {n} kcal', { n: burned })}</p>
             ) : null}
           </div>
-          {budget !== null && (
-            <div className="bulk-energy-ring" aria-hidden={excess > 0 || undefined}>
-              {excess > 0 ? <Icon name="warning" /> : (
-                <span className="energy-ring-reading">
-                  <strong>{remaining?.toLocaleString(locale(), { maximumFractionDigits: 1 })}</strong>
-                  <small>{t('kcal restantes')}</small>
-                </span>
-              )}
-            </div>
-          )}
+          <Ring className="ring-dash-big" value={totals.caloriesEaten} max={budget ?? 0} color="var(--ring-kcal)">
+            <strong>{totals.caloriesEaten}</strong>
+            <small>{budget !== null ? `${budget} ${unitLabel('kcal')}` : unitLabel('kcal')}</small>
+          </Ring>
         </div>
         {budget !== null && (
           <progress className="bulk-sr-only" value={Math.min(totals.caloriesEaten, budget)} max={budget || 1} aria-label={t('Progression des calories')} />
         )}
+
+        <div className="ring-dash-macros">
+          {([
+            ['protein', t('Protéines'), totals.protein, proteinGoal, false],
+            ['carbs', t('Glucides'), totals.carbs, carbMax, true],
+            ['fat', t('Lipides'), totals.fat, fatGoal, true],
+          ] as const).map(([key, label, value, goal, isLimit]) => (
+            <figure key={key} data-macro={key} data-over={(isLimit && value > goal) || undefined}>
+              <figcaption>{label}</figcaption>
+              <Ring value={value} max={goal} color={`var(--ring-${key})`}>
+                <strong>{Math.round(value)}{unitLabel('g')}</strong>
+                <small>{isLimit && key === 'carbs' ? `${t('max')} ` : ''}{goal}{unitLabel('g')}</small>
+              </Ring>
+            </figure>
+          ))}
+        </div>
 
         <div className="action-row">
           <button className="btn btn-secondary" onClick={() => openSummary(today)}>
@@ -359,24 +374,6 @@ export function Today({ onAddFood }: TodayProps) {
       </section>
 
       <section className="cut-nutrition">
-        {/* Même présentation que la prise de masse : trois cartes côte à côte */}
-        <div className="bulk-macros">
-          <article data-macro="protein">
-            <span>{t('Protéines')}</span>
-            <strong>{Math.round(totals.protein)} <small>/ {proteinGoal} {unitLabel('g')}</small></strong>
-            <progress value={Math.min(totals.protein, proteinGoal)} max={proteinGoal || 1} aria-label={t('Progression des protéines')} />
-          </article>
-          <article data-macro="carbs" data-over={totals.carbs > carbMax || undefined}>
-            <span>{t('Glucides')}</span>
-            <strong>{Math.round(totals.carbs)} <small>/ {t('max')} {carbMax} {unitLabel('g')}</small></strong>
-            <progress value={Math.min(totals.carbs, carbMax)} max={carbMax || 1} aria-label={t('Glucides')} />
-          </article>
-          <article data-macro="fat" data-over={totals.fat > fatGoal || undefined}>
-            <span>{t('Lipides')}</span>
-            <strong>{Math.round(totals.fat)} <small>/ {fatGoal} {unitLabel('g')}</small></strong>
-            <progress value={Math.min(totals.fat, fatGoal)} max={fatGoal || 1} aria-label={t('Lipides')} />
-          </article>
-        </div>
         {pinned.length > 0 && <div className="bulk-macros cut-minerals">{pinned.map(item => item.card)}</div>}
         {hasMinerals(pinned) && <p className="macro-note">{mineralsNote}</p>}
         {(unpinned.length > 0 || quip) && (
@@ -468,6 +465,36 @@ export function Today({ onAddFood }: TodayProps) {
           {t('+ Ajouter un aliment')}
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Anneau épais à bouts arrondis, avec le texte au centre */
+function Ring({ value, max, color, className, children }: {
+  value: number;
+  max: number;
+  color: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const ratio = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
+  const over = max > 0 && value > max;
+  const length = 2 * Math.PI * 38;
+  return (
+    <div className={`ring${className ? ` ${className}` : ''}`} data-over={over || undefined}>
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle className="ring-bg" cx="50" cy="50" r="38" />
+        {ratio > 0 && (
+          <circle
+            className="ring-arc"
+            cx="50" cy="50" r="38"
+            style={{ stroke: over ? undefined : color }}
+            strokeDasharray={`${ratio * length} ${length}`}
+            transform="rotate(-90 50 50)"
+          />
+        )}
+      </svg>
+      <span className="ring-center">{children}</span>
     </div>
   );
 }
