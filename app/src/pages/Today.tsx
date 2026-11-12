@@ -54,6 +54,8 @@ export function Today({ onAddFood }: TodayProps) {
   });
   // Jour dont on saisit le bilan à la main : aujourd'hui, ou hier quand la dépense manque
   const [summaryDate, setSummaryDate] = useState<string | null>(null);
+  // Semaine en cours, du lundi au dimanche : calories mangées et dépense connue de chaque jour
+  const [week, setWeek] = useState<WeekDay[]>([]);
 
   const [today, yesterday] = localDateKeys(2);
   const [pinnedMetrics] = useState(getPinnedCutMetrics);
@@ -104,6 +106,7 @@ export function Today({ onAddFood }: TodayProps) {
       setJournalEntries(entries);
       setDailySummary(summary || null);
       setTotals(calculatedTotals);
+      setWeek(await loadWeek(currentWeek(today)));
     } catch (error) {
       console.error('Erreur lors du chargement des données du jour:', error);
     }
@@ -263,7 +266,17 @@ export function Today({ onAddFood }: TodayProps) {
   return (
     <div className="today-page">
       <div className="today-header">
-        <h1>{formatDate(today)}</h1>
+        <h1 className="bulk-sr-only">{formatDate(today)}</h1>
+        <WeekStrip
+          days={week}
+          today={today}
+          budgetFor={burned => {
+            const value = burned ?? profile?.burn;
+            return value ? Math.max(value + objective, 0) : null;
+          }}
+          todayEaten={totals.caloriesEaten}
+          todayBudget={budget}
+        />
       </div>
 
       {/* Rappel : la dépense d'hier manque */}
@@ -496,5 +509,90 @@ function Ring({ value, max, color, className, children }: {
       </svg>
       <span className="ring-center">{children}</span>
     </div>
+  );
+}
+
+interface WeekDay {
+  date: string;
+  eaten: number;
+  burned?: number;
+}
+
+const dateKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+/** Les sept jours de la semaine (lundi → dimanche) qui contient ce jour */
+function currentWeek(today: string): string[] {
+  const start = new Date(`${today}T12:00:00`);
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = new Date(start);
+    day.setDate(start.getDate() + index);
+    return dateKey(day);
+  });
+}
+
+async function loadWeek(dates: string[]): Promise<WeekDay[]> {
+  return Promise.all(dates.map(async date => {
+    const [entries, summary, history] = await Promise.all([
+      getJournalEntriesByDate(date),
+      getDailySummary(date),
+      getCutHistoryDay(date),
+    ]);
+    const logged = entries.reduce((sum, entry) => sum + entry.kcal, 0);
+    return {
+      date,
+      eaten: entries.length ? logged : history?.kcal ?? 0,
+      burned: summary?.caloriesBurned ?? history?.burned,
+    };
+  }));
+}
+
+/** Bande de la semaine : un petit anneau par jour, aujourd'hui rempli */
+function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget }: {
+  days: WeekDay[];
+  today: string;
+  budgetFor: (burned?: number) => number | null;
+  todayEaten: number;
+  todayBudget: number | null;
+}) {
+  if (!days.length) return null;
+  const letter = new Intl.DateTimeFormat(locale(), { weekday: 'narrow' });
+  const full = new Intl.DateTimeFormat(locale(), { weekday: 'long', day: 'numeric', month: 'long' });
+  const length = 2 * Math.PI * 21;
+  return (
+    <ol className="week-strip">
+      {days.map(day => {
+        const isToday = day.date === today;
+        const eaten = isToday ? todayEaten : day.eaten;
+        const budget = isToday ? todayBudget : budgetFor(day.burned);
+        const ratio = budget ? Math.min(1, eaten / budget) : 0;
+        const over = !!budget && eaten > budget;
+        const date = new Date(`${day.date}T12:00:00`);
+        return (
+          <li
+            key={day.date}
+            data-today={isToday || undefined}
+            data-future={day.date > today || undefined}
+            data-over={over || undefined}
+            aria-label={`${full.format(date)}${eaten ? ` · ${Math.round(eaten)} ${unitLabel('kcal')}` : ''}`}
+            aria-current={isToday ? 'date' : undefined}
+          >
+            <svg viewBox="0 0 50 50" aria-hidden="true">
+              <circle className="week-bg" cx="25" cy="25" r="21" />
+              {ratio > 0 && !isToday && (
+                <circle
+                  className="week-arc"
+                  cx="25" cy="25" r="21"
+                  strokeDasharray={`${ratio * length} ${length}`}
+                  transform="rotate(-90 25 25)"
+                />
+              )}
+            </svg>
+            <span aria-hidden="true">{letter.format(date)}</span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
