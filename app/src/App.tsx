@@ -65,7 +65,7 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   );
 
   return (
-    <div className="nutrition-shell" data-mode={mode}>
+    <div className="nutrition-shell" data-mode={mode} data-welcoming={welcoming || undefined}>
       <header className="nutrition-header">
         {welcoming ? (
           <div className="nutrition-brand">

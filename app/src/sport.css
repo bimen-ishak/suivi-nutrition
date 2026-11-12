@@ -662,5 +662,31 @@
 .setup-key-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .setup-cancel { margin-top: 12px; }
 
-.welcome-setup .profile-switch { margin-bottom: 16px; }
-.welcome-setup .setup-actions { margin-top: 16px; }
+/* Bienvenue : une colonne étroite, le logo aligné sur la carte */
+.nutrition-shell .welcome-setup { max-width: 520px; }
+.nutrition-shell[data-welcoming] .nutrition-header {
+  padding-inline: max(var(--gutter), calc((100% - 520px) / 2 + 24px));
+}
+.welcome-setup .setup-card { gap: 0; padding: 24px; }
+.welcome-setup .setup-card h2 {
+  margin: 0 0 10px;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.welcome-setup .profile-switch {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.welcome-setup .profile-switch button { min-height: 52px; padding: 8px 10px; border-radius: 12px; font-size: .95rem; }
+@media (max-width: 420px) {
+  .welcome-setup .setup-card { padding: 20px 16px; }
+  .welcome-setup .profile-switch button { padding: 8px 6px; font-size: .88rem; white-space: nowrap; }
+}
+.welcome-setup .setup-next { margin-top: 8px; min-height: 52px; }
+.welcome-setup .setup-card > p { margin: 0 0 16px; color: var(--text-2); }
+.welcome-setup .bulk-number-grid { margin-bottom: 24px; }
+.welcome-setup .setup-actions .btn { max-width: none; min-height: 52px; }
