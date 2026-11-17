@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { applyTheme, getTheme } from './utils/theme';
 import { Navigation, type NavigationTab } from './components/Navigation';
 import { Today } from './pages/Today';
-import { Library } from './pages/Library';
 import { History } from './pages/History';
 import { Photos } from './pages/Photos';
 import { Settings } from './pages/Settings';
@@ -110,7 +109,6 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
         <div className="app">
           <main className="app-main">
             {activeTab === 'today' && <Today onAddFood={() => setShowAddFood(true)} viewDate={cutDay} onViewDate={date => { setCutDay(date); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
-            {activeTab === 'library' && <Library />}
             {activeTab === 'history' && <History key={historyDay ?? 'list'} initialDate={historyDay} onBack={historyDay ? () => { setHistoryDay(null); setActiveTab('today'); } : undefined} />}
             {activeTab === 'photos' && <Photos />}
             {activeTab === 'settings' && <Settings modeSettings={modeSettings(changeMode)} />}

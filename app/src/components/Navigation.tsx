@@ -55,7 +55,6 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
     { tab: 'today', label: t('Aujourd\'hui') },
     { tab: 'history', label: t('Historique') },
     { tab: 'photos', label: t('Photos') },
-    { tab: 'library', label: t('Bibliothèque') },
     { tab: 'settings', label: t('Paramètres') }
   ];
 
