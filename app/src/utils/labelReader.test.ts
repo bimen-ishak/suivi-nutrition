@@ -194,6 +194,15 @@ describe('readLabel', () => {
     expect(images[1].inline_data.data).toBe('REVG');
   });
 
+  it('envoie les précisions de l\'utilisateur avec les photos', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okResponse({ kcal: 450, protein: 10, carbs: 50, fat: 20 }));
+    await readFoodPhotos([image], 'ma-cle', fetchMock, 'cuit avec 1 cuillère d’huile');
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const prompt = body.contents[0].parts[0].text as string;
+    expect(prompt).toContain('cuit avec 1 cuillère d’huile');
+    expect(prompt).toContain('Elles priment sur ce que montrent les photos');
+  });
+
   it('essaie le modèle suivant quand le premier n\'existe plus', async () => {
     const fetchMock = vi
       .fn()

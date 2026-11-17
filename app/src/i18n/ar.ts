@@ -442,6 +442,8 @@ export const AR: Record<string, ArabicEntry> = {
   "restantes aujourd’hui": "فاضلين النهارده",
   "restantes": "فاضلين",
   "Revenir à aujourd’hui": "ارجع للنهارده",
+  "Précisions pour l’IA (facultatif)": "تفاصيل للذكاء الاصطناعي (اختياري)",
+  "Ex : cuit avec 1 cuillère d’huile, sans la sauce, j’en ai mangé la moitié": "مثلاً: متطبخ بمعلقة زيت، من غير الصوص، كلت نصه",
   "Objectif": "الهدف",
   "prévue": "متوقعة",
   'Ajustement manuel': 'تعديل يدوي',

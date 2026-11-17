@@ -14,6 +14,7 @@ interface LabelScanButtonProps {
 const PHOTO_SIZE = 1600;
 const PHOTO_QUALITY = 0.85;
 const MAX_PHOTOS = 3;
+const MAX_NOTES = 500;
 
 const describe = (result: LabelResult): string => {
   const parts: string[] = [];
@@ -36,6 +37,8 @@ const describe = (result: LabelResult): string => {
 export function LabelScanButton({ onRead }: LabelScanButtonProps) {
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<File[]>([]);
+  // Ce que la photo ne montre pas (huile, sauce, part mangée…) : envoyé à l'IA avec les photos
+  const [notes, setNotes] = useState('');
   const [message, setMessage] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const providerName = getProvider() === 'openrouter' ? t('OpenRouter et le fournisseur du modèle') : 'Google Gemini';
   const hasKey = getActiveKey() !== null;
@@ -63,9 +66,10 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
     setMessage(null);
     try {
       const images = await Promise.all(pending.map(file => compressPhoto(file, PHOTO_SIZE, PHOTO_QUALITY)));
-      const result = await analysePhotos(images);
+      const result = await analysePhotos(images, notes.trim().slice(0, MAX_NOTES));
       onRead(result);
       setPending([]);
+      setNotes('');
       setMessage({ kind: 'ok', text: describe(result) });
     } catch (error) {
       console.error('Erreur de lecture des photos:', error);
@@ -135,6 +139,17 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
               {fileInput}
             </label>
           )}
+          <label className="label-scan-notes">
+            <span>{t('Précisions pour l’IA (facultatif)')}</span>
+            <textarea
+              rows={2}
+              maxLength={MAX_NOTES}
+              disabled={loading}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder={t('Ex : cuit avec 1 cuillère d’huile, sans la sauce, j’en ai mangé la moitié')}
+            />
+          </label>
           <button type="button" className="btn btn-primary" disabled={loading} onClick={analyse}>
             {loading ? ti('⏳ Analyse en cours...') : ti('✨ Envoyer pour analyse')}
           </button>

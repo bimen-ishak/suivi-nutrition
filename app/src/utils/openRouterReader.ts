@@ -40,7 +40,7 @@ export async function readPhotosWithOpenRouter(
     messages: [{
       role: 'user',
       content: [
-        { type: 'text', text: context ? `${PROMPT}\nInformations fournies par l’utilisateur :\n${context}` : PROMPT },
+        { type: 'text', text: context ? `${PROMPT}\nPrécisions de l’utilisateur sur ce repas. Elles priment sur ce que montrent les photos : tiens-en compte dans le poids, les calories et les macros (cuisson, matière grasse ajoutée, sauce, part réellement mangée…). Si elles contredisent l’étiquette pour la composition du produit, garde l’étiquette.\n${context}` : PROMPT },
         ...imageDataUrls.map(url => ({ type: 'image_url', image_url: { url } }))
       ]
     }]

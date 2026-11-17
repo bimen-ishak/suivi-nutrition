@@ -409,6 +409,8 @@ export const EN: Readonly<Record<string, string>> = {
   "restantes aujourd’hui": "left today",
   "restantes": "left",
   "Revenir à aujourd’hui": "Back to today",
+  "Précisions pour l’IA (facultatif)": "Details for the AI (optional)",
+  "Ex : cuit avec 1 cuillère d’huile, sans la sauce, j’en ai mangé la moitié": "E.g. cooked with 1 spoon of oil, no sauce, I ate half",
   "Objectif": "Goal",
   "prévue": "planned",
   "Ajustement manuel": "Manual adjustment",

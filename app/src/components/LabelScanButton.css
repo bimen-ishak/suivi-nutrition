@@ -105,3 +105,26 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
+/* Précisions pour l'IA, sous les photos en attente */
+.label-scan-notes {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.label-scan-notes textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+  line-height: 1.4;
+  resize: vertical;
+}
+.label-scan-notes textarea::placeholder { color: var(--text-3); }
