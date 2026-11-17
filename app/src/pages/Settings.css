@@ -178,3 +178,16 @@
   background: var(--primary-soft);
   border-radius: 14px;
 }
+
+/* Date à tenir sans craquer et photo de motivation */
+.settings-goal { display: grid; gap: 12px; margin: 24px 0; padding: 0; border: 0; }
+.settings-goal legend { margin-bottom: 8px; font-weight: 700; color: var(--text); }
+.settings-goal .section-desc { margin: 0; }
+.settings-goal-date { display: flex; gap: 8px; align-items: center; }
+.settings-goal-date input { flex: 1; min-width: 0; min-height: 44px; }
+.settings-goal-photo { display: grid; gap: 10px; }
+.settings-goal-photo img { width: 120px; height: 120px; object-fit: cover; border-radius: 14px; filter: grayscale(1); }
+.settings-goal-photo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.settings-goal-photo-actions label { cursor: pointer; }
+.settings-goal-note { margin: 0; font-size: .8rem; color: var(--text-3); }
+.settings-goal-error { margin: 0; font-size: .85rem; color: var(--danger); }

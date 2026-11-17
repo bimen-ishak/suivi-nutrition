@@ -12,6 +12,8 @@ import { SettingsGroup } from '../components/SettingsGroup';
 import { CUT_DETAIL_METRICS, getPinnedCutMetrics, savePinnedCutMetrics } from '../utils/cutDashboard';
 import { CutSetup } from '../components/CutSetup';
 import { basalMetabolism, getProfile } from '../utils/profile';
+import { getGoalDate, setGoalDate, getMotivationPhoto, setMotivationPhoto } from '../utils/motivation';
+import { compressPhoto, localDateKey } from '../utils/photo';
 
 const THEMES: { name: ThemeName; label: ReactNode }[] = [
   { name: 'light', label: ti('☀️ Clair') },
@@ -236,6 +238,7 @@ export function Settings({ modeSettings }: { modeSettings?: ReactNode }) {
             </button>
           ))}
         </div>
+        <MotivationSettings />
         <fieldset className="settings-metrics">
           <legend>{t('À afficher sur l’accueil')}</legend>
           {CUT_DETAIL_METRICS.map(({ id, label }) => (
@@ -498,5 +501,79 @@ export function Settings({ modeSettings }: { modeSettings?: ReactNode }) {
 
       </SettingsGroup>
     </div>
+  );
+}
+
+/** Date à tenir sans craquer, et photo montrée avec une phrase à chaque ouverture */
+function MotivationSettings() {
+  const [goal, setGoal] = useState(getGoalDate);
+  const [photo, setPhoto] = useState(getMotivationPhoto);
+  const [error, setError] = useState('');
+  const today = localDateKey(new Date());
+
+  const choosePhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setError('');
+    try {
+      const image = await compressPhoto(file, 900, 0.8);
+      if (!setMotivationPhoto(image)) {
+        setError(t('Plus assez de place sur le téléphone pour cette photo.'));
+        return;
+      }
+      setPhoto(image);
+    } catch {
+      setError(t('Impossible de lire cette photo. Essaie une autre.'));
+    }
+  };
+
+  return (
+    <fieldset className="settings-goal">
+      <legend>{t('Date à tenir sans craquer')}</legend>
+      <p className="section-desc">
+        {t('Jusqu’à cette date, une photo et une phrase t’accueillent à chaque ouverture de l’app.')}
+      </p>
+      <div className="settings-goal-date">
+        <input
+          type="date"
+          min={today}
+          value={goal ?? ''}
+          aria-label={t('Date à tenir sans craquer')}
+          onChange={event => {
+            const value = event.target.value || null;
+            setGoalDate(value);
+            setGoal(value);
+          }}
+        />
+        {goal && (
+          <button type="button" className="btn btn-secondary" onClick={() => { setGoalDate(null); setGoal(null); }}>
+            {t('Retirer')}
+          </button>
+        )}
+      </div>
+      <div className="settings-goal-photo">
+        {photo && <img src={photo} alt={t('Photo de motivation')} />}
+        <div className="settings-goal-photo-actions">
+          <label className="btn btn-secondary">
+            {photo ? t('Changer la photo') : t('Choisir la photo de motivation')}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={event => {
+                void choosePhoto(event.target.files?.[0]);
+                event.target.value = '';
+              }}
+            />
+          </label>
+          {photo && (
+            <button type="button" className="btn btn-secondary" onClick={() => { setMotivationPhoto(null); setPhoto(null); }}>
+              {t('Retirer la photo')}
+            </button>
+          )}
+        </div>
+        <p className="settings-goal-note">{t('La photo reste sur ton téléphone, elle n’est envoyée nulle part.')}</p>
+        {error && <p className="settings-goal-error" role="alert">{error}</p>}
+      </div>
+    </fieldset>
   );
 }

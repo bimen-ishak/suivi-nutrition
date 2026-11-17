@@ -13,6 +13,9 @@ import { BulkPage } from './bulk/BulkPage';
 import { t } from './i18n';
 import { SettingsGroup } from './components/SettingsGroup';
 import { WelcomeSetup } from './components/WelcomeSetup';
+import { MotivationSplash } from './components/MotivationSplash';
+import { shouldShowMotivation } from './utils/motivation';
+import { localDateKey } from './utils/photo';
 import { CutSetup } from './components/CutSetup';
 import { getProfile } from './utils/profile';
 import { Icon } from './components/Icon';
@@ -28,6 +31,8 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   const [cutDay, setCutDay] = useState<string | null>(null);
   const [showAddFood, setShowAddFood] = useState(false);
   const [welcoming, setWelcoming] = useState(() => !hasCompletedWelcome());
+  // Une fois par ouverture de l'app, en sèche, tant que la date à tenir n'est pas passée
+  const [motivating, setMotivating] = useState(() => initialMode === 'cut' && hasCompletedWelcome() && shouldShowMotivation(localDateKey(new Date())));
   // En sèche, le questionnaire calcule calories et macros de chaque personne
   const [needsProfile, setNeedsProfile] = useState(() => !getProfile());
   // La barre de l'iPhone suit le fond du mode affiché
@@ -116,6 +121,7 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
           <Navigation activeTab={activeTab} onTabChange={tab => { setHistoryDay(null); setActiveTab(tab); }} />
         </div>
       )}
+      {motivating && <MotivationSplash today={localDateKey(new Date())} onDone={() => setMotivating(false)} />}
       {/* Toujours au même endroit de l'arbre : la bulle survit au passage d'un écran à l'autre */}
       <ToastHost />
     </div>
