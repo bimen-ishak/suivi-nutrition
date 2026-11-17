@@ -23,10 +23,12 @@ const DISMISSED_KEY = 'dismissedMissingBurned';
 
 interface TodayProps {
   onAddFood: () => void;
-  onOpenDay?: (date: string) => void;
+  /** Jour affiché (AAAA-MM-JJ) ; null = aujourd'hui */
+  viewDate?: string | null;
+  onViewDate?: (date: string | null) => void;
 }
 
-export function Today({ onAddFood, onOpenDay }: TodayProps) {
+export function Today({ onAddFood, viewDate = null, onViewDate }: TodayProps) {
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [dailySummary, setDailySummary] = useState<DailySummary | null>(null);
   const [totals, setTotals] = useState({
@@ -59,11 +61,15 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
   const [week, setWeek] = useState<WeekDay[]>([]);
 
   const [today, yesterday] = localDateKeys(2);
+  // Jour affiché : aujourd'hui, ou un jour passé choisi dans la bande de la semaine
+  const shown = viewDate && viewDate < today ? viewDate : today;
+  const isPast = shown !== today;
   const [pinnedMetrics] = useState(getPinnedCutMetrics);
 
   useEffect(() => {
     loadTodayData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown]);
 
   // Recharger les données quand le composant redevient visible
   useEffect(() => {
@@ -72,7 +78,8 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown]);
 
   // Mettre à jour l'objectif si changé dans les réglages (autre onglet)
   useEffect(() => {
@@ -88,9 +95,9 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
     try {
       const twoWeeksAgo = new Date(Date.now() - 14 * 86_400_000).toISOString().split('T')[0];
       const [entries, summary, calculatedTotals, weights, yesterdayEntries, yesterdayDaily, yesterdayHistory] = await Promise.all([
-        getJournalEntriesByDate(today),
-        getDailySummary(today),
-        recalculateDailySummary(today),
+        getJournalEntriesByDate(shown),
+        getDailySummary(shown),
+        recalculateDailySummary(shown),
         getWeightsSince(twoWeeksAgo),
         getJournalEntriesByDate(yesterday),
         getDailySummary(yesterday),
@@ -100,7 +107,7 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
       const ateYesterday = yesterdayEntries.length > 0 || (yesterdayHistory?.kcal ?? 0) > 0;
       const knowsBurned = !!yesterdayDaily?.caloriesBurned || !!yesterdayHistory?.burned;
       setYesterdaySummary(yesterdayDaily ?? null);
-      setYesterdayMissing(ateYesterday && !knowsBurned);
+      setYesterdayMissing(!isPast && ateYesterday && !knowsBurned);
 
       const latestTrend = getWeightTrend(weights).at(-1)?.trend;
       setTrendWeight(latestTrend);
@@ -112,6 +119,9 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
       console.error('Erreur lors du chargement des données du jour:', error);
     }
   };
+
+  const formatDay = (dateStr: string) =>
+    new Intl.DateTimeFormat(locale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${dateStr}T12:00:00`));
 
   const formatDate = (dateStr: string) => {
     const date = new Date(`${dateStr}T12:00:00`);
@@ -226,11 +236,11 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
   }
 
   if (showSummaryModal) {
-    const modalDate = summaryDate ?? today;
+    const modalDate = summaryDate ?? shown;
     return (
       <DailySummaryModal
         date={modalDate}
-        existingSummary={modalDate === today ? dailySummary : yesterdaySummary}
+        existingSummary={modalDate === shown ? dailySummary : yesterdaySummary}
         onSave={handleSaveSummary}
         onCancel={() => setShowSummaryModal(false)}
       />
@@ -267,17 +277,18 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
   return (
     <div className="today-page">
       <div className="today-header">
-        <h1 className="bulk-sr-only">{formatDate(today)}</h1>
+        <h1 className="bulk-sr-only">{formatDate(shown)}</h1>
         <WeekStrip
           days={week}
           today={today}
+          selected={shown}
           budgetFor={burned => {
             const value = burned ?? profile?.burn;
             return value ? Math.max(value + objective, 0) : null;
           }}
           todayEaten={totals.caloriesEaten}
           todayBudget={budget}
-          onOpenDay={onOpenDay}
+          onSelect={date => onViewDate?.(date === today ? null : date)}
         />
       </div>
 
@@ -319,7 +330,14 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
 
         {/* Bilan en grande barre : mangé en grand, une barre épaisse, puis restant et dépense */}
         <div className="kcal-bar" data-over={excess > 0 || undefined}>
-          <span className="kcal-bar-label">{t('Aujourd’hui')}</span>
+          <div className="kcal-bar-head">
+            <span className="kcal-bar-label">{isPast ? formatDay(shown) : t('Aujourd’hui')}</span>
+            {isPast && (
+              <button type="button" className="kcal-bar-back" onClick={() => onViewDate?.(null)}>
+                {t('Revenir à aujourd’hui')}
+              </button>
+            )}
+          </div>
           <p className="kcal-bar-eaten">
             <strong>{totals.caloriesEaten}</strong>
             {budget !== null && <span>/ {budget} {unitLabel('kcal')}</span>}
@@ -375,7 +393,7 @@ export function Today({ onAddFood, onOpenDay }: TodayProps) {
         </div>
 
         <div className="action-row">
-          <button className="btn btn-secondary" onClick={() => openSummary(today)}>
+          <button className="btn btn-secondary" onClick={() => openSummary(shown)}>
             {burned ? ti('✏️ Modifier le bilan') : t('Saisir ma dépense pour voir le restant')}
           </button>
           <button className="btn btn-secondary" onClick={handleImportHealth}>
@@ -546,14 +564,15 @@ async function loadWeek(dates: string[]): Promise<WeekDay[]> {
   }));
 }
 
-/** Bande de la semaine : un petit anneau par jour, aujourd'hui rempli */
-function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget, onOpenDay }: {
+/** Bande de la semaine : un petit anneau par jour, le jour affiché rempli */
+function WeekStrip({ days, today, selected, budgetFor, todayEaten, todayBudget, onSelect }: {
   days: WeekDay[];
   today: string;
+  selected: string;
   budgetFor: (burned?: number) => number | null;
   todayEaten: number;
   todayBudget: number | null;
-  onOpenDay?: (date: string) => void;
+  onSelect?: (date: string) => void;
 }) {
   if (!days.length) return null;
   const letter = new Intl.DateTimeFormat(locale(), { weekday: 'narrow' });
@@ -563,15 +582,18 @@ function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget, onOpenDay 
     <ol className="week-strip">
       {days.map(day => {
         const isToday = day.date === today;
-        const eaten = isToday ? todayEaten : day.eaten;
-        const budget = isToday ? todayBudget : budgetFor(day.burned);
+        const isSelected = day.date === selected;
+        // Le jour affiché utilise les totaux à jour de la page ; les autres, ceux de la semaine
+        const eaten = isSelected ? todayEaten : day.eaten;
+        const budget = isSelected ? todayBudget : budgetFor(day.burned);
         const ratio = budget ? Math.min(1, eaten / budget) : 0;
         const over = !!budget && eaten > budget;
         const date = new Date(`${day.date}T12:00:00`);
         return (
           <li
             key={day.date}
-            data-today={isToday || undefined}
+            data-today={isSelected || undefined}
+            data-real-today={isToday || undefined}
             data-future={day.date > today || undefined}
             data-over={over || undefined}
           >
@@ -579,13 +601,14 @@ function WeekStrip({ days, today, budgetFor, todayEaten, todayBudget, onOpenDay 
               type="button"
               aria-label={`${full.format(date)}${eaten ? ` · ${Math.round(eaten)} ${unitLabel('kcal')}` : ''}`}
               aria-current={isToday ? 'date' : undefined}
-              // Un jour passé avec des données s'ouvre dans l'Historique ; aujourd'hui remonte en haut
-              disabled={!isToday && (day.date > today || (!day.eaten && !day.burned))}
-              onClick={() => (isToday ? window.scrollTo({ top: 0, behavior: 'smooth' }) : onOpenDay?.(day.date))}
+              aria-pressed={isSelected}
+              // Un appui affiche ce jour sur l'accueil ; les jours à venir ne s'ouvrent pas
+              disabled={day.date > today}
+              onClick={() => onSelect?.(day.date)}
             >
             <svg viewBox="0 0 50 50" aria-hidden="true">
               <circle className="week-bg" cx="25" cy="25" r="21" />
-              {ratio > 0 && !isToday && (
+              {ratio > 0 && !isSelected && (
                 <circle
                   className="week-arc"
                   cx="25" cy="25" r="21"

@@ -16,9 +16,11 @@ import { localDateKey } from '../utils/photo';
 
 interface AddFoodProps {
   onComplete?: () => void;
+  /** Jour où ranger l'aliment (AAAA-MM-JJ) ; aujourd'hui par défaut */
+  date?: string;
 }
 
-export function AddFood({ onComplete }: AddFoodProps) {
+export function AddFood({ onComplete, date }: AddFoodProps) {
   const [foods, setFoods] = useState<Food[]>([]);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -137,7 +139,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
 
       // Créer l'entrée dans le journal
       const now = new Date();
-      const today = localDateKey(now);
+      const today = date ?? localDateKey(now);
       const time = now.toTimeString().slice(0, 5);
       const nowISO = now.toISOString();
 
@@ -203,7 +205,7 @@ export function AddFood({ onComplete }: AddFoodProps) {
         foodId: ONE_OFF_FOOD_ID,
         foodName: data.name,
         foodSource: 'estimation',
-        date: localDateKey(now),
+        date: date ?? localDateKey(now),
         time: now.toTimeString().slice(0, 5),
         meal: data.meal,
         quantity: data.quantity,

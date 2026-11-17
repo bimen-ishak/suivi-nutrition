@@ -408,6 +408,7 @@ export const EN: Readonly<Record<string, string>> = {
   "Dépense": "Burn",
   "restantes aujourd’hui": "left today",
   "restantes": "left",
+  "Revenir à aujourd’hui": "Back to today",
   "Objectif": "Goal",
   "prévue": "planned",
   "Ajustement manuel": "Manual adjustment",

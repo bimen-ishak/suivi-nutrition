@@ -25,6 +25,8 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   const [activeTab, setActiveTab] = useState<NavigationTab>('today');
   // Jour ouvert depuis la bande de la semaine : l'Historique s'ouvre directement dessus
   const [historyDay, setHistoryDay] = useState<string | null>(null);
+  // Jour affiché sur l'accueil de la sèche : null = aujourd'hui
+  const [cutDay, setCutDay] = useState<string | null>(null);
   const [showAddFood, setShowAddFood] = useState(false);
   const [welcoming, setWelcoming] = useState(() => !hasCompletedWelcome());
   // En sèche, le questionnaire calcule calories et macros de chaque personne
@@ -39,6 +41,7 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
       setBulkHome(count => count + 1);
     } else {
       setShowAddFood(false);
+      setCutDay(null);
       setActiveTab('today');
     }
     window.scrollTo(0, 0);
@@ -102,11 +105,11 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
       })} /> : needsProfile ? (
         <CutSetup onComplete={() => { setNeedsProfile(false); window.scrollTo(0, 0); }} />
       ) : showAddFood ? (
-        <AddFood onComplete={() => setShowAddFood(false)} />
+        <AddFood date={cutDay ?? undefined} onComplete={() => setShowAddFood(false)} />
       ) : (
         <div className="app">
           <main className="app-main">
-            {activeTab === 'today' && <Today onAddFood={() => setShowAddFood(true)} onOpenDay={date => { setHistoryDay(date); setActiveTab('history'); window.scrollTo(0, 0); }} />}
+            {activeTab === 'today' && <Today onAddFood={() => setShowAddFood(true)} viewDate={cutDay} onViewDate={date => { setCutDay(date); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
             {activeTab === 'library' && <Library />}
             {activeTab === 'history' && <History key={historyDay ?? 'list'} initialDate={historyDay} onBack={historyDay ? () => { setHistoryDay(null); setActiveTab('today'); } : undefined} />}
             {activeTab === 'photos' && <Photos />}

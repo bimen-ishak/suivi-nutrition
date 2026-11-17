@@ -943,3 +943,22 @@
 .kcal-bar-burn small { margin-inline-start: 6px; color: var(--text-3); font-size: .75rem; }
 .kcal-bar-note { margin: 0; color: var(--text-3); font-size: .8rem; }
 @media (prefers-reduced-motion: reduce) { .kcal-bar-track span { transition: none; } }
+
+/* Jour passé affiché sur l'accueil : son nom, et un bouton pour revenir à aujourd'hui */
+.kcal-bar-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; }
+.kcal-bar-label::first-letter { text-transform: uppercase; }
+.kcal-bar-back {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid #ffffff2e;
+  border-radius: 999px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.kcal-bar-back:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+/* Quand on regarde un autre jour, la lettre d'aujourd'hui reste mise en avant */
+.nutrition-shell[data-mode='cut'] .week-strip li[data-real-today]:not([data-today]) span { color: var(--text); font-weight: 800; }

@@ -441,6 +441,7 @@ export const AR: Record<string, ArabicEntry> = {
   "Dépense": "الحرق",
   "restantes aujourd’hui": "فاضلين النهارده",
   "restantes": "فاضلين",
+  "Revenir à aujourd’hui": "ارجع للنهارده",
   "Objectif": "الهدف",
   "prévue": "متوقعة",
   'Ajustement manuel': 'تعديل يدوي',
