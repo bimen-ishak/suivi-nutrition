@@ -472,6 +472,7 @@ export const AR: Record<string, ArabicEntry> = {
   "À brûler": "تحرق",
   "Déficit par jour": "العجز في اليوم",
   "Réponds à quelques questions pour calculer tes calories et tes macros.": "جاوب على كام سؤال عشان نحسب السعرات والماكروز بتاعتك.",
+  "Moyenne repartie de zéro après ta période de craquage du {date}.": "المتوسط بدأ من الصفر بعد فترة الفلتان اللي خلصت {date}.",
   "Objectif": "الهدف",
   "prévue": "متوقعة",
   'Ajustement manuel': 'تعديل يدوي',

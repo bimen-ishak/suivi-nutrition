@@ -24,8 +24,12 @@ export function getBingePeriods(): BingePeriod[] {
   }
 }
 
+export const BINGE_CHANGE_EVENT = 'binge-periods-change';
+
 function save(periods: BingePeriod[]): BingePeriod[] {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(periods));
+  // L'Historique recalcule sa moyenne dès qu'une période est ajoutée ou retirée
+  window.dispatchEvent(new Event(BINGE_CHANGE_EVENT));
   return getBingePeriods();
 }
 
@@ -75,4 +79,11 @@ export function afterLastBinge(
     weights: weights.filter(point => point.date > cutoff),
     intakes: intakes.filter(day => day.date > cutoff),
   };
+}
+
+/** Fin de la dernière période de craquage qui a commencé au plus tard aujourd'hui, ou null */
+export function lastBingeEnd(periods: BingePeriod[], today: string): string | null {
+  return periods
+    .filter(period => period.start <= today)
+    .reduce<string | null>((latest, period) => (latest === null || period.end > latest ? period.end : latest), null);
 }

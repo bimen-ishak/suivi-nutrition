@@ -12,6 +12,7 @@ import { t, tn, unitLabel, macroLetter, locale, displayUnit, ltr } from '../i18n
 import { ti, Icon } from '../components/Icon';
 import { WeeklySummary } from '../components/WeeklySummary';
 import { localDateKey, localDateKeys } from '../utils/photo';
+import { BINGE_CHANGE_EVENT, getBingePeriods, lastBingeEnd } from '../utils/bingePeriods';
 
 interface DayData {
   date: string;
@@ -29,6 +30,13 @@ interface DayData {
 
 export function History({ initialDate = null, onBack }: { initialDate?: string | null; onBack?: () => void } = {}) {
   const [days, setDays] = useState<DayData[]>([]);
+  // Après une période de craquage, la moyenne de la semaine ne compte que les jours suivants
+  const [bingeEnd, setBingeEnd] = useState(() => lastBingeEnd(getBingePeriods(), localDateKey()));
+  useEffect(() => {
+    const update = () => setBingeEnd(lastBingeEnd(getBingePeriods(), localDateKey()));
+    window.addEventListener(BINGE_CHANGE_EVENT, update);
+    return () => window.removeEventListener(BINGE_CHANGE_EVENT, update);
+  }, []);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(initialDate);
   const [editingSummary, setEditingSummary] = useState(false);
@@ -362,6 +370,7 @@ export function History({ initialDate = null, onBack }: { initialDate?: string |
   const weekDates = new Set(localDateKeys(7));
   const week = days.reduce((result, day) => {
     if (!weekDates.has(day.date)) return result;
+    if (bingeEnd && day.date <= bingeEnd) return result;
     const net = getNetBalance(day);
     if (net === null) return result;
     return {
@@ -381,9 +390,11 @@ export function History({ initialDate = null, onBack }: { initialDate?: string |
 
       <WeeklySummary count={week.count} metrics={[
         { label: weekLabel, value: week.count ? Math.abs(week.net / week.count) : null, unit: unitLabel('kcal') }
-      ]} note={week.provisional
-        ? t('Alimentation et dépense renseignées. Certaines dépenses sont estimées.')
-        : t('Seuls les jours avec alimentation et dépense sont comptés.')} />
+      ]} note={bingeEnd && weekDates.has(bingeEnd)
+        ? t('Moyenne repartie de zéro après ta période de craquage du {date}.', { date: bingeEnd.split('-').reverse().slice(0, 2).join('/') })
+        : week.provisional
+          ? t('Alimentation et dépense renseignées. Certaines dépenses sont estimées.')
+          : t('Seuls les jours avec alimentation et dépense sont comptés.')} />
 
       {days.length === 0 ? (
         <div className="empty-history">

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { addBingePeriod, afterLastBinge, getBingePeriods, inBingePeriod, removeBingePeriod, withoutBinges } from './bingePeriods';
+import { addBingePeriod, afterLastBinge, getBingePeriods, inBingePeriod, lastBingeEnd, removeBingePeriod, withoutBinges } from './bingePeriods';
 import { estimateMaintenance } from './cut';
 
 afterEach(() => localStorage.removeItem('bingePeriods'));
@@ -10,6 +10,13 @@ describe('périodes de craquage', () => {
     expect(getBingePeriods()).toEqual([{ start: '2026-11-03', end: '2026-11-07' }]);
     removeBingePeriod({ start: '2026-11-03', end: '2026-11-07' });
     expect(getBingePeriods()).toEqual([]);
+  });
+
+  it('trouve la fin du dernier craquage déjà commencé', () => {
+    const periods = [{ start: '2026-11-03', end: '2026-11-05' }, { start: '2026-11-10', end: '2026-11-12' }, { start: '2026-12-01', end: '2026-12-02' }];
+    expect(lastBingeEnd(periods, '2026-11-17')).toBe('2026-11-12');
+    expect(lastBingeEnd(periods, '2026-11-04')).toBe('2026-11-05');
+    expect(lastBingeEnd([], '2026-11-17')).toBeNull();
   });
 
   it('ignore un stockage abîmé', () => {

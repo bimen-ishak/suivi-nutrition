@@ -439,6 +439,7 @@ export const EN: Readonly<Record<string, string>> = {
   "À brûler": "To burn",
   "Déficit par jour": "Daily deficit",
   "Réponds à quelques questions pour calculer tes calories et tes macros.": "Answer a few questions to work out your calories and macros.",
+  "Moyenne repartie de zéro après ta période de craquage du {date}.": "Average restarted from zero after your binge period ending {date}.",
   "Objectif": "Goal",
   "prévue": "planned",
   "Ajustement manuel": "Manual adjustment",

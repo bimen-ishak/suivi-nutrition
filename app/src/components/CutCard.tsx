@@ -17,7 +17,7 @@ import {
 import './CutCard.css';
 import { t, unitLabel, locale, ltr } from '../i18n';
 import { ti, Icon } from './Icon';
-import { addBingePeriod, afterLastBinge, getBingePeriods, removeBingePeriod, withoutBinges, WATER_DAYS_AFTER, type BingePeriod } from '../utils/bingePeriods';
+import { addBingePeriod, afterLastBinge, lastBingeEnd, getBingePeriods, removeBingePeriod, withoutBinges, WATER_DAYS_AFTER, type BingePeriod } from '../utils/bingePeriods';
 
 const HISTORY_DAYS = 60;
 const MAINTENANCE_DAYS_NEEDED = 14;
@@ -76,7 +76,8 @@ export function CutCard() {
   const verdict = rate ? getRateVerdict(rate.percentPerWeek) : null;
   const maintenanceData = afterLastBinge(weights, pastIntakes, periods);
   const maintenance = estimateMaintenance(maintenanceData.weights, maintenanceData.intakes);
-  const week = averageIntake(pastIntakes.filter(day => day.date >= dateDaysAgo(7)));
+  const lastEnd = lastBingeEnd(periods, today);
+  const week = averageIntake(pastIntakes.filter(day => day.date >= dateDaysAgo(7) && (!lastEnd || day.date > lastEnd)));
   const chartStart = dateDaysAgo(range);
   const chartPoints = trend.filter(p => p.date >= chartStart);
   const change = weightChange(chartPoints);
