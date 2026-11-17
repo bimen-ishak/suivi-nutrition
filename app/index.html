@@ -23,6 +23,17 @@
         document.querySelector('link[rel="icon"]').setAttribute('href', '%BASE_URL%koul-bulk-192.png');
         document.querySelector('link[rel="apple-touch-icon"]').setAttribute('href', '%BASE_URL%koul-bulk-192.png');
       }
+      // Écran de motivation prévu : fond noir dès le lancement, avant même le chargement de l'app
+      try {
+        const goal = localStorage.getItem('cutGoalDate');
+        const now = new Date();
+        const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const cut = requestedMode === 'cut' || (requestedMode !== 'bulk' && savedMode !== 'bulk');
+        if (cut && goal && goal >= today) {
+          document.documentElement.dataset.motivation = 'pending';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000000');
+        }
+      } catch (e) {}
       // Applique le thème avant l'affichage, pour éviter un flash de l'autre couleur
       try {
         if (localStorage.getItem('theme') === 'dark') {
@@ -41,6 +52,11 @@
       } catch (e) {}
     </script>
     <title>KOUL</title>
+    <style>
+      html[data-motivation='pending'], html[data-motivation='pending'] body { background: #000; }
+      html[data-motivation='pending'] #root { visibility: hidden; }
+      html[data-motivation='pending'] #root .motivation-splash { visibility: visible; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

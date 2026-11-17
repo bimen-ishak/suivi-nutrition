@@ -9,7 +9,7 @@
   background: #000;
   color: #fff;
   cursor: pointer;
-  animation: motivation-in .5s ease-out both;
+  /* Noir dès la première image : l'accueil ne doit jamais apparaître avant */
 }
 .motivation-splash[data-leaving] { animation: motivation-out .8s ease-in forwards; }
 

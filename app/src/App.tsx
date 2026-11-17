@@ -33,6 +33,11 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
   const [welcoming, setWelcoming] = useState(() => !hasCompletedWelcome());
   // Une fois par ouverture de l'app, en sèche, tant que la date à tenir n'est pas passée
   const [motivating, setMotivating] = useState(() => initialMode === 'cut' && hasCompletedWelcome() && shouldShowMotivation(localDateKey(new Date())));
+  // Pas d'écran de motivation cette fois-ci : on retire le fond noir posé au lancement
+  useEffect(() => {
+    if (!motivating) delete document.documentElement.dataset.motivation;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // En sèche, le questionnaire calcule calories et macros de chaque personne
   const [needsProfile, setNeedsProfile] = useState(() => !getProfile());
   // La barre de l'iPhone suit le fond du mode affiché
@@ -121,7 +126,12 @@ function App({ initialMode }: { initialMode: NutritionMode }) {
           <Navigation activeTab={activeTab} onTabChange={tab => { setHistoryDay(null); setActiveTab(tab); }} />
         </div>
       )}
-      {motivating && <MotivationSplash today={localDateKey(new Date())} onDone={() => setMotivating(false)} />}
+      {motivating && <MotivationSplash today={localDateKey(new Date())} onDone={() => {
+        // Fin de l'écran : l'app redevient visible et la barre de l'iPhone reprend sa couleur
+        delete document.documentElement.dataset.motivation;
+        applyTheme(getTheme());
+        setMotivating(false);
+      }} />}
       {/* Toujours au même endroit de l'arbre : la bulle survit au passage d'un écran à l'autre */}
       <ToastHost />
     </div>
