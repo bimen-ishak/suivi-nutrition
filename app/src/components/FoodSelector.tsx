@@ -125,6 +125,11 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
         {activeTab === 'mine' && (
           <div className="search-tab">
             {foods.length > 0 && (
+              <button className="btn btn-primary btn-block mine-create" onClick={onCreateNew}>
+                {t('+ Nouvel aliment')}
+              </button>
+            )}
+            {foods.length > 0 && (
               <div className="search-input-container">
                 <input
                   type="text"
@@ -286,7 +291,7 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
 
       </div>
 
-      {activeTab !== 'oneoff' && (
+      {activeTab !== 'oneoff' && activeTab !== 'mine' && (
         <div className="selector-footer">
           <button className="btn btn-secondary btn-block" onClick={onCreateNew}>
             {t('+ Créer un nouvel aliment')}
