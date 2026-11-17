@@ -1,6 +1,6 @@
 // Lecture de photos d'un produit par une IA gratuite d'OpenRouter, avec la clé personnelle de l'utilisateur
 import { t } from '../i18n';
-import { PROMPT, parseLabelResponse, LabelReadError, unreadableError, type LabelResult } from './labelReader';
+import { buildPrompt, parseLabelResponse, LabelReadError, unreadableError, type LabelResult } from './labelReader';
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 // OpenRouter essaie ces modèles gratuits dans l'ordre : si l'un est saturé, il passe au suivant tout seul
@@ -40,7 +40,7 @@ export async function readPhotosWithOpenRouter(
     messages: [{
       role: 'user',
       content: [
-        { type: 'text', text: context ? `${PROMPT}\nPrécisions de l’utilisateur sur ce repas. Elles priment sur ce que montrent les photos : tiens-en compte dans le poids, les calories et les macros (cuisson, matière grasse ajoutée, sauce, part réellement mangée…). Si elles contredisent l’étiquette pour la composition du produit, garde l’étiquette.\n${context}` : PROMPT },
+        { type: 'text', text: buildPrompt(context, imageDataUrls.length) },
         ...imageDataUrls.map(url => ({ type: 'image_url', image_url: { url } }))
       ]
     }]

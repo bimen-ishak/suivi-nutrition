@@ -203,6 +203,16 @@ describe('readLabel', () => {
     expect(prompt).toContain('Elles priment sur ce que montrent les photos');
   });
 
+  it('analyse une description écrite sans aucune photo', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okResponse({ mode: 'estimate', weight_g: 350, total_kcal: 600, total_protein: 45, total_carbs: 60, total_fat: 18, kcal: 171, protein: 13, carbs: 17, fat: 5 }));
+    const result = await readFoodPhotos([], 'ma-cle', fetchMock, '200 g de riz et un blanc de poulet');
+    const parts = JSON.parse(fetchMock.mock.calls[0][1].body).contents[0].parts;
+    expect(parts).toHaveLength(1);
+    expect(parts[0].text).toContain('AUCUNE photo');
+    expect(parts[0].text).toContain('200 g de riz et un blanc de poulet');
+    expect(result.estimated).toBe(true);
+  });
+
   it('essaie le modèle suivant quand le premier n\'existe plus', async () => {
     const fetchMock = vi
       .fn()

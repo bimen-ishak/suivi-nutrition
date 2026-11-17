@@ -16,9 +16,11 @@ const PHOTO_QUALITY = 0.85;
 const MAX_PHOTOS = 3;
 const MAX_NOTES = 500;
 
-const describe = (result: LabelResult): string => {
+const describe = (result: LabelResult, fromText = false): string => {
   const parts: string[] = [];
-  if (result.estimated) {
+  if (fromText) {
+    parts.push(t('Estimation faite d’après ta description, donc approximative.'));
+  } else if (result.estimated) {
     parts.push(t("Pas d'étiquette lisible : estimation faite d'après l'image, donc approximative."));
   } else {
     parts.push(t("Valeurs lues sur l'étiquette."));
@@ -58,19 +60,22 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
     setPending(current => current.filter((_, i) => i !== index));
   };
 
+  const description = notes.trim().slice(0, MAX_NOTES);
+  const canSend = pending.length > 0 || description.length > 0;
+
   const analyse = async () => {
     const key = getActiveKey();
-    if (pending.length === 0 || !key) return;
+    if (!canSend || !key) return;
 
     setLoading(true);
     setMessage(null);
     try {
       const images = await Promise.all(pending.map(file => compressPhoto(file, PHOTO_SIZE, PHOTO_QUALITY)));
-      const result = await analysePhotos(images, notes.trim().slice(0, MAX_NOTES));
+      const result = await analysePhotos(images, description);
       onRead(result);
       setPending([]);
       setNotes('');
-      setMessage({ kind: 'ok', text: describe(result) });
+      setMessage({ kind: 'ok', text: describe(result, images.length === 0) });
     } catch (error) {
       console.error('Erreur de lecture des photos:', error);
       setMessage({
@@ -106,23 +111,21 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
 
   return (
     <div className="label-scan">
-      {pending.length === 0 ? (
-        <>
-          <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
-            {ti('📷 Photos du produit (IA)')}
-            {fileInput}
-          </label>
-          <p className="label-scan-tip">
-            {t('Jusqu\'à 3 photos : le produit sur la balance, et son étiquette ou son code-barres s\'il y en a. Sans étiquette, l\'IA estime les calories d\'après l\'image.')}
-          </p>
-        </>
-      ) : (
+      {/* Décrire suffit ; une photo est facultative */}
+      <label className="label-scan-notes">
+        <span>{t('Décris ton repas à l’IA')}</span>
+        <textarea
+          rows={3}
+          maxLength={MAX_NOTES}
+          disabled={loading}
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          placeholder={t('Ex : 200 g de riz, un blanc de poulet grillé, 1 cuillère d’huile d’olive')}
+        />
+      </label>
+
+      {pending.length > 0 && (
         <div className="label-scan-pending">
-          <p className="label-scan-ask">
-            {canAddMore
-              ? t('{n} photo prête sur {max}. Veux-tu en prendre une autre avant d\'envoyer ?', { n: pending.length, max: MAX_PHOTOS })
-              : t('{n} photos prêtes (maximum). Tu peux envoyer.', { n: pending.length })}
-          </p>
           <div className="label-scan-thumbs">
             {previews.map((url, index) => (
               <div key={url} className="label-scan-thumb">
@@ -133,30 +136,23 @@ export function LabelScanButton({ onRead }: LabelScanButtonProps) {
               </div>
             ))}
           </div>
-          {canAddMore && (
-            <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
-              {ti('📷 Prendre une autre photo')}
-              {fileInput}
-            </label>
-          )}
-          <label className="label-scan-notes">
-            <span>{t('Précisions pour l’IA (facultatif)')}</span>
-            <textarea
-              rows={2}
-              maxLength={MAX_NOTES}
-              disabled={loading}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder={t('Ex : cuit avec 1 cuillère d’huile, sans la sauce, j’en ai mangé la moitié')}
-            />
-          </label>
-          <button type="button" className="btn btn-primary" disabled={loading} onClick={analyse}>
-            {loading ? ti('⏳ Analyse en cours...') : ti('✨ Envoyer pour analyse')}
-          </button>
         </div>
       )}
+
+      <div className="label-scan-actions">
+        {canAddMore && (
+          <label className={`btn btn-secondary label-scan-btn ${loading ? 'disabled' : ''}`}>
+            {pending.length === 0 ? ti('📷 Ajouter une photo') : ti('📷 Une autre photo')}
+            {fileInput}
+          </label>
+        )}
+        <button type="button" className="btn btn-primary" disabled={loading || !canSend} onClick={analyse}>
+          {loading ? ti('⏳ Analyse en cours...') : ti('✨ Analyser')}
+        </button>
+      </div>
+
       <p className="label-scan-tip">
-        {t('Les photos sélectionnées sont envoyées à {provider} pour analyse uniquement quand tu appuies sur « Envoyer pour analyse ». Une connexion Internet est nécessaire.', { provider: providerName })}
+        {t('Écris ce que tu as mangé, ajoute jusqu’à 3 photos (produit sur la balance, étiquette), ou les deux. Rien n’est envoyé à {provider} avant d’appuyer sur « Analyser ». Une connexion Internet est nécessaire.', { provider: providerName })}
       </p>
       {message && <p className={`label-scan-message ${message.kind}`}>{message.text}</p>}
     </div>

@@ -128,3 +128,8 @@
   resize: vertical;
 }
 .label-scan-notes textarea::placeholder { color: var(--text-3); }
+
+.label-scan-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.label-scan-actions .btn { width: 100%; }
+.label-scan-actions .label-scan-btn,
+.label-scan-actions .btn-primary { min-height: 48px; white-space: nowrap; font-size: .95rem; }

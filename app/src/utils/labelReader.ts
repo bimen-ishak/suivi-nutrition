@@ -237,13 +237,23 @@ const describeFailure = (status: number): string => {
   return t("Google n'a pas répondu (erreur {status}). Réessaie dans un instant.", { status });
 };
 
+/** Consigne envoyée à l'IA : photos, description écrite, ou les deux */
+export function buildPrompt(context: string, photoCount: number): string {
+  const note = context.trim();
+  if (photoCount === 0) {
+    return `${PROMPT}\nIl n’y a AUCUNE photo : l’utilisateur décrit par écrit ce qu’il a mangé. Utilise mode "estimate". Estime d’après la description le poids total réellement mangé (weight_g), les totaux et les valeurs pour 100 g. S’il y a plusieurs aliments, additionne-les en un seul repas et donne-lui un nom court. Tiens compte des détails donnés (cuisson, matière grasse, sauce, quantités).\nDescription :\n${note}`;
+  }
+  if (!note) return PROMPT;
+  return `${PROMPT}\nPrécisions de l’utilisateur sur ce repas. Elles priment sur ce que montrent les photos : tiens-en compte dans le poids, les calories et les macros (cuisson, matière grasse ajoutée, sauce, part réellement mangée…). Si elles contredisent l’étiquette pour la composition du produit, garde l’étiquette.\n${note}`;
+}
+
 const toInlineData = (imageDataUrl: string) => {
   const [header, data] = imageDataUrl.split(',');
   const mimeType = /data:([^;]+);/.exec(header)?.[1] ?? 'image/jpeg';
   return { inline_data: { mime_type: mimeType, data } };
 };
 
-/** Envoie 1 à 3 photos (data URL) à Gemini et renvoie ce qui a été lu ou estimé */
+/** Envoie 0 à 3 photos (data URL) et/ou une description à Gemini, et renvoie ce qui a été lu ou estimé */
 export async function readFoodPhotos(
   imageDataUrls: string[],
   apiKey: string,
@@ -251,7 +261,7 @@ export async function readFoodPhotos(
   context = ''
 ): Promise<LabelResult> {
   const body = JSON.stringify({
-    contents: [{ parts: [{ text: context ? `${PROMPT}\nPrécisions de l’utilisateur sur ce repas. Elles priment sur ce que montrent les photos : tiens-en compte dans le poids, les calories et les macros (cuisson, matière grasse ajoutée, sauce, part réellement mangée…). Si elles contredisent l’étiquette pour la composition du produit, garde l’étiquette.\n${context}` : PROMPT }, ...imageDataUrls.map(toInlineData)] }],
+    contents: [{ parts: [{ text: buildPrompt(context, imageDataUrls.length) }, ...imageDataUrls.map(toInlineData)] }],
     generationConfig: { responseMimeType: 'application/json', temperature: 0 }
   });
 
