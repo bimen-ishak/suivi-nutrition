@@ -324,3 +324,9 @@
 .selector-tabs::-webkit-scrollbar {
   display: none;
 }
+
+/* Quatre onglets sur un téléphone : ils se partagent la largeur sans déborder */
+@media (max-width: 600px) {
+  .selector-tabs .tab { flex: 1 1 0; min-width: 0; padding: 12px 2px; font-size: 0.74rem; display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+  .selector-tabs .tab .icon { width: 18px; height: 18px; }
+}

@@ -8,7 +8,7 @@ import './FoodSelector.css';
 import { t, unitLabel } from '../i18n';
 import { ti, Icon } from './Icon';
 
-export type SelectorTab = 'oneoff' | 'scan' | 'search';
+export type SelectorTab = 'oneoff' | 'mine' | 'scan' | 'search';
 
 interface FoodSelectorProps {
   foods: Food[];
@@ -25,6 +25,18 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [mineQuery, setMineQuery] = useState('');
+
+  // Mes aliments de la bibliothèque : les plus utilisés d'abord, puis par ordre alphabétique
+  const myFoods = useMemo(() => {
+    const query = mineQuery.trim().toLowerCase();
+    return foods
+      .filter(food => !query
+        || food.name.toLowerCase().includes(query)
+        || foodDisplayName(food.name, food.source).toLowerCase().includes(query)
+        || (food.brand?.toLowerCase().includes(query) ?? false))
+      .sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0) || foodDisplayName(a.name, a.source).localeCompare(foodDisplayName(b.name, b.source)));
+  }, [foods, mineQuery]);
 
   // Résultats de recherche dans les aliments personnels
   const personalResults = useMemo(() => {
@@ -86,6 +98,12 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
           {ti('⚡ Ponctuel')}
         </button>
         <button
+          className={`tab ${activeTab === 'mine' ? 'active' : ''}`}
+          onClick={() => setActiveTab('mine')}
+        >
+          {ti('📚 Mes aliments')}
+        </button>
+        <button
           className={`tab ${activeTab === 'scan' ? 'active' : ''}`}
           onClick={() => setActiveTab('scan')}
         >
@@ -102,6 +120,40 @@ export function FoodSelector({ foods, onSelectFood, onCreateNew, onSelectGeneric
       <div className="selector-content">
         {/* Onglet Ponctuel */}
         {activeTab === 'oneoff' && <QuickEntry onSave={onSaveOneOff} />}
+
+        {/* Onglet Mes aliments : la bibliothèque, sans quitter l'ajout */}
+        {activeTab === 'mine' && (
+          <div className="search-tab">
+            {foods.length > 0 && (
+              <div className="search-input-container">
+                <input
+                  type="text"
+                  placeholder={t('Rechercher par nom ou marque...')}
+                  value={mineQuery}
+                  onChange={(e) => setMineQuery(e.target.value)}
+                />
+              </div>
+            )}
+            {foods.length === 0 ? (
+              <div className="empty-state">
+                <p>{t('Ta bibliothèque est vide. Les aliments que tu crées ou scannes apparaîtront ici.')}</p>
+                <button className="btn btn-primary" onClick={onCreateNew}>{t('Créer mon premier aliment')}</button>
+              </div>
+            ) : myFoods.length === 0 ? (
+              <div className="empty-state">
+                <p>{t('Aucun aliment trouvé pour « {query} »', { query: mineQuery })}</p>
+              </div>
+            ) : (
+              <div className="foods-list">
+                {myFoods.map(food => (
+                  <div key={food.id} onClick={() => onSelectFood(food)}>
+                    <FoodCard food={food} compact />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Onglet Scanner */}
         {activeTab === 'scan' && (

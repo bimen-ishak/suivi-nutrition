@@ -418,6 +418,7 @@ export const EN: Readonly<Record<string, string>> = {
   "📷 Ajouter une photo": "📷 Add a photo",
   "📷 Une autre photo": "📷 Another photo",
   "✨ Analyser": "✨ Analyse",
+  "Ta bibliothèque est vide. Les aliments que tu crées ou scannes apparaîtront ici.": "Your library is empty. Foods you create or scan will appear here.",
   "Objectif": "Goal",
   "prévue": "planned",
   "Ajustement manuel": "Manual adjustment",

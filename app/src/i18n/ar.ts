@@ -451,6 +451,7 @@ export const AR: Record<string, ArabicEntry> = {
   "📷 Ajouter une photo": "📷 ضيف صورة",
   "📷 Une autre photo": "📷 صورة كمان",
   "✨ Analyser": "✨ حلّل",
+  "Ta bibliothèque est vide. Les aliments que tu crées ou scannes apparaîtront ici.": "المكتبة فاضية. الأكلات اللي تعملها أو تعملها سكان هتظهر هنا.",
   "Objectif": "الهدف",
   "prévue": "متوقعة",
   'Ajustement manuel': 'تعديل يدوي',
