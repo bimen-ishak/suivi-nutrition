@@ -179,15 +179,133 @@
   border-radius: 14px;
 }
 
-/* Date à tenir sans craquer et photo de motivation */
-.settings-goal { display: grid; gap: 12px; margin: 24px 0; padding: 0; border: 0; }
-.settings-goal legend { margin-bottom: 8px; font-weight: 700; color: var(--text); }
-.settings-goal .section-desc { margin: 0; }
-.settings-goal-date { display: flex; gap: 8px; align-items: center; }
-.settings-goal-date input { flex: 1; min-width: 0; min-height: 44px; }
-.settings-goal-photo { display: grid; gap: 10px; }
-.settings-goal-photo img { width: 120px; height: 120px; object-fit: cover; border-radius: 14px; filter: grayscale(1); }
-.settings-goal-photo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.settings-goal-photo-actions label { cursor: pointer; }
-.settings-goal-note { margin: 0; font-size: .8rem; color: var(--text-3); }
-.settings-goal-error { margin: 0; font-size: .85rem; color: var(--danger); }
+/* Objectifs de sèche : des blocs nets, mêmes champs, mêmes arrondis */
+.goal-blocks { display: grid; gap: 12px; }
+.goal-block {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.goal-block h3 { margin: 0; font-size: 1rem; font-weight: 750; color: var(--text); }
+.goal-hint { margin: -4px 0 0; font-size: .88rem; line-height: 1.45; color: var(--text-2); }
+.goal-wide { width: 100%; min-height: 48px; }
+
+.goal-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.goal-stats div { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-soft); }
+.goal-stats dt { font-size: .72rem; font-weight: 600; line-height: 1.2; color: var(--text-2); }
+.goal-stats dd { margin: 0; font-size: 1.15rem; font-weight: 750; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* Champs : même hauteur, même bordure, même focus */
+.goal-number,
+.goal-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  transition: border-color .15s, box-shadow .15s;
+}
+.goal-number:focus-within,
+.goal-date:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+.goal-number input,
+.goal-date input {
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+}
+.goal-date input { font-size: 1rem; font-weight: 600; }
+.goal-number span { color: var(--text-2); font-size: .9rem; font-weight: 600; white-space: nowrap; }
+
+.goal-presets { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.goal-presets button {
+  min-height: 40px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text-2);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.goal-presets button[aria-pressed='true'] { border-color: var(--primary-border); background: var(--primary-soft); color: var(--primary-strong); }
+
+.goal-clear {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--text-2);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.goal-countdown { margin: -4px 0 0; font-size: .85rem; font-weight: 700; color: var(--primary); }
+
+/* Photo : une grande zone à toucher quand il n'y en a pas, une vignette sinon */
+.goal-photo-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 20px 16px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  text-align: center;
+  cursor: pointer;
+}
+.goal-photo-empty .icon { width: 26px; height: 26px; color: var(--text-2); }
+.goal-photo-empty strong { font-size: .95rem; color: var(--text); }
+.goal-photo-empty small { font-size: .78rem; line-height: 1.35; color: var(--text-3); }
+.goal-photo-set { display: flex; align-items: center; gap: 14px; }
+.goal-photo-set img { width: 84px; height: 84px; flex: none; object-fit: cover; border-radius: 14px; filter: grayscale(1); }
+.goal-photo-actions { display: grid; justify-items: start; gap: 6px; }
+.goal-photo-actions label { cursor: pointer; }
+.goal-link { padding: 4px 0; border: 0; background: none; color: var(--text-2); font: inherit; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.goal-error { margin: 0; font-size: .85rem; color: var(--danger); }
+
+/* Afficher sur l'accueil : des pastilles à cocher */
+.goal-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.goal-chip { position: relative; cursor: pointer; }
+.goal-chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.goal-chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-2);
+  font-size: .9rem;
+  font-weight: 650;
+}
+.goal-chip input:checked + span { border-color: var(--primary-border); background: var(--primary-soft); color: var(--primary-strong); }
+.goal-chip input:checked + span::before { content: '✓'; margin-inline-end: 6px; }
+.goal-chip input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+.goal-save { margin-top: 4px; }
+/* Les grilles ne doivent jamais dépasser la largeur de l'écran */
+.goal-blocks, .goal-block { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.goal-block > * { min-width: 0; }

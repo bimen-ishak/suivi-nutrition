@@ -7,12 +7,12 @@ import { getApiKey, setApiKey, clearApiKey } from '../utils/labelReader';
 import { getOpenRouterKey, setOpenRouterKey, clearOpenRouterKey, getProvider, setProvider, type Provider } from '../utils/aiReader';
 import { t, locale, getLanguage, setLanguage, LANGUAGES } from '../i18n';
 import './Settings.css';
-import { ti } from '../components/Icon';
+import { ti, Icon } from '../components/Icon';
 import { SettingsGroup } from '../components/SettingsGroup';
 import { CUT_DETAIL_METRICS, getPinnedCutMetrics, savePinnedCutMetrics } from '../utils/cutDashboard';
 import { CutSetup } from '../components/CutSetup';
 import { basalMetabolism, getProfile } from '../utils/profile';
-import { getGoalDate, setGoalDate, getMotivationPhoto, setMotivationPhoto } from '../utils/motivation';
+import { daysUntil, getGoalDate, setGoalDate, getMotivationPhoto, setMotivationPhoto } from '../utils/motivation';
 import { compressPhoto, localDateKey } from '../utils/photo';
 
 const THEMES: { name: ThemeName; label: ReactNode }[] = [
@@ -198,60 +198,80 @@ export function Settings({ modeSettings }: { modeSettings?: ReactNode }) {
       </div>
 
       <SettingsGroup title={t('Objectifs de sèche')}>
-        {profile && (
-          <p className="section-desc">
-            {t('{sex}, {age} ans, {height} cm, {weight} kg. Métabolisme de base : {bmr} kcal. Plan : manger {eat} kcal, brûler {burn} kcal par jour.', {
-              sex: profile.sex === 'male' ? t('Homme') : t('Femme'),
-              age: profile.age,
-              height: profile.height,
-              weight: profile.weight,
-              bmr: basalMetabolism(profile),
-              eat: profile.eat,
-              burn: profile.burn
-            })}
-          </p>
-        )}
-        <button className="btn btn-secondary profile-redo" onClick={() => setRedoProfile(true)}>
-          {profile ? t('Refaire le questionnaire') : t('Calculer mes objectifs')}
-        </button>
-        <p className="section-desc">
-          {t('Déficit calorique quotidien souhaité (en kcal, négatif = déficit).')}
-        </p>
-        <div className="objective-input">
-          <input
-            type="number"
-            value={objective}
-            onChange={(e) => setObjectiveState(parseInt(e.target.value) || 0)}
-            step={50}
-            aria-label={t('Objectif calorique')}
-          />
-          <span className="unit">{t('kcal/jour')}</span>
-        </div>
-        <div className="objective-presets">
-          {[-1000, -750, -500, -250, 0].map(preset => (
-            <button
-              key={preset}
-              className={`preset-btn ${objective === preset ? 'active' : ''}`}
-              onClick={() => setObjectiveState(preset)}
-            >
-              {preset}
+        <div className="goal-blocks">
+          <section className="goal-block">
+            <h3>{t('Ton plan')}</h3>
+            {profile ? (
+              <>
+                <p className="goal-hint">
+                  {t('{sex}, {age} ans, {height} cm, {weight} kg', {
+                    sex: profile.sex === 'male' ? t('Homme') : t('Femme'),
+                    age: profile.age,
+                    height: profile.height,
+                    weight: profile.weight
+                  })}
+                </p>
+                <dl className="goal-stats">
+                  <div><dt>{t('Métabolisme de base')}</dt><dd>{basalMetabolism(profile)}</dd></div>
+                  <div><dt>{t('À manger')}</dt><dd>{profile.eat}</dd></div>
+                  <div><dt>{t('À brûler')}</dt><dd>{profile.burn}</dd></div>
+                </dl>
+              </>
+            ) : (
+              <p className="goal-hint">{t('Réponds à quelques questions pour calculer tes calories et tes macros.')}</p>
+            )}
+            <button className="btn btn-secondary goal-wide" onClick={() => setRedoProfile(true)}>
+              {profile ? t('Refaire le questionnaire') : t('Calculer mes objectifs')}
             </button>
-          ))}
-        </div>
-        <MotivationSettings />
-        <fieldset className="settings-metrics">
-          <legend>{t('À afficher sur l’accueil')}</legend>
-          {CUT_DETAIL_METRICS.map(({ id, label }) => (
-            <label key={id}>
-              <input type="checkbox" checked={pinnedMetrics.includes(id)} onChange={event => {
-                const checked = event.target.checked;
-                setPinnedMetrics(current => checked ? [...current, id] : current.filter(metric => metric !== id));
-              }} />
-              {t(label)}
+          </section>
+
+          <section className="goal-block">
+            <h3>{t('Déficit par jour')}</h3>
+            <p className="goal-hint">{t('Déficit calorique quotidien souhaité (en kcal, négatif = déficit).')}</p>
+            <label className="goal-number">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={objective}
+                onChange={(e) => setObjectiveState(parseInt(e.target.value) || 0)}
+                step={50}
+                aria-label={t('Objectif calorique')}
+              />
+              <span>{t('kcal/jour')}</span>
             </label>
-          ))}
-        </fieldset>
-        <button className="btn btn-primary" onClick={handleSaveObjective}>{t('Enregistrer')}</button>
+            <div className="goal-presets" role="group" aria-label={t('Déficit par jour')}>
+              {[-1000, -750, -500, -250, 0].map(preset => (
+                <button
+                  key={preset}
+                  type="button"
+                  aria-pressed={objective === preset}
+                  onClick={() => setObjectiveState(preset)}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <MotivationSettings />
+
+          <section className="goal-block">
+            <h3>{t('À afficher sur l’accueil')}</h3>
+            <div className="goal-chips">
+              {CUT_DETAIL_METRICS.map(({ id, label }) => (
+                <label key={id} className="goal-chip">
+                  <input type="checkbox" checked={pinnedMetrics.includes(id)} onChange={event => {
+                    const checked = event.target.checked;
+                    setPinnedMetrics(current => checked ? [...current, id] : current.filter(metric => metric !== id));
+                  }} />
+                  <span>{t(label)}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <button className="btn btn-primary goal-wide goal-save" onClick={handleSaveObjective}>{t('Enregistrer')}</button>
+        </div>
       </SettingsGroup>
 
       {modeSettings}
@@ -526,13 +546,13 @@ function MotivationSettings() {
     }
   };
 
+  const days = goal ? daysUntil(goal, today) : null;
+
   return (
-    <fieldset className="settings-goal">
-      <legend>{t('Date à tenir sans craquer')}</legend>
-      <p className="section-desc">
-        {t('Jusqu’à cette date, une photo et une phrase t’accueillent à chaque ouverture de l’app.')}
-      </p>
-      <div className="settings-goal-date">
+    <section className="goal-block">
+      <h3>{t('Date à tenir sans craquer')}</h3>
+      <p className="goal-hint">{t('Jusqu’à cette date, une photo et une phrase t’accueillent à chaque ouverture de l’app.')}</p>
+      <div className="goal-date">
         <input
           type="date"
           min={today}
@@ -545,35 +565,37 @@ function MotivationSettings() {
           }}
         />
         {goal && (
-          <button type="button" className="btn btn-secondary" onClick={() => { setGoalDate(null); setGoal(null); }}>
-            {t('Retirer')}
-          </button>
+          <button type="button" className="goal-clear" aria-label={t('Retirer')} onClick={() => { setGoalDate(null); setGoal(null); }}>×</button>
         )}
       </div>
-      <div className="settings-goal-photo">
-        {photo && <img src={photo} alt={t('Photo de motivation')} />}
-        <div className="settings-goal-photo-actions">
-          <label className="btn btn-secondary">
-            {photo ? t('Changer la photo') : t('Choisir la photo de motivation')}
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={event => {
-                void choosePhoto(event.target.files?.[0]);
-                event.target.value = '';
-              }}
-            />
-          </label>
-          {photo && (
-            <button type="button" className="btn btn-secondary" onClick={() => { setMotivationPhoto(null); setPhoto(null); }}>
+      {days !== null && days >= 0 && (
+        <p className="goal-countdown">
+          {days === 0 ? t('C’est le jour J. Tiens bon.') : t('Encore {n} jours sans craquer', { n: days })}
+        </p>
+      )}
+
+      {photo ? (
+        <div className="goal-photo-set">
+          <img src={photo} alt={t('Photo de motivation')} />
+          <div className="goal-photo-actions">
+            <label className="btn btn-secondary">
+              {t('Changer la photo')}
+              <input type="file" accept="image/*" hidden onChange={event => { void choosePhoto(event.target.files?.[0]); event.target.value = ''; }} />
+            </label>
+            <button type="button" className="goal-link" onClick={() => { setMotivationPhoto(null); setPhoto(null); }}>
               {t('Retirer la photo')}
             </button>
-          )}
+          </div>
         </div>
-        <p className="settings-goal-note">{t('La photo reste sur ton téléphone, elle n’est envoyée nulle part.')}</p>
-        {error && <p className="settings-goal-error" role="alert">{error}</p>}
-      </div>
-    </fieldset>
+      ) : (
+        <label className="goal-photo-empty">
+          <Icon name="camera" />
+          <strong>{t('Choisir la photo de motivation')}</strong>
+          <small>{t('La photo reste sur ton téléphone, elle n’est envoyée nulle part.')}</small>
+          <input type="file" accept="image/*" hidden onChange={event => { void choosePhoto(event.target.files?.[0]); event.target.value = ''; }} />
+        </label>
+      )}
+      {error && <p className="goal-error" role="alert">{error}</p>}
+    </section>
   );
 }
