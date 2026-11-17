@@ -432,6 +432,8 @@ export const EN: Readonly<Record<string, string>> = {
   "La photo reste sur ton téléphone, elle n’est envoyée nulle part.": "The photo stays on your phone and is never sent anywhere.",
   "Plus assez de place sur le téléphone pour cette photo.": "Not enough space on the phone for this photo.",
   "Impossible de lire cette photo. Essaie une autre.": "Couldn't read this photo. Try another one.",
+  "En pause": "Paused",
+  "Touche pour continuer, garde le doigt pour mettre en pause": "Tap to continue, hold to pause",
   "Objectif": "Goal",
   "prévue": "planned",
   "Ajustement manuel": "Manual adjustment",

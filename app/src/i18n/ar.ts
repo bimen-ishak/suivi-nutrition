@@ -465,6 +465,8 @@ export const AR: Record<string, ArabicEntry> = {
   "La photo reste sur ton téléphone, elle n’est envoyée nulle part.": "الصورة بتفضل على موبايلك، مش بتتبعت لأي مكان.",
   "Plus assez de place sur le téléphone pour cette photo.": "مفيش مساحة كفاية على الموبايل للصورة دي.",
   "Impossible de lire cette photo. Essaie une autre.": "مش قادر أقرا الصورة دي. جرّب واحدة تانية.",
+  "En pause": "متوقف",
+  "Touche pour continuer, garde le doigt pour mettre en pause": "دوس عشان تكمل، أو سيب صباعك عشان توقف",
   "Objectif": "الهدف",
   "prévue": "متوقعة",
   'Ajustement manuel': 'تعديل يدوي',
