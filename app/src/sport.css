@@ -962,3 +962,29 @@
 .kcal-bar-back:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 /* Quand on regarde un autre jour, la lettre d'aujourd'hui reste mise en avant */
 .nutrition-shell[data-mode='cut'] .week-strip li[data-real-today]:not([data-today]) span { color: var(--text); font-weight: 800; }
+
+/* Bilan d'hier, en haut de l'accueil de la sèche */
+.nutrition-shell .day-result {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--primary-border);
+  border-radius: 16px;
+  background: var(--primary-soft);
+}
+.nutrition-shell .day-result[data-kind='surplus'] { border-color: var(--border); background: var(--surface); }
+@media (min-width: 840px) { .nutrition-shell .day-result { grid-column: 1 / -1; } }
+.day-result-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.day-result-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--signal); color: var(--signal-ink); }
+.day-result[data-kind='surplus'] .day-result-icon { background: var(--surface-soft); color: var(--text-2); }
+.day-result-icon .icon { width: 22px; height: 22px; }
+.day-result-title { margin: 0; font-size: .9rem; font-weight: 700; color: var(--text); }
+.day-result-big { margin: 2px 0 0; font-size: 1.6rem; font-weight: 800; line-height: 1.1; color: var(--primary-strong); font-variant-numeric: tabular-nums; }
+.day-result[data-kind='surplus'] .day-result-big { color: var(--text); }
+.day-result-close { width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: var(--text-2); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.day-result-text { margin: 0; font-size: .9rem; line-height: 1.45; color: var(--text-2); }
+.day-result-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.day-result-stats div { padding: 8px 10px; border-radius: 12px; background: var(--surface); }
+.day-result[data-kind='surplus'] .day-result-stats div { background: var(--surface-soft); }
+.day-result-stats dt { font-size: .72rem; font-weight: 600; color: var(--text-2); }
+.day-result-stats dd { margin: 2px 0 0; font-size: 1.05rem; font-weight: 750; color: var(--text); font-variant-numeric: tabular-nums; }

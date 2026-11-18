@@ -15,10 +15,13 @@ import { ti, Icon } from '../components/Icon';
 import { localDateKeys } from '../utils/photo';
 import { getPinnedCutMetrics } from '../utils/cutDashboard';
 import { dayExpenditure, getProfile, macroTargets, onProfileChange } from '../utils/profile';
+import { dayResult, type DayResult } from '../utils/dayResult';
+import { getBingePeriods, inBingePeriod } from '../utils/bingePeriods';
 
 const DEFAULT_PROTEIN_GOAL = 150;
 const DEFAULT_CARB_LIMIT = 250;
 const DEFAULT_FAT_GOAL = 70;
+const RESULT_SEEN_KEY = 'dayResultSeen';
 const DISMISSED_KEY = 'dismissedMissingBurned';
 
 interface TodayProps {
@@ -48,6 +51,15 @@ export function Today({ onAddFood, viewDate = null, onViewDate }: TodayProps) {
   // Hier : des repas notés mais pas de dépense, donc le raccourci Santé a sans doute été oublié
   const [yesterdaySummary, setYesterdaySummary] = useState<DailySummary | null>(null);
   const [yesterdayMissing, setYesterdayMissing] = useState(false);
+  // Bilan d'hier, montré une fois au matin quand la journée est complète (mangé et brûlé)
+  const [yesterdayResult, setYesterdayResult] = useState<DayResult | null>(null);
+  const [resultSeen, setResultSeen] = useState(() => {
+    try {
+      return localStorage.getItem(RESULT_SEEN_KEY);
+    } catch {
+      return null;
+    }
+  });
   const [dismissed, setDismissed] = useState(() => {
     try {
       return localStorage.getItem(DISMISSED_KEY);
@@ -108,6 +120,16 @@ export function Today({ onAddFood, viewDate = null, onViewDate }: TodayProps) {
       const knowsBurned = !!yesterdayDaily?.caloriesBurned || !!yesterdayHistory?.burned;
       setYesterdaySummary(yesterdayDaily ?? null);
       setYesterdayMissing(!isPast && ateYesterday && !knowsBurned);
+
+      // Bilan d'hier : seulement une journée complète, hors période de craquage, avec une dépense définitive
+      const eatenYesterday = yesterdayEntries.length > 0
+        ? yesterdayEntries.reduce((sum, entry) => sum + entry.kcal, 0)
+        : yesterdayHistory?.kcal ?? 0;
+      const burnedYesterday = yesterdayDaily?.caloriesBurned ?? yesterdayHistory?.burned ?? 0;
+      const complete = eatenYesterday > 0 && burnedYesterday > 0 && !yesterdayDaily?.caloriesBurnedProvisional;
+      setYesterdayResult(complete && !inBingePeriod(yesterday, getBingePeriods())
+        ? dayResult(eatenYesterday, burnedYesterday, getObjective())
+        : null);
 
       const latestTrend = getWeightTrend(weights).at(-1)?.trend;
       setTrendWeight(latestTrend);
@@ -258,6 +280,15 @@ export function Today({ onAddFood, viewDate = null, onViewDate }: TodayProps) {
       : null;
   const quip = quipEvent ? pickMessage(quipEvent, language, today) : null;
   const showMissingBanner = yesterdayMissing && dismissed !== yesterday;
+  const showResult = !isPast && yesterdayResult !== null && resultSeen !== yesterday;
+  const closeResult = () => {
+    setResultSeen(yesterday);
+    try {
+      localStorage.setItem(RESULT_SEEN_KEY, yesterday);
+    } catch {
+      // Sans stockage, le bilan reviendra à la prochaine ouverture : rien de grave
+    }
+  };
   const metric = (key: string, label: string, value: number, goal: number, isLimit: boolean) => (
     <article key={key} data-over={(isLimit && value > goal) || undefined}>
       <span>{label}</span>
@@ -291,6 +322,42 @@ export function Today({ onAddFood, viewDate = null, onViewDate }: TodayProps) {
           onSelect={date => onViewDate?.(date === today ? null : date)}
         />
       </div>
+
+      {/* Bilan d'hier : bravo pour tout déficit, même plus petit que prévu */}
+      {showResult && yesterdayResult && (
+        <section className="day-result" data-kind={yesterdayResult.kind} role="status">
+          <div className="day-result-head">
+            <span className="day-result-icon"><Icon name={yesterdayResult.kind === 'surplus' ? 'leaf' : yesterdayResult.kind === 'goal' ? 'star' : 'target'} /></span>
+            <div>
+              <p className="day-result-title">
+                {yesterdayResult.kind === 'goal'
+                  ? t('Bravo, objectif atteint hier !')
+                  : yesterdayResult.kind === 'deficit'
+                    ? t('Bravo, tu étais en déficit hier !')
+                    : t('Pas de déficit hier')}
+              </p>
+              <p className="day-result-big" dir="ltr">
+                {yesterdayResult.kind === 'surplus'
+                  ? t('+{n} kcal', { n: -yesterdayResult.deficit })
+                  : t('−{n} kcal', { n: yesterdayResult.deficit })}
+              </p>
+            </div>
+            <button type="button" className="day-result-close" aria-label={t('Fermer')} onClick={closeResult}>×</button>
+          </div>
+          <p className="day-result-text">
+            {yesterdayResult.kind === 'goal'
+              ? t('Tu as tenu ton déficit de {goal} kcal. Continue comme ça.', { goal: yesterdayResult.target })
+              : yesterdayResult.kind === 'deficit'
+                ? t('Un peu moins que les {goal} kcal visés, mais chaque jour en déficit te rapproche du but.', { goal: yesterdayResult.target })
+                : t('Tu as mangé un peu plus que ce que tu as brûlé. Aujourd’hui, on repart.')}
+          </p>
+          <dl className="day-result-stats">
+            <div><dt>{t('Mangé')}</dt><dd>{yesterdayResult.eaten}</dd></div>
+            <div><dt>{t('Brûlé')}</dt><dd>{yesterdayResult.burned}</dd></div>
+            <div><dt>{yesterdayResult.kind === 'surplus' ? t('Excédent') : t('Déficit')}</dt><dd>{Math.abs(yesterdayResult.deficit)}</dd></div>
+          </dl>
+        </section>
+      )}
 
       {/* Rappel : la dépense d'hier manque */}
       {showMissingBanner && (
